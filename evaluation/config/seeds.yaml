@@ -1,0 +1,39 @@
+# Evaluation Random Seeds and Experiment Configuration
+# Preserved random seeds for 5-fold evaluation across synthetic learner populations.
+
+version: "1.0"
+experiment_name: "m8_comparative_evaluation"
+
+# Fixed list of 5 random seeds to be reused across all synthetic evaluation runs
+seeds:
+  - 42
+  - 101
+  - 2024
+  - 777
+  - 999
+
+evaluation_scale:
+  num_synthetic_learners: 200
+  num_seed_runs: 5
+
+model_hyperparameters:
+  bkt:
+    prior_p_L: 0.10
+    transit_p_T: 0.15
+    slip_p_S: 0.10
+    guess_p_G: 0.20
+  cat:
+    stopping_variance: 0.15
+    max_questions: 10
+  hlr:
+    half_life_prior_days: 14.0
+    review_eligibility_recall_threshold: 0.85
+  review_scoring_weights:
+    w1_recall_decay: 0.40
+    w2_mastery_gap: 0.30
+    w3_prerequisite_importance: 0.15
+    w4_target_urgency: 0.15
+
+baselines:
+  - "static_prerequisite_order"
+  - "non_adaptive_greedy"

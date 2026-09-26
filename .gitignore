@@ -1,0 +1,25 @@
+# Python & Pytest Caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Data directory (keep structure via .gitkeep)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Environments & IDEs
+.venv/
+venv/
+ENV/
+.idea/
+.vscode/
+*.swp
+.DS_Store
