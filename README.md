@@ -1,6 +1,6 @@
 # Adaptive Learning and Path-Planning Engine
 
-**Team:** Bhuvan (AI23BTECH11013), Abdur Rehman (AI23BTECH11015)
+**Team:** Bhuvan Chandra (AI23BTECH11013), Abdur Rehman (AI23BTECH11015)
 **Course:** CS5903 — Distributed AI Training (DAT)
 
 ## Overview
