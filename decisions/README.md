@@ -10,6 +10,8 @@ This directory contains Architecture Decision Records using the standardized App
 | [ADR-002](file:///c:/Users/bhuva/Downloads/DAT11/decisions/ADR-002-cat-vs-fixed-random-diagnostics.md) | Computerized Adaptive Testing (CAT) vs. Fixed-Order/Random Diagnostics | Accepted | M2 |
 | [ADR-003](file:///c:/Users/bhuva/Downloads/DAT11/decisions/ADR-003-dag-scheduling-vs-set-to-sequence.md) | Explicit DAG Scheduling vs. Set-to-Sequence Recommendation | Accepted | M1, M3, M6, M7 |
 | [ADR-004](file:///c:/Users/bhuva/Downloads/DAT11/decisions/ADR-004-hlr-for-spaced-repetition.md) | Half-Life Regression (HLR) for Spaced Repetition | Accepted | M5 |
+| [ADR-005](file:///c:/Users/bhuva/Downloads/DAT11/decisions/ADR-005-bounded-self-learning-policy.md) | Bounded Self-Learning Policy | Proposed / Optional Extension | M3, M6 |
+
 
 ## Reaffirmation Schedule
 Per course evaluation guidelines, a mandatory reaffirm/change decision record will be filed in this directory on **09 October**, reviewing early benchmark results and confirming or adjusting these baseline architectural decisions.

@@ -17,6 +17,7 @@ data/processed/*
 
 # Environments & IDEs
 .venv/
+.venv_audit/
 venv/
 ENV/
 .idea/
