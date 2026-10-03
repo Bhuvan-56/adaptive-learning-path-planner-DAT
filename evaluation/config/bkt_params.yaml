@@ -1,0 +1,7 @@
+# BKT Model Update Parameters and Evidence Window Configuration
+# Placeholder default parameters, not fitted to empirical student data.
+
+p_S: 0.10  # Slip rate
+p_G: 0.25  # Guess rate
+p_T: 0.10  # Transition / learning rate
+window_size: 4  # Observation window size W for conflict-sensitive classification gate
