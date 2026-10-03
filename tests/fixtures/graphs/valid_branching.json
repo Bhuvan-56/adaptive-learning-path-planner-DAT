@@ -1,0 +1,38 @@
+{
+  "nodes": [
+    {
+      "node_id": "A",
+      "concept_name": "Addition",
+      "baseline_duration": 5,
+      "exercises": ["synthetic_ex_a1", "synthetic_ex_a2"],
+      "base_difficulty": 0.20
+    },
+    {
+      "node_id": "B",
+      "concept_name": "Subtraction",
+      "baseline_duration": 5,
+      "exercises": ["synthetic_ex_b1"],
+      "base_difficulty": 0.25
+    },
+    {
+      "node_id": "C",
+      "concept_name": "Multiplication",
+      "baseline_duration": 10,
+      "exercises": ["synthetic_ex_c1"],
+      "base_difficulty": 0.40
+    },
+    {
+      "node_id": "D",
+      "concept_name": "Division",
+      "baseline_duration": 10,
+      "exercises": ["synthetic_ex_d1"],
+      "base_difficulty": 0.50
+    }
+  ],
+  "edges": [
+    {"source": "A", "target": "B", "importance": 1.0},
+    {"source": "A", "target": "C", "importance": 1.0},
+    {"source": "B", "target": "D", "importance": 0.8},
+    {"source": "C", "target": "D", "importance": 0.9}
+  ]
+}

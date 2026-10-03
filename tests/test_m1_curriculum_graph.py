@@ -1,30 +1,32 @@
-"""
-Acceptance tests for Milestone 1: Curriculum Graph & Learner State Models.
-Mapped to TRACEABILITY.md (TC-1.1, TC-1.2).
-"""
-
+import os
 import pytest
+from src.curriculum.graph import load_graph, validate_graph
+from src.curriculum.errors import GraphErrorCode
+
+FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures", "graphs")
 
 
-def test_tc_1_1_no_lesson_before_unmet_prerequisite():
-    """
-    TC-1.1: Prerequisite Gating
-    Scenario: A plan is generated for a target concept with an unmet mandatory prerequisite.
-    Expected Result: The plan contains no lesson for that target before the prerequisite
-    is explicitly Mastered (p >= 0.85, sigma^2 <= 0.05, n >= 3).
-    """
-    pass  # TODO: implement once planner module exists
+def test_tc_1_2_valid_branching_graph_passes():
+    """TC-1.2: Valid branching graph passes all 5 graph validation checks."""
+    path = os.path.join(FIXTURES_DIR, "valid_branching.json")
+    g = load_graph(path)
+    errors = validate_graph(g)
+    assert errors == []
 
 
-def test_tc_1_2_dag_passes_five_validation_checks():
-    """
-    TC-1.2: Curriculum Graph Validation
-    Scenario: A curriculum DAG is submitted to the validator before planning.
-    Expected Result: The DAG passes all 5 automated checks:
-      1. Existing prerequisite nodes
-      2. Positive durations
-      3. Difficulty bounds in [0.05, 0.95]
-      4. No self-loops
-      5. No cyclic components via Tarjan's SCC
-    """
-    pass  # TODO: implement once graph validation module exists
+@pytest.mark.parametrize(
+    "filename, expected_error",
+    [
+        ("missing_node.json", GraphErrorCode.MISSING_NODE),
+        ("nonpositive_duration.json", GraphErrorCode.NONPOSITIVE_DURATION),
+        ("difficulty_out_of_range.json", GraphErrorCode.DIFFICULTY_OUT_OF_RANGE),
+        ("self_loop.json", GraphErrorCode.SELF_LOOP),
+        ("cycle_detected.json", GraphErrorCode.CYCLE_DETECTED),
+    ],
+)
+def test_tc_1_2_rejects_malformed_graph_files(filename, expected_error):
+    """TC-1.2: Malformed graph fixtures yield ONLY their specific error code."""
+    path = os.path.join(FIXTURES_DIR, filename)
+    g = load_graph(path)
+    errors = validate_graph(g)
+    assert errors == [expected_error]

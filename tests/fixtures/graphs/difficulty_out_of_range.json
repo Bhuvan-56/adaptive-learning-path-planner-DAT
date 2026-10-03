@@ -1,0 +1,12 @@
+{
+  "nodes": [
+    {
+      "node_id": "A",
+      "concept_name": "Addition",
+      "baseline_duration": 5,
+      "exercises": ["synthetic_ex_a1"],
+      "base_difficulty": 0.01
+    }
+  ],
+  "edges": []
+}
