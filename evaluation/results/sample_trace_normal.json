@@ -1,0 +1,176 @@
+[
+  {
+    "node_id": "A",
+    "day": 1,
+    "concept_state": {
+      "p": 0.85,
+      "kappa": 10.0,
+      "sigma2": 0.011590909090909091,
+      "n": 4,
+      "class": "Mastered"
+    },
+    "constraints": {
+      "budget": 15,
+      "remaining_budget": 0,
+      "prerequisites": {}
+    },
+    "score_terms": {},
+    "decision": "FILTERED",
+    "reason_code": "ALREADY_MASTERED",
+    "policy_version": "static_baseline_v0"
+  },
+  {
+    "node_id": "B",
+    "day": 1,
+    "concept_state": {
+      "p": 0.5,
+      "kappa": 2.0,
+      "sigma2": 0.08333333333333333,
+      "n": 0,
+      "class": "Uncertain"
+    },
+    "constraints": {
+      "budget": 15,
+      "remaining_budget": 5,
+      "prerequisites": {
+        "A": true
+      }
+    },
+    "score_terms": {},
+    "decision": "SELECTED",
+    "reason_code": "SELECTED",
+    "policy_version": "static_baseline_v0"
+  },
+  {
+    "node_id": "C",
+    "day": 1,
+    "concept_state": {
+      "p": 0.5,
+      "kappa": 2.0,
+      "sigma2": 0.08333333333333333,
+      "n": 0,
+      "class": "Uncertain"
+    },
+    "constraints": {
+      "budget": 15,
+      "remaining_budget": 10,
+      "prerequisites": {
+        "A": true
+      }
+    },
+    "score_terms": {},
+    "decision": "SELECTED",
+    "reason_code": "SELECTED",
+    "policy_version": "static_baseline_v0"
+  },
+  {
+    "node_id": "D",
+    "day": 1,
+    "concept_state": {
+      "p": 0.5,
+      "kappa": 2.0,
+      "sigma2": 0.08333333333333333,
+      "n": 0,
+      "class": "Uncertain"
+    },
+    "constraints": {
+      "budget": 15,
+      "remaining_budget": 0,
+      "prerequisites": {
+        "C": true,
+        "B": true
+      }
+    },
+    "score_terms": {},
+    "decision": "FILTERED",
+    "reason_code": "BUDGET_EXCEEDED",
+    "policy_version": "static_baseline_v0"
+  },
+  {
+    "node_id": "A",
+    "day": 2,
+    "concept_state": {
+      "p": 0.85,
+      "kappa": 10.0,
+      "sigma2": 0.011590909090909091,
+      "n": 4,
+      "class": "Mastered"
+    },
+    "constraints": {
+      "budget": 15,
+      "remaining_budget": 5,
+      "prerequisites": {}
+    },
+    "score_terms": {},
+    "decision": "FILTERED",
+    "reason_code": "ALREADY_MASTERED",
+    "policy_version": "static_baseline_v0"
+  },
+  {
+    "node_id": "B",
+    "day": 2,
+    "concept_state": {
+      "p": 0.5,
+      "kappa": 2.0,
+      "sigma2": 0.08333333333333333,
+      "n": 0,
+      "class": "Uncertain"
+    },
+    "constraints": {
+      "budget": 15,
+      "remaining_budget": 5,
+      "prerequisites": {
+        "A": true
+      }
+    },
+    "score_terms": {},
+    "decision": "FILTERED",
+    "reason_code": "ALREADY_MASTERED",
+    "policy_version": "static_baseline_v0"
+  },
+  {
+    "node_id": "C",
+    "day": 2,
+    "concept_state": {
+      "p": 0.5,
+      "kappa": 2.0,
+      "sigma2": 0.08333333333333333,
+      "n": 0,
+      "class": "Uncertain"
+    },
+    "constraints": {
+      "budget": 15,
+      "remaining_budget": 5,
+      "prerequisites": {
+        "A": true
+      }
+    },
+    "score_terms": {},
+    "decision": "FILTERED",
+    "reason_code": "ALREADY_MASTERED",
+    "policy_version": "static_baseline_v0"
+  },
+  {
+    "node_id": "D",
+    "day": 2,
+    "concept_state": {
+      "p": 0.5,
+      "kappa": 2.0,
+      "sigma2": 0.08333333333333333,
+      "n": 0,
+      "class": "Uncertain"
+    },
+    "constraints": {
+      "budget": 15,
+      "remaining_budget": 15,
+      "prerequisites": {
+        "C": true,
+        "B": true
+      }
+    },
+    "score_terms": {},
+    "decision": "SELECTED",
+    "reason_code": "SELECTED",
+    "policy_version": "static_baseline_v0"
+  }
+]
