@@ -1,5 +1,25 @@
 [
   {
+    "node_id": "B",
+    "day": 1,
+    "concept_state": {
+      "p": 0.5,
+      "kappa": 2.0,
+      "sigma2": 0.08333333333333333,
+      "n": 0,
+      "class": "Uncertain"
+    },
+    "constraints": {
+      "budget": 5,
+      "remaining_budget": 5,
+      "prerequisites": {}
+    },
+    "score_terms": {},
+    "decision": "FILTERED",
+    "reason_code": "BUDGET_EXCEEDED",
+    "policy_version": "static_baseline_v0"
+  },
+  {
     "node_id": "D",
     "day": 1,
     "concept_state": {
@@ -37,26 +57,6 @@
     "score_terms": {},
     "decision": "FILTERED",
     "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
-    "policy_version": "static_baseline_v0"
-  },
-  {
-    "node_id": "B",
-    "day": 1,
-    "concept_state": {
-      "p": 0.5,
-      "kappa": 2.0,
-      "sigma2": 0.08333333333333333,
-      "n": 0,
-      "class": "Uncertain"
-    },
-    "constraints": {
-      "budget": 5,
-      "remaining_budget": 5,
-      "prerequisites": {}
-    },
-    "score_terms": {},
-    "decision": "FILTERED",
-    "reason_code": "BUDGET_EXCEEDED",
     "policy_version": "static_baseline_v0"
   },
   {
