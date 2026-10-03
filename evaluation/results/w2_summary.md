@@ -5,8 +5,8 @@
 - **5th Percentile Ratio:** 0.8270
 - **Worst-Case Ratio (Minimum):** 0.2143
 - **Instances with Ratio < 0.95:** 35 / 250 (14.0%)
-- **Mean Greedy Scheduler Runtime:** 0.0718 ms
-- **Mean Exact DP Oracle Runtime:** 0.2428 ms
+- **Mean Greedy Scheduler Runtime:** 0.0667 ms
+- **Mean Exact DP Oracle Runtime:** 0.2195 ms
 
 ## Performance Distribution Note
 The greedy score-per-minute heuristic achieves strong empirical performance across random DAG instances, but does not possess a universal 95% approximation guarantee due to known indivisible block knapsack counterexamples.

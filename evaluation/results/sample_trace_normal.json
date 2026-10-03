@@ -77,8 +77,8 @@
       "budget": 15,
       "remaining_budget": 0,
       "prerequisites": {
-        "C": true,
-        "B": true
+        "B": true,
+        "C": true
       }
     },
     "score_terms": {},
@@ -164,8 +164,8 @@
       "budget": 15,
       "remaining_budget": 15,
       "prerequisites": {
-        "C": true,
-        "B": true
+        "B": true,
+        "C": true
       }
     },
     "score_terms": {},
