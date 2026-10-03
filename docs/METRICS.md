@@ -14,40 +14,63 @@ mastery models.
   instance where the total scheduled activity duration for a given day exceeds the
   learner's specified daily time budget (B).
 
-- **Plan Feasibility Rate:** The percentage of generated paths that successfully pass
-  two distinct checks: the capacity feasibility check (total required work $W_{req}$
-  does not exceed total available capacity $DB$) and the scheduling feasibility check
-  (valid day-by-day block assignments exist without indivisible duration conflicts).
+- **Plan Feasibility Rate:** Evaluates whether generated paths pass capacity feasibility ($W_{req} \le D \cdot B$) and scheduling feasibility (block indivisibility). The system categorizes every planning outcome into one of three distinct statuses:
+  1. `FEASIBLE`: Path successfully packed into daily time budget blocks.
+  2. `INFEASIBLE_PROVED`: Mathematically proved impossible (e.g. single block duration > budget or total work $W_{req} > D \cdot B$) with machine-readable minimum fixes.
+  3. `HEURISTIC_NO_PLAN`: Work capacity $W_{req} \le D \cdot B$, but heuristic packer failed to place all activities within deadline $D$.
 
-- **Diagnostic Accuracy and Calibration:** Evaluated using the initial mastery Mean
-  Squared Error (MSE), Brier score, Expected Calibration Error (ECE), and information
-  gained per question to explicitly compare the adaptive CAT diagnostic against
-  fixed-order and random-selection baselines.
+- **Explanation Coverage:** Assessed via the Trace Completeness automated test. This metric verifies that 100% of candidate activities in the candidate universe (the target node plus ALL ancestor nodes in the DAG, not merely the frontier) are successfully documented in the JSON audit trace for every planning day — either marked as `SELECTED` alongside their policy scores, or marked as `FILTERED` alongside a valid machine-readable reason code.
 
-- **Mastery-Prediction Quality:** Measured by computing the Brier score and a 10-bin
-  Expected Calibration Error (ECE) on held-out real learner responses. This relies on
-  the predicted probability of a correct response derived from the estimated mastery
-  and BKT slip/guess parameters: $p(\text{correct}) = p(1-p_{S,c}) + (1-p)p_{G,c}$.
+### TC-3.2 — Greedy-to-Optimal Planning Ratio
 
-- **Simulated Final Mastery (Goal Coverage):** The fraction of simulated learners that
-  reach true mastery of their target concept by the prescribed deadline. In synthetic
-  evaluations, this metric relies on the true latent state of the simulator satisfying
-  the 0.85 threshold, not just the system's own internal estimate.
+The greedy score-per-minute scheduler is evaluated against an exact dynamic-programming oracle on a declared benchmark set of 250 instances (5 random seeds × 50 instances).
 
-- **Retained Mastery After Review:** Tracked as the retention rate at evaluation day T.
-  It serves as a measure of the spaced review mechanism's effectiveness, relying on the
-  Half-Life Regression model's predicted recall metric
-  $R_c = 2^{-\Delta t / H_c}$ (see `docs/FORMAL_MODELS.md`, Predicted Recall).
+The benchmark uses the same:
+- prerequisite constraints,
+- indivisible activity blocks,
+- eligible activity set,
+- daily time budget, and
+- planning objective
 
-- **Replanning Runtime:** Measured as runtime latency to evaluate the efficiency of the
-  greedy score-per-minute heuristic and dynamic replanning algorithm when recalculating
-  daily schedules after a missed session or failed assessment.
+for both the greedy scheduler and the exact oracle.
 
-- **Explanation Coverage:** Assessed via the Trace Completeness automated test. This
-  metric verifies that 100% of the activities on the planning frontier are successfully
-  documented in the JSON audit trace exactly once — either marked as selected alongside
-  their policy scores, or marked as filtered alongside a valid machine-readable reason
-  code.
+The benchmark includes the following counterexample:
+
+- Budget: 10 minutes
+- Item 1: 6 minutes, score 12
+- Item 2: 5 minutes, score 9
+- Item 3: 5 minutes, score 9
+
+Greedy score-per-minute selection chooses Item 1 because
+
+\[
+12/6 = 2.0 > 9/5 = 1.8.
+\]
+
+It therefore obtains a score of 12. The exact optimum selects the two 5-minute items and obtains a score of 18:
+
+\[
+\rho = \frac{12}{18}=0.667.
+\]
+
+Therefore, the project does not claim a universal 95% per-instance approximation guarantee.
+
+The acceptance target is distribution-level:
+
+\[
+\bar{\rho} \geq 0.95
+\]
+
+evaluated across the declared 250-instance benchmark set.
+
+The evaluation reports:
+- mean greedy-to-optimal ratio ($\bar{\rho}$),
+- 5th-percentile ratio ($\rho_{0.05}$),
+- worst-case ratio (minimum ratio, with counterexample $\rho = 0.667$), and
+- mean runtime for both the greedy scheduler and exact oracle.
+
+
+The exact oracle and greedy scheduler must receive identical constraints and inputs.
 
 > Note: when reported in the final evaluation, Plan Feasibility Rate and Simulated Final
 > Mastery should be explicitly compared against the Static Prerequisite Order and

@@ -21,3 +21,27 @@ For complete theoretical documentation on dataset strategy, synthetic learner si
 
 - **`data/raw/`**: Storage location for original, untouched dataset downloads (e.g., Junyi CSVs, ASSISTments Skill Builder CSVs). Untouched raw data files are excluded from version control via `.gitignore`.
 - **`data/processed/`**: Output directory for cleaned datasets, student-split logs (70% train, 15% dev, 15% test), extracted curriculum DAG JSON definitions, pre-calculated median durations, and fitted model weights.
+
+## Dataset Provenance
+
+For each dataset release used by the project, this file records:
+
+- dataset name and exact release;
+- download/acquisition source;
+- acquisition date;
+- content hash;
+- field mapping;
+- timing units;
+- prerequisite information;
+- access/usage terms.
+
+Before use, the selected Junyi Academy and ASSISTments releases must be checked for the actual availability of prerequisite and timing fields.
+
+If a required field is unavailable, its fallback must be explicitly labelled as one of:
+
+- manual annotation;
+- deterministic engineering assumption; or
+- synthetic simulator value.
+
+Such fields must not be presented as measured properties of the original dataset.
+

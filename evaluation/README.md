@@ -39,3 +39,38 @@ All random seeds, learner profile initializations, and model evaluation paramete
 
 - [`evaluation/config/profiles.yaml`](config/profiles.yaml): Preserves definitions and time budgets for the four standard learner profiles (Profile 1: 5 min, Profile 2: 10 min, Profile 3: 15 min, Profile 4: 30 min).
 - [`evaluation/config/seeds.yaml`](config/seeds.yaml): Versioned random seeds (`seeds: [42, 101, 2024, 777, 999]`) for evaluation reproducibility across 200 synthetic learners.
+
+## Evaluation Protocol
+
+Evaluation uses fixed configuration and matched policy conditions.
+
+### Data leakage control
+
+- Fit preprocessing and model parameters on training students only.
+- Preserve chronological order within each learner sequence.
+- Select thresholds on the development split.
+- Freeze thresholds before evaluation.
+
+### Policy matching
+
+All compared policies receive the same:
+
+- initial learner information;
+- curriculum;
+- eligible activity set;
+- time budget;
+- outcome simulator; and
+- learner realization/random seed.
+
+### Diagnostic matching
+
+CAT, fixed-order, and random diagnostic policies use the same item bank and learner pool.
+
+### Outcome evaluation
+
+Retention is evaluated using held-out delayed outcomes rather than the planner's own predicted mastery.
+
+### Paired evaluation
+
+Where stochastic simulation is used, policies are evaluated on the same learner realizations so that paired learner-level outcome differences can be computed.
+

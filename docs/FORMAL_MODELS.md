@@ -24,19 +24,76 @@ $S_{c,t} = (p_{c,t}, \sigma^2_{c,t}, d_{c,t}, R_{c,t})$.
   information, calculated using Half-Life Regression (HLR) to determine when spaced
   reviews are required.
 
+### Beta Confidence Representation
+
+For each concept \(c\), the system maintains a Beta-distributed confidence proxy:
+
+\[
+p_{c,t}^{\mathrm{conf}}
+\sim
+\operatorname{Beta}(A_{c,t},B_{c,t}).
+\]
+
+Its mean is matched to the BKT mastery estimate:
+
+\[
+p_{c,t}
+=
+\frac{A_{c,t}}
+{A_{c,t}+B_{c,t}}.
+\]
+
+The corresponding variance is
+
+\[
+\sigma_{c,t}^{2}
+=
+\frac{A_{c,t}B_{c,t}}
+{(A_{c,t}+B_{c,t})^2(A_{c,t}+B_{c,t}+1)}.
+\]
+
+Equivalently,
+
+\[
+\sigma_{c,t}^{2}
+=
+\frac{p_{c,t}(1-p_{c,t})}
+{\kappa_{c,t}+1},
+\qquad
+\kappa_{c,t}=A_{c,t}+B_{c,t}.
+\]
+
+Therefore,
+
+\[
+0\leq\sigma_{c,t}^{2}
+\leq p_{c,t}(1-p_{c,t}).
+\]
+
+The Beta representation is treated as a confidence proxy unless empirical calibration establishes a stronger probabilistic interpretation.
+
+### Mathematical Notation & Symbol Disambiguation
+
+To prevent symbol collision across formal specifications:
+- **Variance ($\sigma^2_{c,t}$):** $\sigma$ and $\sigma^2$ are strictly reserved for variance and standard deviation of belief proxies.
+- **Sigmoid Function ($\operatorname{sigm}(z)$):** Logistic functions are denoted exclusively as $\operatorname{sigm}(z) = \frac{1}{1 + e^{-z}}$. The symbol $\sigma$ is never used for sigmoid functions.
+- **Discrimination Slope ($a_c$):** Item Response Theory (IRT) concept-level discrimination parameters are denoted as $a_c$.
+- **Duration Multiplier ($w_L$):** Objective scoring duration weight multipliers are denoted as $w_L$.
+
 ### Learner-State Constraints & Thresholds
 
 Concepts are strictly classified into distinct states based on specific combinations of
-these fields, evaluated in the following precedence order:
+these fields and a **Conflict-Sensitive Evidence Window Gate** ($W=4$), evaluated in the following strict precedence order:
 
-- **Uncertain:** $\sigma^2_{c,t} > 0.05$. This state strictly overrides all others for
-  planning and assessment decisions.
-- **Mastered:** $\sigma^2_{c,t} \le 0.05$, $p_{c,t} \ge 0.85$, and at least 3 scored
-  observations have been recorded. A concept cannot be marked as Mastered solely due to
-  low variance.
-- **Weak:** $\sigma^2_{c,t} \le 0.05$, $p_{c,t} \le 0.40$, and at least 3 scored
-  observations.
-- **Developing:** All remaining field combinations that do not satisfy the above rules.
+- **Uncertain:** $\sigma^2_{c,t} > 0.05$ OR $n_{c,t} < 3$. This state strictly overrides all others for
+  planning and assessment decisions, ensuring unprobed concepts ($n=0$) cannot be misclassified as Mastered or Developing.
+- **Mastered:** $p_{c,t} \ge 0.85$, $\sigma^2_{c,t} \le 0.05$, $n_{c,t} \ge 3$, AND the observation window is full ($|W| \ge 4$) with at least 3 out of 4 correct outcomes ($\ge 75\%$).
+- **Weak:** $p_{c,t} < 0.40$ (STRICT), $\sigma^2_{c,t} \le 0.05$, $n_{c,t} \ge 3$, AND the observation window is full ($|W| \ge 4$) with at least 3 out of 4 incorrect outcomes ($\le 25\%$ correct). (Note: $p_{c,t} = 0.40$ is Developing; $p_{c,t} < 0.40$ is Weak).
+- **Developing:** All remaining field combinations that do not satisfy the above rules, including cases where mastery or weakness thresholds are met by BKT point estimates but the observation window gate fails due to contradictory evidence.
+
+*Implementation Note:* The earlier $p_T = 0.0$ learning-rate workaround used to prevent drift during alternating sequences was a non-realistic parameter setting that has been completely removed. Default BKT parameters ($p_S=0.10, p_G=0.25, p_T=0.10$) are loaded from `config/bkt_params.yaml`, and contradictory evidence protection is handled structurally by the conflict-sensitive window gate.
+
+
 
 ## Formal Curriculum Model
 

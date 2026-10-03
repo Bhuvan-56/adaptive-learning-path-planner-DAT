@@ -54,3 +54,36 @@ evaluation.
   memory half-life ($H_{c,0}$) will be populated using a prior value ($H_{prior}$). This
   value represents the median half-life estimated from the broader HLR training
   population, preventing unseen concepts from receiving undefined recall estimates.
+
+## Data Provenance
+
+For every public dataset used, record:
+
+1. exact release or download source;
+2. acquisition date;
+3. content hash;
+4. source-to-project field mapping;
+5. measurement units;
+6. prerequisite-field availability;
+7. timing-field availability;
+8. access and usage terms; and
+9. any manual or synthetic fallback used for missing fields.
+
+Missing fields must not be silently treated as observed data.
+
+## Fair Comparison
+
+All policy comparisons must use:
+
+- the same initial learner information;
+- the same curriculum;
+- the same time budget;
+- the same outcome simulator;
+- the same learner realizations and evaluation seeds where stochastic simulation is used.
+
+Preprocessing and learned parameters are fitted using training students only. Thresholds are selected using the development split and frozen before evaluation.
+
+Diagnostic policies share the same item bank and learner pool.
+
+Temporal order within each learner sequence is preserved.
+

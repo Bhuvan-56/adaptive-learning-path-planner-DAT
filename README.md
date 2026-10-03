@@ -49,19 +49,49 @@ TRACEABILITY.md- requirement -> milestone -> acceptance test mapping
 
 ## Setup
 
-> To be filled in as implementation begins (Week 2 onward): environment setup,
-> dependency installation, and dataset download/preprocessing commands.
+1. Ensure Python 3.11 is installed.
+2. Install pinned dependencies:
 
-## Running the System
+```bash
+pip install -r requirements.txt
+```
 
-> To be filled in once an end-to-end vertical slice exists (Week 3 onward): the exact
-> command(s) to generate a learning plan for a sample learner profile.
+## Running Tests
 
-## Evaluation
+Run the full pytest suite:
 
-Baselines, metrics, and reproducible experiment configuration live under `/evaluation`.
-See `docs/METRICS.md` for the full list of initial metrics and `TRACEABILITY.md` for how
-each milestone (M1-M8) maps to its acceptance tests.
+```bash
+pytest
+```
+
+Run specific test modules:
+
+```bash
+# Graph loader & validator tests (TC-1.2)
+pytest tests/test_m1_curriculum_graph.py
+
+# Learner state model tests (M1)
+pytest tests/test_m1_learner_state.py
+
+# Path planning & infeasibility tests (TC-3.1, TC-3.2)
+pytest tests/test_m3_path_planning.py
+
+# Explainability & trace checker tests (TC-7.1, TC-7.2, TC-7.3)
+pytest tests/test_m7_explainability.py
+```
+
+## Running the Benchmark
+
+Run the 250-instance Greedy vs. Exact DP Oracle optimality benchmark:
+
+```bash
+python -m src.planning.benchmark
+```
+
+This generates:
+- `evaluation/results/w2_greedy_vs_oracle.csv` (per-instance benchmark results)
+- `evaluation/results/w2_summary.md` (summary statistics: mean, 5th percentile, worst-case, runtimes)
+
 
 ## Documentation Index
 
