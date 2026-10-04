@@ -20,7 +20,7 @@
     "policy_version": "static_baseline_v0"
   },
   {
-    "node_id": "D",
+    "node_id": "A",
     "day": 1,
     "concept_state": {
       "p": 0.5,
@@ -36,7 +36,7 @@
     },
     "score_terms": {},
     "decision": "FILTERED",
-    "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
+    "reason_code": "BUDGET_EXCEEDED",
     "policy_version": "static_baseline_v0"
   },
   {
@@ -60,7 +60,7 @@
     "policy_version": "static_baseline_v0"
   },
   {
-    "node_id": "A",
+    "node_id": "D",
     "day": 1,
     "concept_state": {
       "p": 0.5,
@@ -76,7 +76,7 @@
     },
     "score_terms": {},
     "decision": "FILTERED",
-    "reason_code": "BUDGET_EXCEEDED",
+    "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
     "policy_version": "static_baseline_v0"
   }
 ]
