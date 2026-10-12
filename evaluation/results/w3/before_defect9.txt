@@ -1,0 +1,276 @@
+================================================================================
+DEFECT 9 EVIDENCE REPORT: BEFORE DEFECT 9 FIX (w3-pre-fix tag / commit a8847b5)
+================================================================================
+
+SUMMARY TABLE:
+Category               | Member                         | Emitted in src/ | Referenced in tests/
+-----------------------------------------------------------------------------------------------
+ReasonCode             | SELECTED                       | 3               | 6                   
+ReasonCode             | PREREQUISITE_UNMET             | 1               | 0                   
+ReasonCode             | ALREADY_MASTERED               | 2               | 1                   
+ReasonCode             | BLOCK_EXCEEDS_DAILY_BUDGET     | 3               | 2                   
+ReasonCode             | BUDGET_EXCEEDED                | 3               | 0                   
+ReasonCode             | REVIEW_DEFERRED_BUDGET         | 0               | 0                   
+ReasonCode             | REVIEW_DEFERRED_SHARE_CAP      | 0               | 0                   
+ReasonCode             | NOT_ON_PATH_TO_TARGET          | 0               | 0                   
+ReasonCode             | UNCERTAIN_NEEDS_ASSESSMENT     | 0               | 0                   
+InfeasibilityReason    | BLOCK_EXCEEDS_DAILY_BUDGET     | 3               | 2                   
+InfeasibilityReason    | CAPACITY_EXCEEDED              | 2               | 0                   
+InfeasibilityReason    | SCHEDULING_CONSTRAINTS_UNMET   | 0               | 0                   
+FeasibilityStatus      | FEASIBLE                       | 14              | 4                   
+FeasibilityStatus      | INFEASIBLE_PROVED              | 8               | 3                   
+FeasibilityStatus      | HEURISTIC_NO_PLAN              | 1               | 1                   
+-----------------------------------------------------------------------------------------------
+
+================================================================================
+DETAILED COMMANDS AND RAW OUTPUT
+================================================================================
+
+### ReasonCode.SELECTED
+Emitted places in src/: 3
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "SELECTED" -- src/
+Raw output (src):
+src/planning/static_baseline.py:108:                day_decisions[node_id] = ("SELECTED", ReasonCode.SELECTED, dur)
+src/planning/static_baseline.py:143:                    "remaining_budget": rem_budget + (dur if decision == "SELECTED" else 0),
+src/trace/schema.py:7:    SELECTED = "SELECTED"
+src/trace/schema.py:30:    decision: str  # "SELECTED" or "FILTERED"
+
+Referenced places in tests/: 6
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "SELECTED" -- tests/
+Raw output (tests):
+tests/test_m7_explainability.py:52:        {"node_id": "A", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_explainability.py:53:        {"node_id": "B", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_explainability.py:54:        {"node_id": "C", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_explainability.py:66:        {"node_id": "A", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_explainability.py:67:        {"node_id": "A", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_explainability.py:68:        {"node_id": "B", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+
+------------------------------------------------------------
+
+### ReasonCode.PREREQUISITE_UNMET
+Emitted places in src/: 1
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "PREREQUISITE_UNMET" -- src/
+Raw output (src):
+src/planning/static_baseline.py:104:                day_decisions[node_id] = ("FILTERED", ReasonCode.PREREQUISITE_UNMET, dur)
+src/trace/schema.py:8:    PREREQUISITE_UNMET = "PREREQUISITE_UNMET"
+
+Referenced places in tests/: 0
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "PREREQUISITE_UNMET" -- tests/
+Raw output (tests):
+<NO MATCHES>
+
+------------------------------------------------------------
+
+### ReasonCode.ALREADY_MASTERED
+Emitted places in src/: 2
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "ALREADY_MASTERED" -- src/
+Raw output (src):
+src/planning/static_baseline.py:45:                reason = ReasonCode.ALREADY_MASTERED
+src/planning/static_baseline.py:122:                reason = ReasonCode.ALREADY_MASTERED
+src/trace/schema.py:9:    ALREADY_MASTERED = "ALREADY_MASTERED"
+
+Referenced places in tests/: 1
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "ALREADY_MASTERED" -- tests/
+Raw output (tests):
+tests/test_m7_explainability.py:40:    assert a_entries[0]["reason_code"] == "ALREADY_MASTERED"
+
+------------------------------------------------------------
+
+### ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET
+Emitted places in src/: 3
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "BLOCK_EXCEEDS_DAILY_BUDGET" -- src/
+Raw output (src):
+src/planning/feasibility.py:14:    BLOCK_EXCEEDS_DAILY_BUDGET = "BLOCK_EXCEEDS_DAILY_BUDGET"
+src/planning/feasibility.py:28:       with BLOCK_EXCEEDS_DAILY_BUDGET and minimum budget fix.
+src/planning/feasibility.py:49:            "reason_code": InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET,
+src/planning/static_baseline.py:47:                reason = ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET
+src/trace/schema.py:10:    BLOCK_EXCEEDS_DAILY_BUDGET = "BLOCK_EXCEEDS_DAILY_BUDGET"
+
+Referenced places in tests/: 2
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "BLOCK_EXCEEDS_DAILY_BUDGET" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:32:        assert explanation["reason_code"] == InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+tests/test_m3_path_planning.py:55:    assert explanation["reason_code"] == InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+
+------------------------------------------------------------
+
+### ReasonCode.BUDGET_EXCEEDED
+Emitted places in src/: 3
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "BUDGET_EXCEEDED" -- src/
+Raw output (src):
+src/planning/static_baseline.py:49:                reason = ReasonCode.BUDGET_EXCEEDED
+src/planning/static_baseline.py:106:                day_decisions[node_id] = ("FILTERED", ReasonCode.BUDGET_EXCEEDED, dur)
+src/planning/static_baseline.py:128:                reason = ReasonCode.BUDGET_EXCEEDED
+src/trace/schema.py:11:    BUDGET_EXCEEDED = "BUDGET_EXCEEDED"
+
+Referenced places in tests/: 0
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "BUDGET_EXCEEDED" -- tests/
+Raw output (tests):
+<NO MATCHES>
+
+------------------------------------------------------------
+
+### ReasonCode.REVIEW_DEFERRED_BUDGET
+Emitted places in src/: 0
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "REVIEW_DEFERRED_BUDGET" -- src/
+Raw output (src):
+src/trace/schema.py:12:    REVIEW_DEFERRED_BUDGET = "REVIEW_DEFERRED_BUDGET"
+
+Referenced places in tests/: 0
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "REVIEW_DEFERRED_BUDGET" -- tests/
+Raw output (tests):
+<NO MATCHES>
+
+------------------------------------------------------------
+
+### ReasonCode.REVIEW_DEFERRED_SHARE_CAP
+Emitted places in src/: 0
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "REVIEW_DEFERRED_SHARE_CAP" -- src/
+Raw output (src):
+src/trace/schema.py:13:    REVIEW_DEFERRED_SHARE_CAP = "REVIEW_DEFERRED_SHARE_CAP"
+
+Referenced places in tests/: 0
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "REVIEW_DEFERRED_SHARE_CAP" -- tests/
+Raw output (tests):
+<NO MATCHES>
+
+------------------------------------------------------------
+
+### ReasonCode.NOT_ON_PATH_TO_TARGET
+Emitted places in src/: 0
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "NOT_ON_PATH_TO_TARGET" -- src/
+Raw output (src):
+src/trace/schema.py:14:    NOT_ON_PATH_TO_TARGET = "NOT_ON_PATH_TO_TARGET"
+
+Referenced places in tests/: 0
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "NOT_ON_PATH_TO_TARGET" -- tests/
+Raw output (tests):
+<NO MATCHES>
+
+------------------------------------------------------------
+
+### ReasonCode.UNCERTAIN_NEEDS_ASSESSMENT
+Emitted places in src/: 0
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "UNCERTAIN_NEEDS_ASSESSMENT" -- src/
+Raw output (src):
+src/trace/schema.py:15:    UNCERTAIN_NEEDS_ASSESSMENT = "UNCERTAIN_NEEDS_ASSESSMENT"
+
+Referenced places in tests/: 0
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "UNCERTAIN_NEEDS_ASSESSMENT" -- tests/
+Raw output (tests):
+<NO MATCHES>
+
+------------------------------------------------------------
+
+### InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+Emitted places in src/: 3
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "BLOCK_EXCEEDS_DAILY_BUDGET" -- src/
+Raw output (src):
+src/planning/feasibility.py:14:    BLOCK_EXCEEDS_DAILY_BUDGET = "BLOCK_EXCEEDS_DAILY_BUDGET"
+src/planning/feasibility.py:28:       with BLOCK_EXCEEDS_DAILY_BUDGET and minimum budget fix.
+src/planning/feasibility.py:49:            "reason_code": InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET,
+src/planning/static_baseline.py:47:                reason = ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET
+src/trace/schema.py:10:    BLOCK_EXCEEDS_DAILY_BUDGET = "BLOCK_EXCEEDS_DAILY_BUDGET"
+
+Referenced places in tests/: 2
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "BLOCK_EXCEEDS_DAILY_BUDGET" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:32:        assert explanation["reason_code"] == InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+tests/test_m3_path_planning.py:55:    assert explanation["reason_code"] == InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+
+------------------------------------------------------------
+
+### InfeasibilityReason.CAPACITY_EXCEEDED
+Emitted places in src/: 2
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "CAPACITY_EXCEEDED" -- src/
+Raw output (src):
+src/planning/feasibility.py:15:    CAPACITY_EXCEEDED = "CAPACITY_EXCEEDED"
+src/planning/feasibility.py:30:       with CAPACITY_EXCEEDED and necessary (not sufficient) fixes.
+src/planning/feasibility.py:64:            "reason_code": InfeasibilityReason.CAPACITY_EXCEEDED,
+
+Referenced places in tests/: 0
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "CAPACITY_EXCEEDED" -- tests/
+Raw output (tests):
+<NO MATCHES>
+
+------------------------------------------------------------
+
+### InfeasibilityReason.SCHEDULING_CONSTRAINTS_UNMET
+Emitted places in src/: 0
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "SCHEDULING_CONSTRAINTS_UNMET" -- src/
+Raw output (src):
+src/planning/feasibility.py:16:    SCHEDULING_CONSTRAINTS_UNMET = "SCHEDULING_CONSTRAINTS_UNMET"
+
+Referenced places in tests/: 0
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "SCHEDULING_CONSTRAINTS_UNMET" -- tests/
+Raw output (tests):
+<NO MATCHES>
+
+------------------------------------------------------------
+
+### FeasibilityStatus.FEASIBLE
+Emitted places in src/: 14
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "FEASIBLE" -- src/
+Raw output (src):
+src/planning/feasibility.py:8:    FEASIBLE = "FEASIBLE"
+src/planning/feasibility.py:9:    INFEASIBLE_PROVED = "INFEASIBLE_PROVED"
+src/planning/feasibility.py:27:    1. Per-activity check: if any required activity duration > budget, returns INFEASIBLE_PROVED
+src/planning/feasibility.py:29:    2. Aggregate capacity check: if total work W_req > deadline_days * budget, returns INFEASIBLE_PROVED
+src/planning/feasibility.py:31:    3. Otherwise returns FEASIBLE pending solver execution.
+src/planning/feasibility.py:34:        return FeasibilityStatus.FEASIBLE, {"status": FeasibilityStatus.FEASIBLE, "message": "No required activities."}
+src/planning/feasibility.py:47:        return FeasibilityStatus.INFEASIBLE_PROVED, {
+src/planning/feasibility.py:48:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/feasibility.py:62:        return FeasibilityStatus.INFEASIBLE_PROVED, {
+src/planning/feasibility.py:63:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/feasibility.py:74:    return FeasibilityStatus.FEASIBLE, {
+src/planning/feasibility.py:75:        "status": FeasibilityStatus.FEASIBLE,
+src/planning/static_baseline.py:39:    if status == FeasibilityStatus.INFEASIBLE_PROVED:
+src/planning/static_baseline.py:74:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/static_baseline.py:163:    final_status = FeasibilityStatus.FEASIBLE
+
+Referenced places in tests/: 4
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "FEASIBLE" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:30:        assert plan["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m3_path_planning.py:34:        assert plan["status"] in [FeasibilityStatus.FEASIBLE, FeasibilityStatus.HEURISTIC_NO_PLAN]
+tests/test_m3_path_planning.py:53:    assert plan["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m7_explainability.py:92:    assert plan["status"] == "INFEASIBLE_PROVED"
+
+------------------------------------------------------------
+
+### FeasibilityStatus.INFEASIBLE_PROVED
+Emitted places in src/: 8
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "INFEASIBLE_PROVED" -- src/
+Raw output (src):
+src/planning/feasibility.py:9:    INFEASIBLE_PROVED = "INFEASIBLE_PROVED"
+src/planning/feasibility.py:27:    1. Per-activity check: if any required activity duration > budget, returns INFEASIBLE_PROVED
+src/planning/feasibility.py:29:    2. Aggregate capacity check: if total work W_req > deadline_days * budget, returns INFEASIBLE_PROVED
+src/planning/feasibility.py:47:        return FeasibilityStatus.INFEASIBLE_PROVED, {
+src/planning/feasibility.py:48:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/feasibility.py:62:        return FeasibilityStatus.INFEASIBLE_PROVED, {
+src/planning/feasibility.py:63:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/static_baseline.py:39:    if status == FeasibilityStatus.INFEASIBLE_PROVED:
+src/planning/static_baseline.py:74:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+
+Referenced places in tests/: 3
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "INFEASIBLE_PROVED" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:30:        assert plan["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m3_path_planning.py:53:    assert plan["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m7_explainability.py:92:    assert plan["status"] == "INFEASIBLE_PROVED"
+
+------------------------------------------------------------
+
+### FeasibilityStatus.HEURISTIC_NO_PLAN
+Emitted places in src/: 1
+Command (src): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "HEURISTIC_NO_PLAN" -- src/
+Raw output (src):
+src/planning/feasibility.py:10:    HEURISTIC_NO_PLAN = "HEURISTIC_NO_PLAN"
+src/planning/static_baseline.py:165:        final_status = FeasibilityStatus.HEURISTIC_NO_PLAN
+
+Referenced places in tests/: 1
+Command (tests): git -C C:\Users\bhuva\Downloads\w3-pre-fix-tree grep -n "HEURISTIC_NO_PLAN" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:34:        assert plan["status"] in [FeasibilityStatus.FEASIBLE, FeasibilityStatus.HEURISTIC_NO_PLAN]
+
+------------------------------------------------------------
