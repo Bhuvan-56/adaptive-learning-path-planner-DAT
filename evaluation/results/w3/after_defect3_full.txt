@@ -1,0 +1,15 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\bhuva\Downloads\DAT11\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collecting ... collected 7 items
+
+tests/test_m3_oracle_order.py::test_oracle_order_independence PASSED     [ 14%]
+tests/test_m3_oracle_bruteforce.py::test_bruteforce_comparison_200_random_instances PASSED [ 28%]
+tests/test_m3_oracle_bruteforce.py::test_permutations_two_item_example PASSED [ 42%]
+tests/test_m3_oracle_bruteforce.py::test_permutations_four_item_branching_case PASSED [ 57%]
+tests/test_m3_oracle_bruteforce.py::test_oracle_hard_cap_raises_value_error PASSED [ 71%]
+tests/test_m3_oracle_bruteforce.py::test_oracle_timeout_raises_timeout_error PASSED [ 85%]
+tests/test_m3_oracle_bruteforce.py::test_oracle_zero_feasible_items_returns_zero PASSED [100%]
+
+============================== 7 passed in 1.38s ==============================
