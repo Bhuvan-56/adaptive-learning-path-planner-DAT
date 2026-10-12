@@ -113,3 +113,56 @@ def test_oracle_hard_cap_exceeded():
     with pytest.raises(ValueError, match="Oracle hard cap exceeded"):
         run_exact_dp_oracle(items, budget)
 
+
+def test_defect_7_nan_duration():
+    """Defect 7 sub-case 1: validate_graph must reject NaN duration."""
+    import networkx as nx
+    from src.curriculum.graph import validate_graph
+    from src.curriculum.errors import GraphErrorCode
+    g = nx.DiGraph()
+    g.add_node("A", baseline_duration=float("nan"), base_difficulty=0.5)
+    g.graph["raw_edges"] = []
+    errors = validate_graph(g)
+    assert GraphErrorCode.NON_FINITE_VALUE in errors
+
+
+def test_defect_7_nan_difficulty():
+    """Defect 7 sub-case 2: validate_graph must reject NaN difficulty."""
+    import networkx as nx
+    from src.curriculum.graph import validate_graph
+    from src.curriculum.errors import GraphErrorCode
+    g = nx.DiGraph()
+    g.add_node("A", baseline_duration=10, base_difficulty=float("nan"))
+    g.graph["raw_edges"] = []
+    errors = validate_graph(g)
+    assert GraphErrorCode.NON_FINITE_VALUE in errors
+
+
+def test_defect_7_cycle_produces_no_plan():
+    """Defect 7 sub-case 3: cyclic graph must be rejected as InvalidInput and never produce fallback plan."""
+    import networkx as nx
+    from src.planning.service import plan_request
+    g = nx.DiGraph()
+    g.add_node("A", baseline_duration=10, base_difficulty=0.5)
+    g.add_node("B", baseline_duration=10, base_difficulty=0.5)
+    g.add_edge("A", "B", importance=1.0)
+    g.add_edge("B", "A", importance=1.0)
+    g.graph["raw_edges"] = [("A", "B", 1.0), ("B", "A", 1.0)]
+    result = plan_request(g, {}, budget=20, deadline_days=5, targets="B")
+    assert not result.is_valid
+    assert "CYCLE_DETECTED" in result.error_codes
+
+
+def test_defect_7_deadline_zero_no_zero_division():
+    """Defect 7 sub-case 4: deadline_days = 0 must return InvalidInput without raising ZeroDivisionError."""
+    import networkx as nx
+    from src.planning.service import plan_request
+    g = nx.DiGraph()
+    g.add_node("A", baseline_duration=10, base_difficulty=0.5)
+    g.graph["raw_edges"] = []
+    result = plan_request(g, {}, budget=10, deadline_days=0, targets="A")
+    assert not result.is_valid
+    assert "INVALID_DEADLINE" in result.error_codes
+
+
+

@@ -1,0 +1,12 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 13 items / 9 deselected / 4 selected
+
+tests/test_m3_path_planning.py::test_defect_7_nan_duration XFAIL (De...) [ 25%]
+tests/test_m3_path_planning.py::test_defect_7_nan_difficulty XFAIL (...) [ 50%]
+tests/test_m3_path_planning.py::test_defect_7_cycle_produces_no_plan XFAIL [ 75%]
+tests/test_m3_path_planning.py::test_defect_7_deadline_zero_no_zero_division XFAIL [100%]
+
+====================== 9 deselected, 4 xfailed in 0.50s =======================
