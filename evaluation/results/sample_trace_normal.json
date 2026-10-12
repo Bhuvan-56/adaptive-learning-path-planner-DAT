@@ -11,7 +11,7 @@
     },
     "constraints": {
       "budget": 15,
-      "remaining_budget": 0,
+      "remaining_budget": 15,
       "prerequisites": {}
     },
     "score_terms": {},
@@ -31,7 +31,7 @@
     },
     "constraints": {
       "budget": 15,
-      "remaining_budget": 5,
+      "remaining_budget": 15,
       "prerequisites": {
         "A": true
       }
@@ -77,8 +77,8 @@
       "budget": 15,
       "remaining_budget": 0,
       "prerequisites": {
-        "B": true,
-        "C": true
+        "C": true,
+        "B": true
       }
     },
     "score_terms": {},
@@ -98,7 +98,7 @@
     },
     "constraints": {
       "budget": 15,
-      "remaining_budget": 5,
+      "remaining_budget": 15,
       "prerequisites": {}
     },
     "score_terms": {},
@@ -110,15 +110,15 @@
     "node_id": "B",
     "day": 2,
     "concept_state": {
-      "p": 0.5,
-      "kappa": 2.0,
-      "sigma2": 0.08333333333333333,
-      "n": 0,
-      "class": "Uncertain"
+      "p": 0.85,
+      "kappa": 10.0,
+      "sigma2": 0.011590909090909091,
+      "n": 4,
+      "class": "Mastered"
     },
     "constraints": {
       "budget": 15,
-      "remaining_budget": 5,
+      "remaining_budget": 15,
       "prerequisites": {
         "A": true
       }
@@ -132,15 +132,15 @@
     "node_id": "C",
     "day": 2,
     "concept_state": {
-      "p": 0.5,
-      "kappa": 2.0,
-      "sigma2": 0.08333333333333333,
-      "n": 0,
-      "class": "Uncertain"
+      "p": 0.85,
+      "kappa": 10.0,
+      "sigma2": 0.011590909090909091,
+      "n": 4,
+      "class": "Mastered"
     },
     "constraints": {
       "budget": 15,
-      "remaining_budget": 5,
+      "remaining_budget": 15,
       "prerequisites": {
         "A": true
       }
@@ -164,8 +164,8 @@
       "budget": 15,
       "remaining_budget": 15,
       "prerequisites": {
-        "B": true,
-        "C": true
+        "C": true,
+        "B": true
       }
     },
     "score_terms": {},

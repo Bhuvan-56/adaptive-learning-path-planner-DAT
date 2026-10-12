@@ -1,0 +1,15 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\bhuva\Downloads\DAT11\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collecting ... collected 7 items
+
+tests/test_m7_trace_contract.py::test_check_trace_missing_whole_day_2_of_2 PASSED [ 14%]
+tests/test_m7_trace_contract.py::test_check_trace_bogus_decision PASSED  [ 28%]
+tests/test_m7_trace_contract.py::test_check_trace_missing_constraints_field PASSED [ 42%]
+tests/test_m7_trace_contract.py::test_check_trace_extra_candidate PASSED [ 57%]
+tests/test_m7_trace_contract.py::test_check_trace_duplicate_node PASSED  [ 71%]
+tests/test_m7_trace_contract.py::test_check_trace_mastered_reason_with_uncertain_state PASSED [ 85%]
+tests/test_m7_trace_contract.py::test_check_no_plan_trace_contract PASSED [100%]
+
+============================== 7 passed in 0.13s ==============================
