@@ -3,7 +3,7 @@
   "data_route": "synthetic_dag_generator",
   "dirty": true,
   "experiment_name": "w2_scheduling_benchmark",
-  "git_sha": "e9f25c69c56cea2c83470ba4bc6cbf2a4e967835",
+  "git_sha": "324c9d937771d2dd82485ade486a06377bda61e4",
   "package_versions": {
     "networkx": "3.1",
     "numpy": "1.24.3",
@@ -18,5 +18,5 @@
     37,
     47
   ],
-  "timestamp": "2026-10-12T10:00:43.342209+00:00"
+  "timestamp": "2026-10-12T10:01:56.628130+00:00"
 }
