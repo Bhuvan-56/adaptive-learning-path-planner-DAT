@@ -1,0 +1,9 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 16 items / 15 deselected / 1 selected
+
+tests/test_m1_learner_state.py::test_defect_6_load_bkt_params_rejects_missing_malformed_and_invalid_probs PASSED [100%]
+
+====================== 1 passed, 15 deselected in 0.06s =======================

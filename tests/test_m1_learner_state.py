@@ -200,33 +200,48 @@ def test_defect_5_window_size_6_retains_six_observations_and_updates_quorum():
     assert state_5_of_6.classify(policy=policy) == "Mastered"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Defect 6: load_bkt_params swallows errors and does not reject invalid probabilities or NaN",
-)
 def test_defect_6_load_bkt_params_rejects_missing_malformed_and_invalid_probs(tmp_path):
     """Defect 6: Configuration loader must reject missing files, malformed YAML, out-of-range probabilities, and NaN."""
+    from src.state.policy import load_policy, default_policy
+
     # 1. Missing file must raise FileNotFoundError
     with pytest.raises(FileNotFoundError):
         load_bkt_params(str(tmp_path / "nonexistent.yaml"))
+    with pytest.raises(FileNotFoundError):
+        load_policy(str(tmp_path / "nonexistent.yaml"))
 
     # 2. Malformed YAML must raise ValueError
     bad_yaml = tmp_path / "bad.yaml"
     bad_yaml.write_text("p_S: [invalid yaml: {", encoding="utf-8")
     with pytest.raises(ValueError):
         load_bkt_params(str(bad_yaml))
+    with pytest.raises(ValueError):
+        load_policy(str(bad_yaml))
 
     # 3. Probability 1.2 must raise ValueError
     invalid_prob = tmp_path / "prob_high.yaml"
     invalid_prob.write_text("p_S: 1.2\np_G: 0.25\np_T: 0.10\nwindow_size: 4", encoding="utf-8")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="p_S"):
         load_bkt_params(str(invalid_prob))
+    with pytest.raises(ValueError, match="p_S"):
+        load_policy(str(invalid_prob))
 
     # 4. NaN probability must raise ValueError
     nan_prob = tmp_path / "prob_nan.yaml"
     nan_prob.write_text("p_S: .nan\np_G: 0.25\np_T: 0.10\nwindow_size: 4", encoding="utf-8")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="p_S"):
         load_bkt_params(str(nan_prob))
+    with pytest.raises(ValueError, match="p_S"):
+        load_policy(str(nan_prob))
+
+    # 5. Explicit default_policy logs its use
+    log = []
+    policy, warnings = default_policy(log)
+    assert len(log) == 1
+    assert "fallback to declared default" in log[0]
+    assert warnings is log
+    assert policy.window_size == 4
+
 
 
 
