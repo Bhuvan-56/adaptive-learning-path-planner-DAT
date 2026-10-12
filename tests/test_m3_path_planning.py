@@ -165,4 +165,26 @@ def test_defect_7_deadline_zero_no_zero_division():
     assert "INVALID_DEADLINE" in result.error_codes
 
 
+@pytest.mark.xfail(strict=True, reason="Defect 8: remaining_budget in trace reconstructed after day instead of at decision")
+def test_static_baseline_sequential_budget_12_then_6():
+    """Defect 8: sequential selections under budget 12 must record 12 then 6 in trace."""
+    import networkx as nx
+    from src.state.learner_state import ConceptState
+    from src.planning.static_baseline import generate_static_plan
+
+    g = nx.DiGraph()
+    g.add_node("A", baseline_duration=6)
+    g.add_node("B", baseline_duration=6)
+    g.add_edge("A", "B")
+    learner_states = {"A": ConceptState.cold_start(), "B": ConceptState.cold_start()}
+
+    plan = generate_static_plan(g, learner_states, budget=12, deadline_days=1, target_node="B")
+    selected_entries = [e for e in plan["trace"] if e["decision"] == "SELECTED"]
+    assert len(selected_entries) == 2
+    assert selected_entries[0]["node_id"] == "A"
+    assert selected_entries[0]["constraints"]["remaining_budget"] == 12
+    assert selected_entries[1]["node_id"] == "B"
+    assert selected_entries[1]["constraints"]["remaining_budget"] == 6
+
+
 

@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\bhuva\Downloads\DAT11\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collecting ... collected 14 items / 13 deselected / 1 selected
+
+tests/test_m3_path_planning.py::test_static_baseline_sequential_budget_12_then_6 XFAIL [100%]
+
+=========================== short test summary info ===========================
+XFAIL tests/test_m3_path_planning.py::test_static_baseline_sequential_budget_12_then_6 - Defect 8: remaining_budget in trace reconstructed after day instead of at decision
+====================== 13 deselected, 1 xfailed in 1.44s ======================
