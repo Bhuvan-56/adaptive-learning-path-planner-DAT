@@ -177,3 +177,17 @@ def test_variance_validity():
         for kappa_val in [2.0, 5.0, 10.0, 50.0]:
             state = ConceptState(A=p_val * kappa_val, B=(1.0 - p_val) * kappa_val, n=3)
             assert state.validate()
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="Defect 5: WINDOW_SIZE is frozen at import and update with window_size=6 retains only 4 observations",
+)
+def test_defect_5_window_size_6_retains_six_observations_and_updates_quorum():
+    """Defect 5: Calling update with window_size=6 must retain 6 observations, not 4."""
+    state = ConceptState.cold_start()
+    params = {"p_S": 0.10, "p_G": 0.25, "p_T": 0.10, "window_size": 6}
+    for _ in range(6):
+        state.update(True, params=params)
+    assert len(state.history) == 6
+
