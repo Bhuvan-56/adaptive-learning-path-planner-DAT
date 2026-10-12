@@ -37,13 +37,15 @@ The architecture consists of eight distinct modular components (M1 through M8):
 ```
 src/
   curriculum/  - graph loader, topological validator, error types
-  planning/    - static baseline, greedy scheduler, exact DP oracle, feasibility
+  planning/    - static baseline, greedy scheduler, exact DP oracle, feasibility, replanning
   state/       - learner state model (BKT update, Beta variance proxy, classification)
   trace/       - decision audit trace schema, candidate universe, trace checker
+  simulation/  - synthetic learner simulator with Matched BKT generator and EvaluatorView
 config/        - BKT default parameters and learner profiles configuration
 data/          - dataset documentation, processed logs, curriculum DAG definitions
 decisions/     - architecture and methodology decision records (ADR-001 to ADR-009)
 evaluation/    - baselines, benchmark results, metrics, configuration
+experiments/   - benchmark configurations and evaluation definitions
 tests/         - unit and acceptance test suites for M1-M8
 weekly/        - dated weekly progress records and inputs
 docs/          - problem boundary, data strategy, formal models, metrics, audits

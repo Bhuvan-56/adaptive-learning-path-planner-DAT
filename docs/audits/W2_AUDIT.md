@@ -1,10 +1,17 @@
 # Week 2 Independent Audit Report
 
 > [!WARNING]
-> **Historical Document Notice (Pre-Fix Baseline):**  
-> This audit report is a historical pre-fix document produced prior to the mid-review audit. Several milestone items marked as PASS below (notably TC-1.1 prerequisite gating) were disproved during the review and cataloged as defects (Defects 1–10). This document is retained for historical traceability only and is not treated as an independent review. Post-fix validation is tied to commit `w3-pre-fix` (`a8847b5`).
+> ## HISTORICAL PRE-FIX AUDIT
+> **Notice of Outdated Historical Baseline:**  
+> This audit document is retained strictly for historical traceability and reflects the pre-fix state of the repository as of Week 2 (03 October 2026). The following statements in the body of this report are materially out of date following the Week 3 defect repairs and audits:
+> 1. **Test Pass Counts:** The report cites "29 active tests pass, 9 skipped". The current test suite has expanded to 93 passing tests and 9 skipped stubs across all repaired components.
+> 2. **Zero-Learning Workaround:** The report analyzes a temporary parameter workaround ($p_T=0.0$). This workaround was completely rejected and removed; canonical BKT parameters ($p_S=0.10, p_G=0.20, p_T=0.15$) and the conflict-sensitive sliding window gate ($W=4$) are now formally enforced and verified against pyBKT parity.
+> 3. **Uncommitted Files:** The report notes that all Week 2 files were uncommitted in the working tree. All increments, configurations, tests, and documentation are now fully version-controlled, tracked, and tagged across Git commits.
+> 4. **Missing NetworkX / Environment Confusion:** The report notes `ModuleNotFoundError: No module named 'networkx'` when running with unconfigured system Python. All dependencies are formally specified in `requirements.txt` and verified in clean virtual environments via automated audit scripts and CI workflows.
+>
+> Furthermore, because the original auditor is unnamed ("Independent Auditor"), this audit is not treated as an independent review.
 
-**Auditor:** Independent Auditor  
+**Auditor:** Independent Auditor (Unnamed; not independent review)  
 **Date:** 03 October 2026  
 **Repository:** Adaptive Learning and Path-Planning Engine (Project ID 3)  
 **Target Increment:** Week 2 Deliverables (M1, M3, M7 foundation)
@@ -104,3 +111,23 @@ During implementation of Week 2 work, three source files were edited to resolve 
 - Do NOT claim dynamic replanning, CAT/IRT diagnostics, HLR review decay, or multi-policy evaluation are implemented (these are skipped W3+ stubs).
 - Do NOT claim real Junyi/ASSISTments datasets are downloaded or preprocessed (`data/raw/` and `data/processed/` remain empty).
 - Do NOT claim Week 2 work is committed or tagged in Git (`git status` shows all files uncommitted).
+
+---
+
+## 6. Post-Fix Addendum (Week 3 Reconciliation)
+
+### Commit SHA & Head Status
+- **Current Branch Head SHA:** `5d3f88d250bd30dfacf5188e4cd002a98cfabacd`
+- **Branch:** `w3/t3-docs` (branched from `main` following merge of tasks A1–A4, B1–B4, Defect 9 evidence, and T2 end-to-end CLI demo)
+
+### Current Empirical Test Counts
+- **Execution Command:** `.venv_w2\Scripts\python.exe -m pytest -q -rs`
+- **Output:**
+  ```text
+  93 passed, 9 skipped in 10.82s
+  ```
+- **Active Acceptance Tests:** 93 passed, 0 failed, 9 skipped (the 9 skips correspond strictly to unimplemented future milestone stubs M2, M4, M5, M6, M8).
+
+### Independence Note
+- The author of the original Week 2 audit was recorded as "Independent Auditor" without name, institutional affiliation, or external verification. Consequently, this document cannot be considered an independent external review under objective audit standards. All claims are verified directly against source code, executable tests, and deterministic hash manifests.
+
