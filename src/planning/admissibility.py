@@ -7,14 +7,21 @@ def is_admissible(
     selected_set: Set[str],
     mastered_set: Set[str],
     remaining_budget: int,
-    g: Optional[nx.DiGraph] = None
+    g: Optional[nx.DiGraph] = None,
+    planned_set: Optional[Set[str]] = None,
+    allow_conditional: bool = False,
+    learner_states: Optional[Dict[str, Any]] = None
 ) -> bool:
     """
     Evaluates whether an activity block is admissible for scheduling on a given day.
 
     An activity is admissible iff:
     1. Its duration is <= remaining daily budget.
-    2. All of its mandatory prerequisite activities are present in selected_set or mastered_set.
+    2. All of its mandatory prerequisite activities are present in:
+       - mastered_set (unconditional unlocking), or
+       - planned_set (only if allow_conditional is True, e.g. placed conditionally on a later day), or
+       - selected_set (for intra-day selections when allow_conditional is not used).
+    3. No prerequisite has a failed (Weak) or Uncertain learner state, unless already mastered or planned.
     """
     node_id = activity.get("node_id") or activity.get("id")
     dur = activity.get("duration") if "duration" in activity else activity.get("baseline_duration", 0)
@@ -27,5 +34,21 @@ def is_admissible(
     else:
         prereqs = set(activity.get("prerequisites", []))
 
-    unmet = prereqs - (selected_set | mastered_set)
+    if planned_set is None:
+        planned_set = set()
+
+    if learner_states is not None:
+        for p in prereqs:
+            if p not in mastered_set and (not allow_conditional or p not in planned_set):
+                st = learner_states.get(p)
+                if st is not None:
+                    st_class = st.classify() if hasattr(st, "classify") else (st.get("class") if isinstance(st, dict) else None)
+                    if st_class in ("Weak", "Uncertain"):
+                        return False
+
+    if allow_conditional:
+        unmet = prereqs - (mastered_set | planned_set)
+    else:
+        unmet = prereqs - (mastered_set | selected_set)
+
     return len(unmet) == 0

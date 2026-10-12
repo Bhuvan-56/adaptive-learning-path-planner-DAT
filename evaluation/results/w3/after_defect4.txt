@@ -1,0 +1,9 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\bhuva\Downloads\DAT11\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collecting ... collected 7 items / 6 deselected / 1 selected
+
+tests/test_m3_states_feasibility.py::test_defect_4_three_six_minute_tasks_heuristic_no_plan_consistent_nested_status PASSED [100%]
+
+======================= 1 passed, 6 deselected in 0.98s =======================
