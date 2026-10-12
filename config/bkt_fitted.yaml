@@ -1,0 +1,24 @@
+# ==============================================================================
+# PROVENANCE RECORD: SYNTHETIC DATA
+# Source: Fitted using pyBKT (v1.4.3) on synthetic response data
+# Data file: data/processed/synthetic_bkt_responses.csv
+# Model: Standard 4-parameter BKT (Corbett & Anderson 1995)
+# Split: Student-level split (train: student_01..09, heldout: student_10)
+# WARNING: Parameters estimated on synthetic simulation data. NOT REAL LEARNER DATA.
+# ==============================================================================
+dataset_type: SYNTHETIC_DATA
+description: Fitted BKT parameters on synthetic student responses. NOT REAL LEARNER
+  DATA.
+skill_name: Addition
+fitted_parameters:
+  p_S: 0.09389350193119235
+  p_G: 0.3251211164969382
+  p_T: 0.22159130231353227
+  prior: 0.04792007810298316
+  forget: 0.0
+window_size: 4
+mastered_p: 0.85
+weak_p: 0.4
+sigma2_max: 0.05
+min_obs: 3
+kappa0: 2.0
