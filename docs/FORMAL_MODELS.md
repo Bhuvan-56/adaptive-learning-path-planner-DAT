@@ -116,14 +116,14 @@ mathematically denoted as $G = (V, E)$.
 ### Graph Validation Constraints
 
 Before any planning engine operations occur, the curriculum administrator's DAG must
-pass five specific hard constraints:
+pass six specific hard constraints:
 
-1. Every prerequisite node referenced by an edge must explicitly exist in the node list.
-2. Every baseline duration must be a positive, non-null value.
-3. Every normalized difficulty value must be strictly bounded within $[0.05, 0.95]$.
-4. No node is permitted to contain a self-loop.
-5. Tarjan's strongly connected components algorithm must detect zero cyclic prerequisite
-   components.
+1. Every prerequisite node referenced by an edge must explicitly exist in the node list (`MISSING_NODE`).
+2. Every baseline duration must be a positive, non-null value (`NONPOSITIVE_DURATION`).
+3. Every normalized difficulty value must be strictly bounded within $[0.05, 0.95]$ (`DIFFICULTY_OUT_OF_RANGE`).
+4. No node is permitted to contain a self-loop (`SELF_LOOP`).
+5. Tarjan's strongly connected components algorithm must detect zero cyclic prerequisite components (`CYCLE_DETECTED`).
+6. Every baseline duration and base difficulty must be a finite numerical value, rejecting NaN or infinite values (`NON_FINITE_VALUE`).
 
 ### Sample Curriculum Graph (Branching Prerequisites)
 

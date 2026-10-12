@@ -21,9 +21,14 @@ mastery models.
 
 - **Explanation Coverage:** Assessed via the Trace Completeness automated test. This metric verifies that 100% of candidate activities in the candidate universe (the target node plus ALL ancestor nodes in the DAG, not merely the frontier) are successfully documented in the JSON audit trace for every planning day — either marked as `SELECTED` alongside their policy scores, or marked as `FILTERED` alongside a valid machine-readable reason code.
 
+- **Variance Threshold Disambiguation:**
+  The system uses two strictly distinct variance parameters that must not be conflated:
+  1. *CAT Diagnostic Stopping Variance Threshold ($\operatorname{Var}(\theta) \le 0.15$):* In Computerized Adaptive Testing (TC-2.2), calibration terminates immediately once the posterior latent ability estimation variance $\operatorname{Var}(\theta) \le 0.15$ (or at exactly 10 questions, whichever comes first).
+  2. *Mastered Heuristic Variance Ceiling ($\sigma^2 \le 0.05$):* In BKT mastery state classification (TC-1.1), a concept is classified as Mastered only when its Beta-distributed evidence confidence proxy $\sigma^2 = \frac{p(1-p)}{\kappa+1} \le 0.05$ (alongside $p \ge 0.85$, $n \ge 3$, and window quorum), guaranteeing sufficient interaction certainty before dependent material unlocks.
+
 ### TC-3.2 — Greedy-to-Optimal Planning Ratio
 
-The greedy score-per-minute scheduler is evaluated against an exact dynamic-programming oracle on a declared benchmark set of 250 instances (5 random seeds × 50 instances).
+The greedy score-per-minute scheduler is evaluated against an exact exhaustive search oracle on a declared benchmark set of 250 instances (5 random seeds × 50 instances).
 
 The benchmark uses the same:
 - prerequisite constraints,
@@ -34,7 +39,7 @@ The benchmark uses the same:
 
 for both the greedy scheduler and the exact oracle.
 
-The benchmark includes the following counterexample:
+The benchmark includes the following discrete knapsack counterexample:
 
 - Budget: 10 minutes
 - Item 1: 6 minutes, score 12
@@ -53,22 +58,13 @@ It therefore obtains a score of 12. The exact optimum selects the two 5-minute i
 \rho = \frac{12}{18}=0.667.
 \]
 
-Therefore, the project does not claim a universal 95% per-instance approximation guarantee.
+Therefore, the project does not claim a universal or per-instance approximation bound.
 
-The acceptance target is distribution-level:
-
-\[
-\bar{\rho} \geq 0.95
-\]
-
-evaluated across the declared 250-instance benchmark set.
-
-The evaluation reports:
+Instead, TC-3.2 is structured as a distribution-level empirical report across the declared 250-instance benchmark set, reporting:
 - mean greedy-to-optimal ratio ($\bar{\rho}$),
 - 5th-percentile ratio ($\rho_{0.05}$),
-- worst-case ratio (minimum ratio, with counterexample $\rho = 0.667$), and
-- mean runtime for both the greedy scheduler and exact oracle.
-
+- worst-case minimum ratio ($\rho_{\min}$), with the 12/18 counterexample ($\rho = 0.667$) and empirical benchmark minimum ($\rho = 0.2143$) explicitly cited, and
+- mean runtimes for both the greedy scheduler and exact exhaustive oracle.
 
 The exact oracle and greedy scheduler must receive identical constraints and inputs.
 
