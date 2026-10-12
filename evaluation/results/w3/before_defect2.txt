@@ -1,0 +1,20 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\bhuva\Downloads\DAT11\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collecting ... collected 6 items
+
+tests/test_m7_trace_contract.py::test_check_trace_missing_whole_day_2_of_2 XFAIL [ 16%]
+tests/test_m7_trace_contract.py::test_check_trace_bogus_decision XFAIL   [ 33%]
+tests/test_m7_trace_contract.py::test_check_trace_missing_constraints_field XFAIL [ 50%]
+tests/test_m7_trace_contract.py::test_check_trace_extra_candidate XFAIL  [ 66%]
+tests/test_m7_trace_contract.py::test_check_trace_duplicate_node PASSED  [ 83%]
+tests/test_m7_trace_contract.py::test_check_trace_mastered_reason_with_uncertain_state XFAIL [100%]
+
+=========================== short test summary info ===========================
+XFAIL tests/test_m7_trace_contract.py::test_check_trace_missing_whole_day_2_of_2 - Defect 2: check_trace ignores num_days and passes day-1-only trace
+XFAIL tests/test_m7_trace_contract.py::test_check_trace_bogus_decision - Defect 2: check_trace passes BOGUS decision
+XFAIL tests/test_m7_trace_contract.py::test_check_trace_missing_constraints_field - Defect 2: check_trace does not enforce all schema fields
+XFAIL tests/test_m7_trace_contract.py::test_check_trace_extra_candidate - Defect 2: check_trace ignores extra candidate nodes
+XFAIL tests/test_m7_trace_contract.py::test_check_trace_mastered_reason_with_uncertain_state - Defect 2: check_trace allows ALREADY_MASTERED with Uncertain state
+======================== 1 passed, 5 xfailed in 0.20s =========================
