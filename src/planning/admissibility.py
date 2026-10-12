@@ -39,12 +39,13 @@ def is_admissible(
 
     if learner_states is not None:
         for p in prereqs:
-            if p not in mastered_set and (not allow_conditional or p not in planned_set):
-                st = learner_states.get(p)
-                if st is not None:
-                    st_class = st.classify() if hasattr(st, "classify") else (st.get("class") if isinstance(st, dict) else None)
-                    if st_class in ("Weak", "Uncertain"):
-                        return False
+            st = learner_states.get(p)
+            if st is not None:
+                st_class = st.classify() if hasattr(st, "classify") else (st.get("class") if isinstance(st, dict) else None)
+                if st_class == "Weak" and p not in mastered_set:
+                    return False
+                if st_class == "Uncertain" and p not in mastered_set and (not allow_conditional or p not in planned_set):
+                    return False
 
     if allow_conditional:
         unmet = prereqs - (mastered_set | planned_set)
