@@ -5,7 +5,7 @@ from src.state.learner_state import ConceptState
 from src.planning.static_baseline import generate_static_plan
 from src.planning.feasibility import FeasibilityStatus, InfeasibilityReason
 from src.planning.greedy import run_greedy_scheduler
-from src.planning.oracle import run_exact_dp_oracle
+from src.planning.oracle import run_exhaustive_oracle, run_exact_dp_oracle
 from src.planning.benchmark import run_benchmark
 
 FIXTURE_GRAPH = os.path.join(os.path.dirname(__file__), "fixtures", "graphs", "valid_branching.json")
@@ -67,10 +67,11 @@ def test_tc_3_2_counterexample():
     ]
 
     greedy_score = run_greedy_scheduler(items, budget)
-    oracle_score = run_exact_dp_oracle(items, budget)
+    oracle_score = run_exhaustive_oracle(items, budget)
 
     assert greedy_score == 12
     assert oracle_score == 18
+    assert run_exact_dp_oracle(items, budget) == 18
 
     ratio = greedy_score / oracle_score
     assert ratio == pytest.approx(2.0 / 3.0)
@@ -95,16 +96,19 @@ def test_greedy_and_oracle_share_constraints():
     ]
 
     greedy_score = run_greedy_scheduler(items, budget)
-    oracle_score = run_exact_dp_oracle(items, budget)
+    oracle_score = run_exhaustive_oracle(items, budget)
 
     assert greedy_score == 25
     assert oracle_score == 25
 
 
 def test_oracle_hard_cap_exceeded():
-    """Verifies that the exact DP oracle raises ValueError when items > 20 hard cap."""
+    """Verifies that the exhaustive oracle raises ValueError when items > 20 hard cap."""
     budget = 10
     items = [{"node_id": f"item_{i}", "duration": 1, "score": 1} for i in range(21)]
+
+    with pytest.raises(ValueError, match="Oracle hard cap exceeded"):
+        run_exhaustive_oracle(items, budget)
 
     with pytest.raises(ValueError, match="Oracle hard cap exceeded"):
         run_exact_dp_oracle(items, budget)

@@ -5,7 +5,7 @@ import networkx as nx
 from src.planning.admissibility import is_admissible
 
 
-def run_exact_dp_oracle(
+def run_exhaustive_oracle(
     items: List[Dict[str, Any]],
     budget: int,
     mastered_set: Optional[Set[str]] = None,
@@ -13,8 +13,9 @@ def run_exact_dp_oracle(
     timeout_seconds: float = 2.0
 ) -> int:
     """
-    Exact dynamic programming / exhaustive oracle for single-day schedule optimization.
-    Finds maximum achievable score over precedence-closed subsets of duration <= budget.
+    Exhaustive oracle for single-day schedule optimization.
+    Finds maximum achievable score over precedence-closed subsets of duration <= budget,
+    independent of the input list order.
 
     Hard cap at 20 activities and per-instance timeout to protect CI.
     """
@@ -24,12 +25,18 @@ def run_exact_dp_oracle(
     if mastered_set is None:
         mastered_set = set()
 
+    start_time = time.time()
+
+    # Normalize items
     normalized_items = []
     for idx, item in enumerate(items):
         node_id = str(item.get("node_id") or item.get("id", f"item_{idx}"))
         dur = int(item.get("duration") if "duration" in item else item.get("baseline_duration", 0))
         score = float(item.get("score", 0))
-        prereqs = item.get("prerequisites", [])
+        if g is not None and node_id in g:
+            prereqs = set(g.predecessors(node_id))
+        else:
+            prereqs = set(item.get("prerequisites", []))
         normalized_items.append({
             "node_id": node_id,
             "duration": dur,
@@ -38,33 +45,87 @@ def run_exact_dp_oracle(
             "raw": item
         })
 
-    n = len(normalized_items)
-    start_time = time.time()
+    # Build dependency graph among input items to find topological ordering for search
+    item_nids = {it["node_id"] for it in normalized_items}
+    dep_graph = nx.DiGraph()
+    for it in normalized_items:
+        dep_graph.add_node(it["node_id"])
+    for it in normalized_items:
+        for p in it["prerequisites"]:
+            if p in item_nids:
+                dep_graph.add_edge(p, it["node_id"])
+
+    try:
+        topo_order = list(nx.topological_sort(dep_graph))
+        order_map = {nid: i for i, nid in enumerate(topo_order)}
+        sorted_items = sorted(normalized_items, key=lambda it: order_map[it["node_id"]])
+    except nx.NetworkXUnfeasible:
+        sorted_items = normalized_items
+
+    n = len(sorted_items)
+    # Precompute suffix score sums for branch-and-bound pruning
+    suffix_scores = [0.0] * (n + 1)
+    for i in range(n - 1, -1, -1):
+        suffix_scores[i] = suffix_scores[i + 1] + max(0.0, sorted_items[i]["score"])
+
     max_score = 0.0
 
-    # Exhaustive search over valid precedence-closed combinations
-    # Since n <= 20, bitmask / recursive search with memoization or subset search is ultra fast
-    def search(idx: int, current_selected: Set[str], current_budget: int, current_score: float):
+    def search(idx: int, selected_set: Set[str], cur_budget: int, cur_score: float):
         nonlocal max_score
         if time.time() - start_time > timeout_seconds:
             raise TimeoutError("Oracle execution timed out.")
 
-        if current_score > max_score:
-            max_score = current_score
+        if cur_score > max_score:
+            max_score = cur_score
 
-        for i in range(idx, n):
-            item = normalized_items[i]
-            node_id = item["node_id"]
-            if node_id not in current_selected:
-                if is_admissible(item, current_selected, mastered_set, current_budget, g):
-                    current_selected.add(node_id)
-                    search(
-                        i + 1,
-                        current_selected,
-                        current_budget - item["duration"],
-                        current_score + item["score"]
-                    )
-                    current_selected.remove(node_id)
+        if idx == n or cur_score + suffix_scores[idx] <= max_score:
+            return
+
+        item = sorted_items[idx]
+        nid = item["node_id"]
+        dur = item["duration"]
+
+        # Check admissibility: fits within remaining budget and all prerequisites satisfied
+        can_include = (dur <= cur_budget) and item["prerequisites"].issubset(selected_set | mastered_set)
+
+        # Branch 1: include item
+        if can_include:
+            selected_set.add(nid)
+            search(
+                idx + 1,
+                selected_set,
+                cur_budget - dur,
+                cur_score + item["score"]
+            )
+            selected_set.remove(nid)
+
+        # Branch 2: exclude item
+        search(
+            idx + 1,
+            selected_set,
+            cur_budget,
+            cur_score
+        )
 
     search(0, set(), budget, 0.0)
     return int(round(max_score))
+
+
+def run_exact_dp_oracle(
+    items: List[Dict[str, Any]],
+    budget: int,
+    mastered_set: Optional[Set[str]] = None,
+    g: Optional[nx.DiGraph] = None,
+    timeout_seconds: float = 2.0
+) -> int:
+    """
+    Deprecated alias for run_exhaustive_oracle.
+    Retained for backward compatibility.
+    """
+    return run_exhaustive_oracle(
+        items=items,
+        budget=budget,
+        mastered_set=mastered_set,
+        g=g,
+        timeout_seconds=timeout_seconds
+    )
