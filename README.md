@@ -96,6 +96,22 @@ This generates:
 - `evaluation/results/w2_greedy_vs_oracle.csv` (per-instance benchmark results)
 - `evaluation/results/w2_summary.md` (summary statistics: mean, 5th percentile, worst-case, runtimes)
 
+## End-to-End CLI Demo
+
+Run the end-to-end multi-scenario CLI demonstration:
+
+```bash
+python -m src.cli demo --out evaluation/results/w3/demo --seed 20261012 --budget 10
+```
+
+This runs the complete workflow:
+- Validates the curriculum DAG (`data/curricula/demo_curriculum.json`).
+- Generates Day 1 plans for Novice and Intermediate learners.
+- Simulates adaptive assessment responses and replanning (Passed vs. Failed scenarios).
+- Simulates a missed day and subsequent budget reduction proving block infeasibility.
+- Writes all plan and trace JSON files, state transitions (`response_updates.json`), and provenance manifest (`manifest.json`) to `--out`.
+
+
 ## Bayesian Knowledge Tracing (pyBKT) Integration
 
 The engine supports offline parameter estimation using `pyBKT` and proves exact mathematical equivalence with the project's online sequential BKT adapter (`src/state/bkt_adapter.py`).
