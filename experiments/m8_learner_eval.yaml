@@ -1,10 +1,11 @@
-# Evaluation Random Seeds and Experiment Configuration
-# Preserved random seeds for 5-fold evaluation across synthetic learner populations.
+# FUTURE EXPERIMENT CONFIGURATION (Milestone M8)
+# Holds future multi-policy comparative evaluation parameters for synthetic learner populations.
+# NOTE: BKT hyperparameters below apply only to future learner simulation, not the planning engine.
 
+status: "FUTURE_EXPERIMENT"
+experiment_name: "m8_learner_eval"
 version: "1.0"
-experiment_name: "m8_comparative_evaluation"
 
-# Fixed list of 5 random seeds to be reused across all synthetic evaluation runs
 seeds:
   - 42
   - 101

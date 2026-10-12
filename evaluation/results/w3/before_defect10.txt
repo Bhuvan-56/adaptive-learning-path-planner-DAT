@@ -1,0 +1,9 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 1 item
+
+tests/test_provenance.py::test_defect_10_no_conflicting_bkt_keys_across_configs XFAIL [100%]
+
+============================= 1 xfailed in 0.09s ==============================
