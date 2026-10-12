@@ -165,7 +165,6 @@ def test_defect_7_deadline_zero_no_zero_division():
     assert "INVALID_DEADLINE" in result.error_codes
 
 
-@pytest.mark.xfail(strict=True, reason="Defect 8: remaining_budget in trace reconstructed after day instead of at decision")
 def test_static_baseline_sequential_budget_12_then_6():
     """Defect 8: sequential selections under budget 12 must record 12 then 6 in trace."""
     import networkx as nx
