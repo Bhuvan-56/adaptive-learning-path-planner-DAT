@@ -19,30 +19,34 @@ See `docs/PROBLEM_BOUNDARY.md` for the full scope statement and actor definition
 
 ## System Components
 
-| Module               | Responsibility                                                           |
-| -------------------- | ------------------------------------------------------------------------ |
-| Curriculum Graph     | Validated DAG of concepts and mandatory prerequisites                    |
-| Diagnostic (CAT/IRT) | Cold-starts a new learner's initial mastery estimate                     |
-| Mastery Model (BKT)  | Continuously updates per-concept mastery from quiz/exercise evidence     |
-| Planning Engine      | Daily, time-budgeted scheduling of new learning, review, and remediation |
-| Spaced Review (HLR)  | Predicts recall decay and triggers reviews before forgetting             |
-| Explainability Layer | Produces a structured JSON audit trace for every generated plan          |
+The architecture consists of eight distinct modular components (M1 through M8):
+
+| Module | Responsibility |
+| --- | --- |
+| M1: Curriculum Graph & Learner State | Validated DAG of concepts, BKT mastery tracking, and Beta belief state |
+| M2: Diagnostic (CAT/IRT) | Cold-starts a new learner's initial mastery estimate via adaptive testing |
+| M3: Path Planning Engine | Daily, time-budgeted scheduling (score-per-minute greedy & exact DP oracle) |
+| M4: Difficulty Adaptation | Dynamically adjusts exercise difficulty based on learner performance |
+| M5: Spaced Review & Remediation | Predicts HLR recall decay and schedules prerequisite remediation |
+| M6: Dynamic Replanning & Infeasibility | Re-optimizes schedules on missed days or budget changes with infeasibility detection |
+| M7: Explainability Layer | Produces structured JSON audit traces and verifies decision completeness |
+| M8: Comparative Evaluation Suite | Compares planning policies against baselines across matched learner profiles |
 
 ## Repository Structure
 
 ```
-/data          - dataset documentation, processed logs, curriculum DAG definitions
-/models        - BKT, IRT, and HLR implementations
-/diagnostic    - CAT item selection and calibration
-/planner       - DAG validation, scheduling, infeasibility detection, optimization
-/adaptation    - difficulty and remediation policies
-/audit         - explainability and JSON trace generation
-/simulators    - synthetic learner generation
-/evaluation    - baselines, robustness experiments, ablations, metrics, config
-/tests         - graph validation, planner, infeasibility, adaptation, trace tests
-/decisions     - architecture and methodology decision records
-/weekly        - dated weekly progress records
-docs/          - problem boundary, assumptions, data strategy, formal models
+src/
+  curriculum/  - graph loader, topological validator, error types
+  planning/    - static baseline, greedy scheduler, exact DP oracle, feasibility
+  state/       - learner state model (BKT update, Beta variance proxy, classification)
+  trace/       - decision audit trace schema, candidate universe, trace checker
+config/        - BKT default parameters and learner profiles configuration
+data/          - dataset documentation, processed logs, curriculum DAG definitions
+decisions/     - architecture and methodology decision records (ADR-001 to ADR-009)
+evaluation/    - baselines, benchmark results, metrics, configuration
+tests/         - unit and acceptance test suites for M1-M8
+weekly/        - dated weekly progress records and inputs
+docs/          - problem boundary, data strategy, formal models, metrics, audits
 ASSUMPTIONS.md - documented system assumptions
 TRACEABILITY.md- requirement -> milestone -> acceptance test mapping
 ```

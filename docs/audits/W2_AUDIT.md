@@ -1,5 +1,9 @@
 # Week 2 Independent Audit Report
 
+> [!WARNING]
+> **Historical Document Notice (Pre-Fix Baseline):**  
+> This audit report is a historical pre-fix document produced prior to the mid-review audit. Several milestone items marked as PASS below (notably TC-1.1 prerequisite gating) were disproved during the review and cataloged as defects (Defects 1–10). This document is retained for historical traceability only and is not treated as an independent review. Post-fix validation is tied to commit `w3-pre-fix` (`a8847b5`).
+
 **Auditor:** Independent Auditor  
 **Date:** 03 October 2026  
 **Repository:** Adaptive Learning and Path-Planning Engine (Project ID 3)  

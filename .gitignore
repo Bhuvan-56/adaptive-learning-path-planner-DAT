@@ -18,11 +18,12 @@ data/processed/*
 # Environments & IDEs
 .venv/
 .venv_audit/
+.venv_w2/
+.venv_oss/
+.venv*/
 venv/
 ENV/
 .idea/
 .vscode/
 *.swp
 .DS_Store
-
-.venv*/
