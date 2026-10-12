@@ -8,6 +8,7 @@ class FeasibilityStatus(str, Enum):
     FEASIBLE = "FEASIBLE"
     INFEASIBLE_PROVED = "INFEASIBLE_PROVED"
     HEURISTIC_NO_PLAN = "HEURISTIC_NO_PLAN"
+    CAPACITY_CHECK_PASSED = "CAPACITY_CHECK_PASSED"
 
 
 class InfeasibilityReason(str, Enum):
@@ -28,10 +29,10 @@ def check_feasibility(
        with BLOCK_EXCEEDS_DAILY_BUDGET and minimum budget fix.
     2. Aggregate capacity check: if total work W_req > deadline_days * budget, returns INFEASIBLE_PROVED
        with CAPACITY_EXCEEDED and necessary (not sufficient) fixes.
-    3. Otherwise returns FEASIBLE pending solver execution.
+    3. Otherwise returns CAPACITY_CHECK_PASSED pending solver execution.
     """
     if not required_nodes:
-        return FeasibilityStatus.FEASIBLE, {"status": FeasibilityStatus.FEASIBLE, "message": "No required activities."}
+        return FeasibilityStatus.CAPACITY_CHECK_PASSED, {"status": FeasibilityStatus.CAPACITY_CHECK_PASSED, "message": "No required activities."}
 
     # 1. Per-activity check
     offending_nodes = []
@@ -82,8 +83,8 @@ def check_feasibility(
             "notes": "Calculated fixes are necessary lower bounds, but not guaranteed sufficient due to block indivisibility."
         }
 
-    return FeasibilityStatus.FEASIBLE, {
-        "status": FeasibilityStatus.FEASIBLE,
+    return FeasibilityStatus.CAPACITY_CHECK_PASSED, {
+        "status": FeasibilityStatus.CAPACITY_CHECK_PASSED,
         "w_req": w_req,
         "total_capacity": total_capacity
     }
