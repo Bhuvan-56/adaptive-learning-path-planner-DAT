@@ -179,15 +179,24 @@ def test_variance_validity():
             assert state.validate()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Defect 5: WINDOW_SIZE is frozen at import and update with window_size=6 retains only 4 observations",
-)
 def test_defect_5_window_size_6_retains_six_observations_and_updates_quorum():
-    """Defect 5: Calling update with window_size=6 must retain 6 observations, not 4."""
+    """Defect 5: Calling update with window_size=6 must retain 6 observations, not 4, and update quorum to 5."""
+    from src.state.policy import PolicyConfig
     state = ConceptState.cold_start()
-    params = {"p_S": 0.10, "p_G": 0.25, "p_T": 0.10, "window_size": 6}
+    policy = PolicyConfig(window_size=6)
     for _ in range(6):
-        state.update(True, params=params)
+        state.update(True, policy=policy)
     assert len(state.history) == 6
+
+    # For window_size 6, quorum is ceil(0.75 * 6) = 5.
+    # 4 correct out of 6 (< 5 quorum) must NOT reach Mastered even with high p
+    state_4_of_6 = ConceptState(A=9.0, B=1.0, n=6, history=[1, 1, 1, 1, 0, 0], policy=policy)
+    assert state_4_of_6.p >= 0.85
+    assert state_4_of_6.classify(policy=policy) == "Developing"
+
+    # 5 correct out of 6 (>= 5 quorum) reaches Mastered
+    state_5_of_6 = ConceptState(A=9.0, B=1.0, n=6, history=[1, 1, 1, 1, 1, 0], policy=policy)
+    assert state_5_of_6.p >= 0.85
+    assert state_5_of_6.classify(policy=policy) == "Mastered"
+
 
