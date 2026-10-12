@@ -96,6 +96,27 @@ This generates:
 - `evaluation/results/w2_greedy_vs_oracle.csv` (per-instance benchmark results)
 - `evaluation/results/w2_summary.md` (summary statistics: mean, 5th percentile, worst-case, runtimes)
 
+## Bayesian Knowledge Tracing (pyBKT) Integration
+
+The engine supports offline parameter estimation using `pyBKT` and proves exact mathematical equivalence with the project's online sequential BKT adapter (`src/state/bkt_adapter.py`).
+
+### 1. Fit the pyBKT Model
+
+Fit pyBKT on student training responses and write fitted parameters to `config/bkt_fitted.yaml`:
+
+```bash
+python examples/pybkt_fit_predict.py
+```
+
+This outputs fitted parameters (`prior`, `p_T`, `p_G`, `p_S`, `forget=0.0`) and evaluates prediction on a held-out student.
+
+### 2. Run the BKT Parity Test
+
+Verify that the online BKT adapter matches pyBKT's predictions step-by-step to within $10^{-6}$:
+
+```bash
+pytest tests/test_m1_bkt_parity.py -v
+```
 
 ## Documentation Index
 

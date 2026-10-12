@@ -1,0 +1,36 @@
+{
+  "dataset_type": "SYNTHETIC_DATA",
+  "description": "Synthetic learner responses generated via standard 4-parameter BKT process. NOT REAL LEARNER DATA.",
+  "generator_seed": 42,
+  "generator_parameters": {
+    "skill_name": "Addition",
+    "true_prior": 0.2,
+    "true_p_T": 0.15,
+    "true_p_S": 0.1,
+    "true_p_G": 0.2,
+    "true_p_F": 0.0,
+    "n_students": 10,
+    "interactions_per_student": 15,
+    "total_rows": 150
+  },
+  "train_students": [
+    "student_01",
+    "student_02",
+    "student_03",
+    "student_04",
+    "student_05",
+    "student_06",
+    "student_07",
+    "student_08"
+  ],
+  "heldout_students": [
+    "student_09",
+    "student_10"
+  ],
+  "columns": [
+    "user_id",
+    "skill_name",
+    "correct",
+    "order_id"
+  ]
+}
