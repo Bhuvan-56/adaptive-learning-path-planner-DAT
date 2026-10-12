@@ -53,12 +53,23 @@ def check_feasibility(
         }
 
     # 2. Aggregate check
+    if deadline_days <= 0:
+        return FeasibilityStatus.INFEASIBLE_PROVED, {
+            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+            "reason_code": InfeasibilityReason.CAPACITY_EXCEEDED,
+            "message": "deadline_days must be greater than zero.",
+            "necessary_not_sufficient_fixes": {
+                "extend_deadline_by_days": 1,
+                "increase_daily_budget_by_minutes": 0
+            }
+        }
+
     w_req = sum(g.nodes[node_id].get("baseline_duration", 0) for node_id in required_nodes)
     total_capacity = deadline_days * budget
 
     if w_req > total_capacity:
-        x_days = max(0, math.ceil(w_req / budget) - deadline_days)
-        y_minutes = max(0, math.ceil(w_req / deadline_days) - budget)
+        x_days = max(0, math.ceil(w_req / budget) - deadline_days) if budget > 0 else 0
+        y_minutes = max(0, math.ceil(w_req / deadline_days) - budget) if deadline_days > 0 else 0
         return FeasibilityStatus.INFEASIBLE_PROVED, {
             "status": FeasibilityStatus.INFEASIBLE_PROVED,
             "reason_code": InfeasibilityReason.CAPACITY_EXCEEDED,

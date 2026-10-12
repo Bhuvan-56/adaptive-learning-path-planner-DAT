@@ -110,10 +110,6 @@ def test_oracle_hard_cap_exceeded():
         run_exact_dp_oracle(items, budget)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Defect 7: validate_graph accepts NaN duration",
-)
 def test_defect_7_nan_duration():
     """Defect 7 sub-case 1: validate_graph must reject NaN duration."""
     import networkx as nx
@@ -126,10 +122,6 @@ def test_defect_7_nan_duration():
     assert GraphErrorCode.NON_FINITE_VALUE in errors
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Defect 7: validate_graph accepts NaN difficulty",
-)
 def test_defect_7_nan_difficulty():
     """Defect 7 sub-case 2: validate_graph must reject NaN difficulty."""
     import networkx as nx
@@ -142,10 +134,6 @@ def test_defect_7_nan_difficulty():
     assert GraphErrorCode.NON_FINITE_VALUE in errors
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Defect 7: cyclic graph produces fallback plan",
-)
 def test_defect_7_cycle_produces_no_plan():
     """Defect 7 sub-case 3: cyclic graph must be rejected as InvalidInput and never produce fallback plan."""
     import networkx as nx
@@ -161,10 +149,6 @@ def test_defect_7_cycle_produces_no_plan():
     assert "CYCLE_DETECTED" in result.error_codes
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Defect 7: deadline_days = 0 raises ZeroDivisionError in feasibility",
-)
 def test_defect_7_deadline_zero_no_zero_division():
     """Defect 7 sub-case 4: deadline_days = 0 must return InvalidInput without raising ZeroDivisionError."""
     import networkx as nx
@@ -175,5 +159,6 @@ def test_defect_7_deadline_zero_no_zero_division():
     result = plan_request(g, {}, budget=10, deadline_days=0, targets="A")
     assert not result.is_valid
     assert "INVALID_DEADLINE" in result.error_codes
+
 
 

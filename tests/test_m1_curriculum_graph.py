@@ -22,6 +22,7 @@ def test_tc_1_2_valid_branching_graph_passes():
         ("difficulty_out_of_range.json", GraphErrorCode.DIFFICULTY_OUT_OF_RANGE),
         ("self_loop.json", GraphErrorCode.SELF_LOOP),
         ("cycle_detected.json", GraphErrorCode.CYCLE_DETECTED),
+        ("non_finite_value.json", GraphErrorCode.NON_FINITE_VALUE),
     ],
 )
 def test_tc_1_2_rejects_malformed_graph_files(filename, expected_error):

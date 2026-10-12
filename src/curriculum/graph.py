@@ -42,15 +42,17 @@ def load_graph(path: str) -> nx.DiGraph:
 
 def validate_graph(g: nx.DiGraph) -> List[GraphErrorCode]:
     """
-    Validates a curriculum graph against five strict graph integrity checks:
+    Validates a curriculum graph against six strict graph integrity checks:
     1. MISSING_NODE: Edge references non-existent node.
     2. NONPOSITIVE_DURATION: Baseline duration <= 0 or null.
     3. DIFFICULTY_OUT_OF_RANGE: Base difficulty outside [0.05, 0.95].
     4. SELF_LOOP: Node has edge pointing to itself.
     5. CYCLE_DETECTED: Graph contains cyclic components (SCC size > 1).
+    6. NON_FINITE_VALUE: Baseline duration or base difficulty is NaN or infinite.
 
     Returns a list of GraphErrorCode entries. Never raises on bad data.
     """
+    import math
     errors: List[GraphErrorCode] = []
 
     # 1. Missing node check
@@ -64,23 +66,34 @@ def validate_graph(g: nx.DiGraph) -> List[GraphErrorCode]:
     if has_missing_node:
         errors.append(GraphErrorCode.MISSING_NODE)
 
-    # 2. Nonpositive duration check
+    # 2. Duration check: non-finite or non-positive
+    has_non_finite_dur = False
     has_bad_duration = False
     for _, attrs in g.nodes(data=True):
         dur = attrs.get("baseline_duration")
-        if dur is None or dur <= 0:
+        if dur is not None and (not isinstance(dur, (int, float)) or not math.isfinite(dur)):
+            has_non_finite_dur = True
+            break
+        elif dur is None or dur <= 0:
             has_bad_duration = True
             break
-    if has_bad_duration:
-        errors.append(GraphErrorCode.NONPOSITIVE_DURATION)
 
-    # 3. Difficulty out of range check [0.05, 0.95]
+    # 3. Difficulty check: non-finite or out of range [0.05, 0.95]
+    has_non_finite_diff = False
     has_bad_difficulty = False
     for _, attrs in g.nodes(data=True):
         diff = attrs.get("base_difficulty")
-        if diff is None or diff < 0.05 or diff > 0.95:
+        if diff is not None and (not isinstance(diff, (int, float)) or not math.isfinite(diff)):
+            has_non_finite_diff = True
+            break
+        elif diff is None or diff < 0.05 or diff > 0.95:
             has_bad_difficulty = True
             break
+
+    if has_non_finite_dur or has_non_finite_diff:
+        errors.append(GraphErrorCode.NON_FINITE_VALUE)
+    if has_bad_duration:
+        errors.append(GraphErrorCode.NONPOSITIVE_DURATION)
     if has_bad_difficulty:
         errors.append(GraphErrorCode.DIFFICULTY_OUT_OF_RANGE)
 

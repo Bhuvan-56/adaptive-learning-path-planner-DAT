@@ -81,8 +81,8 @@ def generate_static_plan(
     subgraph = g.subgraph(required_nodes)
     try:
         topo_order = list(nx.lexicographical_topological_sort(subgraph))
-    except nx.NetworkXUnfeasible:
-        topo_order = sorted(list(required_nodes))
+    except nx.NetworkXUnfeasible as e:
+        raise ValueError("Cyclic graph detected; cannot produce fallback plan.") from e
 
     completed_set = set(mastered_nodes)
     remaining_nodes = list(topo_order)
