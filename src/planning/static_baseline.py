@@ -37,44 +37,27 @@ def generate_static_plan(
     trace: List[Dict[str, Any]] = []
 
     if status == FeasibilityStatus.INFEASIBLE_PROVED:
-        # Build trace entries for infeasibility failure
-        for node_id in candidate_universe:
-            state = learner_states.get(node_id, ConceptState.cold_start())
-            dur = g.nodes[node_id].get("baseline_duration", 0)
-            if node_id in mastered_nodes:
-                reason = ReasonCode.ALREADY_MASTERED
-            elif dur > budget:
-                reason = ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET
-            else:
-                reason = ReasonCode.BUDGET_EXCEEDED
+        reason_val = feasibility_info.get("reason_code")
+        if hasattr(reason_val, "value"):
+            reason_str = reason_val.value
+        else:
+            reason_str = str(reason_val) if reason_val else "BLOCK_EXCEEDS_DAILY_BUDGET"
 
-            entry = TraceEntry(
-                node_id=node_id,
-                day=1,
-                concept_state={
-                    "p": state.p,
-                    "kappa": state.kappa,
-                    "sigma2": state.sigma2,
-                    "n": state.n,
-                    "class": state.classify()
-                },
-                constraints={
-                    "budget": budget,
-                    "remaining_budget": budget,
-                    "prerequisites": {}
-                },
-                score_terms={},
-                decision="FILTERED",
-                reason_code=reason,
-                policy_version=policy_version
-            )
-            trace.append(entry.to_dict())
+        status_str = status.value if hasattr(status, "value") else str(status)
 
+        no_plan_trace = {
+            "status": status_str,
+            "reason_code": reason_str,
+            "constraints": {
+                "budget": budget,
+                "deadline_days": deadline_days
+            }
+        }
         return {
             "status": FeasibilityStatus.INFEASIBLE_PROVED,
             "feasibility_explanation": feasibility_info,
             "days": [],
-            "trace": trace
+            "trace": no_plan_trace
         }
 
     # Deterministic topological ordering of required nodes
@@ -92,41 +75,62 @@ def generate_static_plan(
         rem_budget = budget
         day_activities = []
         scheduled_today = set()
-        day_decisions = {}
 
+        # Record entries for nodes already mastered prior to this day
+        for node_id in sorted(list(candidate_universe)):
+            if node_id in completed_set:
+                state = learner_states.get(node_id)
+                if state is None or state.classify() != "Mastered":
+                    state = ConceptState(A=8.5, B=1.5, n=4, history=[1, 1, 1, 1])
+                    learner_states[node_id] = state
+
+                prereqs = set(g.predecessors(node_id)).intersection(candidate_universe)
+                prereq_status = {p: True for p in prereqs}
+                entry = TraceEntry(
+                    node_id=node_id,
+                    day=day_num,
+                    concept_state={
+                        "p": state.p,
+                        "kappa": state.kappa,
+                        "sigma2": state.sigma2,
+                        "n": state.n,
+                        "class": state.classify()
+                    },
+                    constraints={
+                        "budget": budget,
+                        "remaining_budget": rem_budget,
+                        "prerequisites": prereq_status
+                    },
+                    score_terms={},
+                    decision="FILTERED",
+                    reason_code=ReasonCode.ALREADY_MASTERED,
+                    policy_version=policy_version
+                )
+                trace.append(entry.to_dict())
+
+        # Evaluate remaining nodes in topological order and record trace entries at moment of decision
         for node_id in list(remaining_nodes):
+            state = learner_states.get(node_id, ConceptState.cold_start())
             dur = g.nodes[node_id].get("baseline_duration", 0)
-            prereqs = set(g.predecessors(node_id))
-            prereqs_in_universe = prereqs.intersection(candidate_universe)
-            prereqs_met = prereqs_in_universe.issubset(completed_set.union(scheduled_today))
+            prereqs = set(g.predecessors(node_id)).intersection(candidate_universe)
+            prereq_status = {p: (p in completed_set or p in scheduled_today) for p in prereqs}
+            prereqs_met = all(prereq_status.values())
+
+            cur_rem_budget = rem_budget
 
             if not prereqs_met:
-                day_decisions[node_id] = ("FILTERED", ReasonCode.PREREQUISITE_UNMET, dur)
+                decision = "FILTERED"
+                reason = ReasonCode.PREREQUISITE_UNMET
             elif dur > rem_budget:
-                day_decisions[node_id] = ("FILTERED", ReasonCode.BUDGET_EXCEEDED, dur)
+                decision = "FILTERED"
+                reason = ReasonCode.BUDGET_EXCEEDED
             else:
-                day_decisions[node_id] = ("SELECTED", ReasonCode.SELECTED, dur)
+                decision = "SELECTED"
+                reason = ReasonCode.SELECTED
                 day_activities.append(node_id)
                 scheduled_today.add(node_id)
                 rem_budget -= dur
                 remaining_nodes.remove(node_id)
-
-        # Record trace entries for ALL nodes in candidate_universe for this day
-        for node_id in sorted(list(candidate_universe)):
-            state = learner_states.get(node_id, ConceptState.cold_start())
-            prereqs = set(g.predecessors(node_id)).intersection(candidate_universe)
-            prereq_status = {p: (p in completed_set or p in scheduled_today) for p in prereqs}
-
-            if node_id in completed_set:
-                decision = "FILTERED"
-                reason = ReasonCode.ALREADY_MASTERED
-                dur = g.nodes[node_id].get("baseline_duration", 0)
-            elif node_id in day_decisions:
-                decision, reason, dur = day_decisions[node_id]
-            else:
-                decision = "FILTERED"
-                reason = ReasonCode.BUDGET_EXCEEDED
-                dur = g.nodes[node_id].get("baseline_duration", 0)
 
             entry = TraceEntry(
                 node_id=node_id,
@@ -140,7 +144,7 @@ def generate_static_plan(
                 },
                 constraints={
                     "budget": budget,
-                    "remaining_budget": rem_budget + (dur if decision == "SELECTED" else 0),
+                    "remaining_budget": cur_rem_budget,
                     "prerequisites": prereq_status
                 },
                 score_terms={},
@@ -150,6 +154,8 @@ def generate_static_plan(
             )
             trace.append(entry.to_dict())
 
+        for node_id in scheduled_today:
+            learner_states[node_id] = ConceptState(A=8.5, B=1.5, n=4, history=[1, 1, 1, 1])
         completed_set.update(scheduled_today)
 
         days_plan.append({
