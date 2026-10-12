@@ -1,0 +1,22 @@
+{
+  "config_hash": "70e78c7e7ff24d27fd25808a266ceda28c1ac04ad0e7737720cd11e5649c6505",
+  "data_route": "synthetic_dag_generator",
+  "dirty": true,
+  "experiment_name": "w2_scheduling_benchmark",
+  "git_sha": "2a59db921463d6f92c10cdfb29de780c30824eaa",
+  "package_versions": {
+    "networkx": "3.1",
+    "numpy": "1.24.3",
+    "pytest": "7.3.1",
+    "yaml": "6.0.1"
+  },
+  "python_version": "3.11.4",
+  "seeds": [
+    7,
+    17,
+    27,
+    37,
+    47
+  ],
+  "timestamp": "2026-10-12T08:02:14.057159+00:00"
+}

@@ -1,0 +1,28 @@
+# W2 Scheduling Optimality Benchmark Experiment Configuration
+experiment_name: "w2_scheduling_benchmark"
+version: "1.0"
+
+# Fixed benchmark seeds (5 seeds x 50 instances = 250 instances)
+seeds:
+  - 7
+  - 17
+  - 27
+  - 37
+  - 47
+
+instances_per_seed: 50
+
+# Instance generation parameters
+generator_params:
+  min_activities: 4
+  max_activities: 12
+  budgets:
+    - 5
+    - 10
+    - 15
+    - 30
+  prereq_probability: 0.35
+  min_duration: 1
+  max_duration: 10
+  min_score: 1
+  max_score: 20
