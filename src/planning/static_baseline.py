@@ -1,8 +1,8 @@
-from typing import Dict, List, Any, Set
+from typing import Dict, List, Any, Set, Optional
 import networkx as nx
 
 from src.state.learner_state import ConceptState
-from src.planning.feasibility import check_feasibility, FeasibilityStatus
+from src.planning.feasibility import check_feasibility, FeasibilityStatus, InfeasibilityReason
 from src.trace.schema import TraceEntry, ReasonCode
 from src.trace.universe import get_candidate_universe
 
@@ -13,28 +13,32 @@ def generate_static_plan(
     budget: int,
     deadline_days: int,
     target_node: str,
-    policy_version: str = "static_baseline_v0"
+    policy_version: str = "static_baseline_v0",
+    completed_nodes: Optional[Set[str]] = None
 ) -> Dict[str, Any]:
     """
     Generates a daily study schedule using a deterministic static baseline topological sort planner.
     Performs block indivisibility feasibility checking and emits a candidate decision trace.
+
+    Maintains three separate planner states:
+    - planned: placed on a future day
+    - completed: the learner actually did it; supplied as input
+    - evidence_mastered: learner-state classifier returns Mastered
     """
     candidate_universe = get_candidate_universe(g, target_node)
 
-    # Required nodes: candidates not currently Mastered
+    completed_set = set(completed_nodes or set())
+    evidence_mastered = set()
     required_nodes = set()
-    mastered_nodes = set()
 
     for node_id in candidate_universe:
         state = learner_states.get(node_id, ConceptState.cold_start())
         if state.classify() == "Mastered":
-            mastered_nodes.add(node_id)
-        else:
+            evidence_mastered.add(node_id)
+        elif node_id not in completed_set:
             required_nodes.add(node_id)
 
     status, feasibility_info = check_feasibility(g, required_nodes, budget, deadline_days)
-
-    trace: List[Dict[str, Any]] = []
 
     if status == FeasibilityStatus.INFEASIBLE_PROVED:
         reason_val = feasibility_info.get("reason_code")
@@ -67,25 +71,25 @@ def generate_static_plan(
     except nx.NetworkXUnfeasible as e:
         raise ValueError("Cyclic graph detected; cannot produce fallback plan.") from e
 
-    completed_set = set(mastered_nodes)
+    planned: Dict[str, int] = {}
     remaining_nodes = list(topo_order)
     days_plan = []
+    trace: List[Dict[str, Any]] = []
+    assessment_candidates: Set[str] = set()
 
     for day_num in range(1, deadline_days + 1):
         rem_budget = budget
         day_activities = []
+        conditional_activities = []
         scheduled_today = set()
 
-        # Record entries for nodes already mastered prior to this day
+        # Record entries for nodes already mastered, completed, or scheduled on prior days
         for node_id in sorted(list(candidate_universe)):
-            if node_id in completed_set:
-                state = learner_states.get(node_id)
-                if state is None or state.classify() != "Mastered":
-                    state = ConceptState(A=8.5, B=1.5, n=4, history=[1, 1, 1, 1])
-                    learner_states[node_id] = state
+            state = learner_states.get(node_id, ConceptState.cold_start())
+            prereqs = set(g.predecessors(node_id)).intersection(candidate_universe)
+            prereq_status = {p: True for p in prereqs}
 
-                prereqs = set(g.predecessors(node_id)).intersection(candidate_universe)
-                prereq_status = {p: True for p in prereqs}
+            if node_id in evidence_mastered:
                 entry = TraceEntry(
                     node_id=node_id,
                     day=day_num,
@@ -107,28 +111,109 @@ def generate_static_plan(
                     policy_version=policy_version
                 )
                 trace.append(entry.to_dict())
+            elif node_id in completed_set:
+                entry = TraceEntry(
+                    node_id=node_id,
+                    day=day_num,
+                    concept_state={
+                        "p": state.p,
+                        "kappa": state.kappa,
+                        "sigma2": state.sigma2,
+                        "n": state.n,
+                        "class": state.classify()
+                    },
+                    constraints={
+                        "budget": budget,
+                        "remaining_budget": rem_budget,
+                        "prerequisites": prereq_status
+                    },
+                    score_terms={},
+                    decision="FILTERED",
+                    reason_code=ReasonCode.COMPLETED,
+                    policy_version=policy_version
+                )
+                trace.append(entry.to_dict())
+            elif node_id in planned and planned[node_id] < day_num:
+                entry = TraceEntry(
+                    node_id=node_id,
+                    day=day_num,
+                    concept_state={
+                        "p": state.p,
+                        "kappa": state.kappa,
+                        "sigma2": state.sigma2,
+                        "n": state.n,
+                        "class": state.classify()
+                    },
+                    constraints={
+                        "budget": budget,
+                        "remaining_budget": rem_budget,
+                        "prerequisites": prereq_status
+                    },
+                    score_terms={},
+                    decision="FILTERED",
+                    reason_code=ReasonCode.ALREADY_SCHEDULED,
+                    policy_version=policy_version
+                )
+                trace.append(entry.to_dict())
 
         # Evaluate remaining nodes in topological order and record trace entries at moment of decision
         for node_id in list(remaining_nodes):
             state = learner_states.get(node_id, ConceptState.cold_start())
             dur = g.nodes[node_id].get("baseline_duration", 0)
             prereqs = set(g.predecessors(node_id)).intersection(candidate_universe)
-            prereq_status = {p: (p in completed_set or p in scheduled_today) for p in prereqs}
-            prereqs_met = all(prereq_status.values())
 
+            prereq_status = {}
+            prereqs_met = True
+            has_conditional_prereq = False
+            uncertain_prereqs = []
+            failed_prereqs = []
+
+            for p in prereqs:
+                p_state = learner_states.get(p, ConceptState.cold_start())
+                p_class = p_state.classify()
+
+                if p in evidence_mastered:
+                    prereq_status[p] = True
+                elif p in planned and planned[p] < day_num:
+                    prereq_status[p] = True
+                    has_conditional_prereq = True
+                elif p in scheduled_today:
+                    prereq_status[p] = True
+                    has_conditional_prereq = True
+                else:
+                    prereq_status[p] = False
+                    prereqs_met = False
+                    if p_class == "Uncertain":
+                        uncertain_prereqs.append(p)
+                        assessment_candidates.add(p)
+                    elif p_class == "Weak":
+                        failed_prereqs.append(p)
+
+            is_conditional = has_conditional_prereq
             cur_rem_budget = rem_budget
 
             if not prereqs_met:
                 decision = "FILTERED"
-                reason = ReasonCode.PREREQUISITE_UNMET
+                if uncertain_prereqs:
+                    reason = ReasonCode.UNCERTAIN_NEEDS_ASSESSMENT
+                else:
+                    reason = ReasonCode.PREREQUISITE_UNMET
+                is_conditional = False
             elif dur > rem_budget:
                 decision = "FILTERED"
-                reason = ReasonCode.BUDGET_EXCEEDED
+                if dur > budget:
+                    reason = ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET
+                else:
+                    reason = ReasonCode.BUDGET_EXCEEDED
+                is_conditional = False
             else:
                 decision = "SELECTED"
                 reason = ReasonCode.SELECTED
                 day_activities.append(node_id)
+                if is_conditional:
+                    conditional_activities.append(node_id)
                 scheduled_today.add(node_id)
+                planned[node_id] = day_num
                 rem_budget -= dur
                 remaining_nodes.remove(node_id)
 
@@ -145,7 +230,9 @@ def generate_static_plan(
                 constraints={
                     "budget": budget,
                     "remaining_budget": cur_rem_budget,
-                    "prerequisites": prereq_status
+                    "prerequisites": prereq_status,
+                    "conditional": is_conditional,
+                    "revalidate_before_execution": is_conditional
                 },
                 score_terms={},
                 decision=decision,
@@ -154,25 +241,30 @@ def generate_static_plan(
             )
             trace.append(entry.to_dict())
 
-        for node_id in scheduled_today:
-            learner_states[node_id] = ConceptState(A=8.5, B=1.5, n=4, history=[1, 1, 1, 1])
-        completed_set.update(scheduled_today)
-
         days_plan.append({
             "day": day_num,
             "activities": day_activities,
+            "conditional_activities": conditional_activities,
             "minutes_used": budget - rem_budget,
             "minutes_remaining": rem_budget
         })
 
-
-    final_status = FeasibilityStatus.FEASIBLE
     if remaining_nodes:
         final_status = FeasibilityStatus.HEURISTIC_NO_PLAN
+        feasibility_info["status"] = FeasibilityStatus.HEURISTIC_NO_PLAN
+        feasibility_info["reason_code"] = InfeasibilityReason.SCHEDULING_CONSTRAINTS_UNMET
+    else:
+        final_status = FeasibilityStatus.FEASIBLE
+        feasibility_info["status"] = FeasibilityStatus.FEASIBLE
 
     return {
         "status": final_status,
         "feasibility_explanation": feasibility_info,
         "days": days_plan,
-        "trace": trace
+        "trace": trace,
+        "assessment_candidates": sorted(list(assessment_candidates))
     }
+
+
+generate_static_baseline = generate_static_plan
+

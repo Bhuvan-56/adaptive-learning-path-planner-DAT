@@ -2,8 +2,8 @@
 platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\bhuva\Downloads\DAT11\.venv_w2\Scripts\python.exe
 cachedir: .pytest_cache
 rootdir: C:\Users\bhuva\Downloads\DAT11
-collecting ... collected 1 item
+collecting ... collected 7 items / 6 deselected / 1 selected
 
-tests/test_m3_oracle_order.py::test_oracle_order_independence PASSED     [100%]
+tests/test_m3_states_feasibility.py::test_defect_1_day_2_uncertain_node_never_traced_already_mastered PASSED [100%]
 
-============================== 1 passed in 0.97s ==============================
+======================= 1 passed, 6 deselected in 0.90s =======================
