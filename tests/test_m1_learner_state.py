@@ -200,3 +200,33 @@ def test_defect_5_window_size_6_retains_six_observations_and_updates_quorum():
     assert state_5_of_6.classify(policy=policy) == "Mastered"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="Defect 6: load_bkt_params swallows errors and does not reject invalid probabilities or NaN",
+)
+def test_defect_6_load_bkt_params_rejects_missing_malformed_and_invalid_probs(tmp_path):
+    """Defect 6: Configuration loader must reject missing files, malformed YAML, out-of-range probabilities, and NaN."""
+    # 1. Missing file must raise FileNotFoundError
+    with pytest.raises(FileNotFoundError):
+        load_bkt_params(str(tmp_path / "nonexistent.yaml"))
+
+    # 2. Malformed YAML must raise ValueError
+    bad_yaml = tmp_path / "bad.yaml"
+    bad_yaml.write_text("p_S: [invalid yaml: {", encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_bkt_params(str(bad_yaml))
+
+    # 3. Probability 1.2 must raise ValueError
+    invalid_prob = tmp_path / "prob_high.yaml"
+    invalid_prob.write_text("p_S: 1.2\np_G: 0.25\np_T: 0.10\nwindow_size: 4", encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_bkt_params(str(invalid_prob))
+
+    # 4. NaN probability must raise ValueError
+    nan_prob = tmp_path / "prob_nan.yaml"
+    nan_prob.write_text("p_S: .nan\np_G: 0.25\np_T: 0.10\nwindow_size: 4", encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_bkt_params(str(nan_prob))
+
+
+
