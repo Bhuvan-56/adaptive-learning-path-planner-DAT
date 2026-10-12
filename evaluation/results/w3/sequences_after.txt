@@ -1,0 +1,19 @@
+--- ALL CORRECT ---
+Step 1: p=0.8043, n=1, sigma2=0.0393, class=Uncertain
+Step 2: p=0.9430, n=2, sigma2=0.0107, class=Uncertain
+Step 3: p=0.9851, n=3, sigma2=0.0024, class=Developing
+Step 4: p=0.9962, n=4, sigma2=0.0005, class=Mastered
+Step 5: p=0.9991, n=5, sigma2=0.0001, class=Mastered
+Step 6: p=0.9998, n=6, sigma2=0.0000, class=Mastered
+--- ALL INCORRECT ---
+Step 1: p=0.2059, n=1, sigma2=0.0409, class=Uncertain
+Step 2: p=0.1301, n=2, sigma2=0.0226, class=Uncertain
+Step 3: p=0.1176, n=3, sigma2=0.0173, class=Developing
+Step 4: p=0.1157, n=4, sigma2=0.0146, class=Weak
+Step 5: p=0.1154, n=5, sigma2=0.0128, class=Weak
+Step 6: p=0.1154, n=6, sigma2=0.0113, class=Weak
+--- ALTERNATING ---
+Step 4: p=0.3566, n=4, sigma2=0.0328, class=Developing
+Step 8: p=0.2846, n=8, sigma2=0.0185, class=Developing
+Step 20: p=0.2406, n=20, sigma2=0.0079, class=Developing
+Step 100: p=0.2385, n=100, sigma2=0.0018, class=Developing
