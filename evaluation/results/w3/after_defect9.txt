@@ -1,0 +1,385 @@
+================================================================================
+DEFECT 9 EVIDENCE REPORT: AFTER DEFECT 9 FIX (current main branch)
+================================================================================
+
+SUMMARY TABLE:
+Category               | Member                         | Emitted in src/ | Referenced in tests/
+-----------------------------------------------------------------------------------------------
+ReasonCode             | SELECTED                       | 13              | 12                  
+ReasonCode             | PREREQUISITE_UNMET             | 3               | 5                   
+ReasonCode             | ALREADY_MASTERED               | 6               | 8                   
+ReasonCode             | ALREADY_SCHEDULED              | 2               | 3                   
+ReasonCode             | COMPLETED                      | 3               | 3                   
+ReasonCode             | BLOCK_EXCEEDS_DAILY_BUDGET     | 5               | 8                   
+ReasonCode             | BUDGET_EXCEEDED                | 3               | 4                   
+ReasonCode             | UNCERTAIN_NEEDS_ASSESSMENT     | 2               | 4                   
+InfeasibilityReason    | BLOCK_EXCEEDS_DAILY_BUDGET     | 5               | 8                   
+InfeasibilityReason    | CAPACITY_EXCEEDED              | 3               | 1                   
+InfeasibilityReason    | SCHEDULING_CONSTRAINTS_UNMET   | 2               | 3                   
+FeasibilityStatus      | FEASIBLE                       | 17              | 14                  
+FeasibilityStatus      | INFEASIBLE_PROVED              | 12              | 9                   
+FeasibilityStatus      | HEURISTIC_NO_PLAN              | 4               | 7                   
+FeasibilityStatus      | CAPACITY_CHECK_PASSED          | 4               | 3                   
+-----------------------------------------------------------------------------------------------
+
+================================================================================
+DETAILED COMMANDS AND RAW OUTPUT
+================================================================================
+
+### ReasonCode.SELECTED
+Emitted places in src/: 13
+Command (src): git grep -n "SELECTED" -- src/
+Raw output (src):
+src/planning/replan.py:385:                decision = "SELECTED"
+src/planning/replan.py:386:                reason = ReasonCode.SELECTED
+src/planning/static_baseline.py:214:                decision = "SELECTED"
+src/planning/static_baseline.py:215:                reason = ReasonCode.SELECTED
+src/trace/checker.py:5:VALID_DECISIONS = {"SELECTED", "FILTERED"}
+src/trace/checker.py:27:    5. Any decision is not in {"SELECTED", "FILTERED"}.
+src/trace/checker.py:29:    7. Decision and reason code mismatch (SELECTED must have SELECTED, FILTERED must have filtering reason).
+src/trace/checker.py:85:                    f"Entry for node '{node_id}' on day {day} has invalid decision '{decision}'. Must be 'SELECTED' or 'FILTERED'."
+src/trace/checker.py:93:            if decision == "SELECTED" and reason_code != ReasonCode.SELECTED.value:
+src/trace/checker.py:95:                    f"Selected entry for node '{node_id}' on day {day} must carry reason SELECTED, got '{reason_code}'."
+src/trace/checker.py:98:            if decision == "FILTERED" and reason_code == ReasonCode.SELECTED.value:
+src/trace/checker.py:100:                    f"Filtered entry for node '{node_id}' on day {day} cannot carry reason SELECTED."
+src/trace/schema.py:7:    SELECTED = "SELECTED"
+src/trace/schema.py:29:    decision: str  # "SELECTED" or "FILTERED"
+
+Referenced places in tests/: 12
+Command (tests): git grep -n "SELECTED" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:181:    selected_entries = [e for e in plan["trace"] if e["decision"] == "SELECTED"]
+tests/test_m3_states_feasibility.py:77:    assert trace_day2_b["decision"] == "SELECTED"
+tests/test_m3_states_feasibility.py:151:        "SELECTED",
+tests/test_m6_replanning_events.py:131:            "decision": "SELECTED",
+tests/test_m6_replanning_events.py:132:            "reason_code": ReasonCode.SELECTED.value,
+tests/test_m7_explainability.py:52:        {"node_id": "A", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_explainability.py:53:        {"node_id": "B", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_explainability.py:54:        {"node_id": "C", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_explainability.py:66:        {"node_id": "A", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_explainability.py:67:        {"node_id": "A", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_explainability.py:68:        {"node_id": "B", "day": 1, "decision": "SELECTED", "reason_code": "SELECTED"},
+tests/test_m7_trace_contract.py:6:def make_valid_entry(node_id="A", day=1, decision="SELECTED", reason_code="SELECTED", concept_class="Developing"):
+
+------------------------------------------------------------
+
+### ReasonCode.PREREQUISITE_UNMET
+Emitted places in src/: 3
+Command (src): git grep -n "PREREQUISITE_UNMET" -- src/
+Raw output (src):
+src/planning/replan.py:160:                rc = ReasonCode.PREREQUISITE_UNMET
+src/planning/replan.py:375:                    reason = ReasonCode.PREREQUISITE_UNMET
+src/planning/static_baseline.py:204:                    reason = ReasonCode.PREREQUISITE_UNMET
+src/trace/schema.py:8:    PREREQUISITE_UNMET = "PREREQUISITE_UNMET"
+
+Referenced places in tests/: 5
+Command (tests): git grep -n "PREREQUISITE_UNMET" -- tests/
+Raw output (tests):
+tests/test_m3_states_feasibility.py:99:    # In plan: if A was completed and Weak, B stays blocked with PREREQUISITE_UNMET
+tests/test_m3_states_feasibility.py:103:    assert any(e["reason_code"] == ReasonCode.PREREQUISITE_UNMET.value for e in b_entries)
+tests/test_m3_states_feasibility.py:152:        "PREREQUISITE_UNMET",
+tests/test_m6_replanning_events.py:91:    # B entries carry PREREQUISITE_UNMET
+tests/test_m6_replanning_events.py:94:    assert any(e["reason_code"] == ReasonCode.PREREQUISITE_UNMET.value for e in b_entries)
+
+------------------------------------------------------------
+
+### ReasonCode.ALREADY_MASTERED
+Emitted places in src/: 6
+Command (src): git grep -n "ALREADY_MASTERED" -- src/
+Raw output (src):
+src/planning/replan.py:156:                rc = ReasonCode.ALREADY_MASTERED
+src/planning/replan.py:278:                    reason_code=ReasonCode.ALREADY_MASTERED,
+src/planning/static_baseline.py:110:                    reason_code=ReasonCode.ALREADY_MASTERED,
+src/trace/checker.py:31:    9. Reason ALREADY_MASTERED contradicts concept_state (concept_state must be Mastered).
+src/trace/checker.py:108:            if reason_code == ReasonCode.ALREADY_MASTERED.value:
+src/trace/checker.py:116:                        f"Entry for node '{node_id}' on day {day} has reason ALREADY_MASTERED but concept state '{concept_class}' (expected 'Mastered')."
+src/trace/schema.py:9:    ALREADY_MASTERED = "ALREADY_MASTERED"
+
+Referenced places in tests/: 8
+Command (tests): git grep -n "ALREADY_MASTERED" -- tests/
+Raw output (tests):
+tests/test_m3_states_feasibility.py:12:    """Defect 1: on day 2, a merely scheduled node with Uncertain state must not be traced ALREADY_MASTERED."""
+tests/test_m3_states_feasibility.py:24:    # Must NOT be ALREADY_MASTERED; must be ALREADY_SCHEDULED with actual Uncertain state
+tests/test_m3_states_feasibility.py:25:    assert trace_day2_a["reason_code"] != "ALREADY_MASTERED"
+tests/test_m3_states_feasibility.py:153:        "ALREADY_MASTERED",
+tests/test_m7_explainability.py:40:    assert a_entries[0]["reason_code"] == "ALREADY_MASTERED"
+tests/test_m7_trace_contract.py:77:    """Defect 2 / Step 5: check_trace must reject ALREADY_MASTERED reason with Uncertain state."""
+tests/test_m7_trace_contract.py:83:        reason_code=ReasonCode.ALREADY_MASTERED.value,
+tests/test_m7_trace_contract.py:86:    with pytest.raises(ValueError, match="ALREADY_MASTERED"):
+
+------------------------------------------------------------
+
+### ReasonCode.ALREADY_SCHEDULED
+Emitted places in src/: 2
+Command (src): git grep -n "ALREADY_SCHEDULED" -- src/
+Raw output (src):
+src/planning/replan.py:322:                    reason_code=ReasonCode.ALREADY_SCHEDULED,
+src/planning/static_baseline.py:154:                    reason_code=ReasonCode.ALREADY_SCHEDULED,
+src/trace/schema.py:10:    ALREADY_SCHEDULED = "ALREADY_SCHEDULED"
+
+Referenced places in tests/: 3
+Command (tests): git grep -n "ALREADY_SCHEDULED" -- tests/
+Raw output (tests):
+tests/test_m3_states_feasibility.py:24:    # Must NOT be ALREADY_MASTERED; must be ALREADY_SCHEDULED with actual Uncertain state
+tests/test_m3_states_feasibility.py:26:    assert trace_day2_a["reason_code"] == ReasonCode.ALREADY_SCHEDULED.value
+tests/test_m3_states_feasibility.py:154:        "ALREADY_SCHEDULED",
+
+------------------------------------------------------------
+
+### ReasonCode.COMPLETED
+Emitted places in src/: 3
+Command (src): git grep -n "COMPLETED" -- src/
+Raw output (src):
+src/planning/replan.py:158:                rc = ReasonCode.COMPLETED
+src/planning/replan.py:300:                    reason_code=ReasonCode.COMPLETED,
+src/planning/static_baseline.py:132:                    reason_code=ReasonCode.COMPLETED,
+src/trace/schema.py:11:    COMPLETED = "COMPLETED"
+
+Referenced places in tests/: 3
+Command (tests): git grep -n "COMPLETED" -- tests/
+Raw output (tests):
+tests/test_m3_states_feasibility.py:132:    """Step 3: completed input node is traced with reason code COMPLETED."""
+tests/test_m3_states_feasibility.py:145:    assert a_entry["reason_code"] == ReasonCode.COMPLETED.value
+tests/test_m3_states_feasibility.py:155:        "COMPLETED",
+
+------------------------------------------------------------
+
+### ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET
+Emitted places in src/: 5
+Command (src): git grep -n "BLOCK_EXCEEDS_DAILY_BUDGET" -- src/
+Raw output (src):
+src/planning/feasibility.py:15:    BLOCK_EXCEEDS_DAILY_BUDGET = "BLOCK_EXCEEDS_DAILY_BUDGET"
+src/planning/feasibility.py:29:       with BLOCK_EXCEEDS_DAILY_BUDGET and minimum budget fix.
+src/planning/feasibility.py:50:            "reason_code": InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET,
+src/planning/replan.py:380:                    reason = ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET
+src/planning/static_baseline.py:48:            reason_str = str(reason_val) if reason_val else "BLOCK_EXCEEDS_DAILY_BUDGET"
+src/planning/static_baseline.py:209:                    reason = ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET
+src/trace/schema.py:12:    BLOCK_EXCEEDS_DAILY_BUDGET = "BLOCK_EXCEEDS_DAILY_BUDGET"
+
+Referenced places in tests/: 8
+Command (tests): git grep -n "BLOCK_EXCEEDS_DAILY_BUDGET" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:32:        assert explanation["reason_code"] == InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+tests/test_m3_path_planning.py:55:    assert explanation["reason_code"] == InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+tests/test_m3_states_feasibility.py:156:        "BLOCK_EXCEEDS_DAILY_BUDGET",
+tests/test_m6_replanning_events.py:196:    assert expl["reason_code"] == InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+tests/test_m7_trace_contract.py:94:        "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
+tests/test_m7_trace_contract.py:105:        "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
+tests/test_m7_trace_contract.py:115:        check_no_plan_trace({"reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET", "constraints": {"budget": 5}})
+tests/test_m7_trace_contract.py:123:        check_no_plan_trace({"status": "INFEASIBLE_PROVED", "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET"})
+
+------------------------------------------------------------
+
+### ReasonCode.BUDGET_EXCEEDED
+Emitted places in src/: 3
+Command (src): git grep -n "BUDGET_EXCEEDED" -- src/
+Raw output (src):
+src/planning/replan.py:162:                rc = ReasonCode.BUDGET_EXCEEDED
+src/planning/replan.py:382:                    reason = ReasonCode.BUDGET_EXCEEDED
+src/planning/static_baseline.py:211:                    reason = ReasonCode.BUDGET_EXCEEDED
+src/trace/schema.py:13:    BUDGET_EXCEEDED = "BUDGET_EXCEEDED"
+
+Referenced places in tests/: 4
+Command (tests): git grep -n "BUDGET_EXCEEDED" -- tests/
+Raw output (tests):
+tests/test_m3_states_feasibility.py:52:    # Also verify BUDGET_EXCEEDED is emitted in trace
+tests/test_m3_states_feasibility.py:53:    budget_exceeded_entries = [e for e in plan["trace"] if e["reason_code"] == ReasonCode.BUDGET_EXCEEDED.value]
+tests/test_m3_states_feasibility.py:157:        "BUDGET_EXCEEDED",
+tests/test_m6_replanning_events.py:142:            "reason_code": ReasonCode.BUDGET_EXCEEDED.value,
+
+------------------------------------------------------------
+
+### ReasonCode.UNCERTAIN_NEEDS_ASSESSMENT
+Emitted places in src/: 2
+Command (src): git grep -n "UNCERTAIN_NEEDS_ASSESSMENT" -- src/
+Raw output (src):
+src/planning/replan.py:373:                    reason = ReasonCode.UNCERTAIN_NEEDS_ASSESSMENT
+src/planning/static_baseline.py:202:                    reason = ReasonCode.UNCERTAIN_NEEDS_ASSESSMENT
+src/trace/schema.py:14:    UNCERTAIN_NEEDS_ASSESSMENT = "UNCERTAIN_NEEDS_ASSESSMENT"
+
+Referenced places in tests/: 4
+Command (tests): git grep -n "UNCERTAIN_NEEDS_ASSESSMENT" -- tests/
+Raw output (tests):
+tests/test_m3_states_feasibility.py:108:    """Step 5 & Defect 9: Uncertain prerequisite routes to UNCERTAIN_NEEDS_ASSESSMENT and an assessment candidate."""
+tests/test_m3_states_feasibility.py:120:    # Therefore, C routes to UNCERTAIN_NEEDS_ASSESSMENT, and B is yielded as assessment candidate.
+tests/test_m3_states_feasibility.py:125:    assert day1_c["reason_code"] == ReasonCode.UNCERTAIN_NEEDS_ASSESSMENT.value
+tests/test_m3_states_feasibility.py:158:        "UNCERTAIN_NEEDS_ASSESSMENT"
+
+------------------------------------------------------------
+
+### InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+Emitted places in src/: 5
+Command (src): git grep -n "BLOCK_EXCEEDS_DAILY_BUDGET" -- src/
+Raw output (src):
+src/planning/feasibility.py:15:    BLOCK_EXCEEDS_DAILY_BUDGET = "BLOCK_EXCEEDS_DAILY_BUDGET"
+src/planning/feasibility.py:29:       with BLOCK_EXCEEDS_DAILY_BUDGET and minimum budget fix.
+src/planning/feasibility.py:50:            "reason_code": InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET,
+src/planning/replan.py:380:                    reason = ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET
+src/planning/static_baseline.py:48:            reason_str = str(reason_val) if reason_val else "BLOCK_EXCEEDS_DAILY_BUDGET"
+src/planning/static_baseline.py:209:                    reason = ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET
+src/trace/schema.py:12:    BLOCK_EXCEEDS_DAILY_BUDGET = "BLOCK_EXCEEDS_DAILY_BUDGET"
+
+Referenced places in tests/: 8
+Command (tests): git grep -n "BLOCK_EXCEEDS_DAILY_BUDGET" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:32:        assert explanation["reason_code"] == InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+tests/test_m3_path_planning.py:55:    assert explanation["reason_code"] == InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+tests/test_m3_states_feasibility.py:156:        "BLOCK_EXCEEDS_DAILY_BUDGET",
+tests/test_m6_replanning_events.py:196:    assert expl["reason_code"] == InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+tests/test_m7_trace_contract.py:94:        "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
+tests/test_m7_trace_contract.py:105:        "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
+tests/test_m7_trace_contract.py:115:        check_no_plan_trace({"reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET", "constraints": {"budget": 5}})
+tests/test_m7_trace_contract.py:123:        check_no_plan_trace({"status": "INFEASIBLE_PROVED", "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET"})
+
+------------------------------------------------------------
+
+### InfeasibilityReason.CAPACITY_EXCEEDED
+Emitted places in src/: 3
+Command (src): git grep -n "CAPACITY_EXCEEDED" -- src/
+Raw output (src):
+src/planning/feasibility.py:16:    CAPACITY_EXCEEDED = "CAPACITY_EXCEEDED"
+src/planning/feasibility.py:31:       with CAPACITY_EXCEEDED and necessary (not sufficient) fixes.
+src/planning/feasibility.py:60:            "reason_code": InfeasibilityReason.CAPACITY_EXCEEDED,
+src/planning/feasibility.py:76:            "reason_code": InfeasibilityReason.CAPACITY_EXCEEDED,
+
+Referenced places in tests/: 1
+Command (tests): git grep -n "CAPACITY_EXCEEDED" -- tests/
+Raw output (tests):
+tests/test_m6_replanning_events.py:244:    assert expl["reason_code"] == InfeasibilityReason.CAPACITY_EXCEEDED
+
+------------------------------------------------------------
+
+### InfeasibilityReason.SCHEDULING_CONSTRAINTS_UNMET
+Emitted places in src/: 2
+Command (src): git grep -n "SCHEDULING_CONSTRAINTS_UNMET" -- src/
+Raw output (src):
+src/planning/feasibility.py:17:    SCHEDULING_CONSTRAINTS_UNMET = "SCHEDULING_CONSTRAINTS_UNMET"
+src/planning/replan.py:434:        feasibility_info["reason_code"] = InfeasibilityReason.SCHEDULING_CONSTRAINTS_UNMET
+src/planning/static_baseline.py:259:        feasibility_info["reason_code"] = InfeasibilityReason.SCHEDULING_CONSTRAINTS_UNMET
+
+Referenced places in tests/: 3
+Command (tests): git grep -n "SCHEDULING_CONSTRAINTS_UNMET" -- tests/
+Raw output (tests):
+tests/test_m3_states_feasibility.py:31:    """Defect 4 & Defect 9: three 6-minute tasks on budget 10 across 2 days return HEURISTIC_NO_PLAN with consistent nested status and SCHEDULING_CONSTRAINTS_UNMET."""
+tests/test_m3_states_feasibility.py:44:    # 2. Planner returns HEURISTIC_NO_PLAN and nested explanation agrees with SCHEDULING_CONSTRAINTS_UNMET
+tests/test_m3_states_feasibility.py:50:    assert plan["feasibility_explanation"]["reason_code"] == InfeasibilityReason.SCHEDULING_CONSTRAINTS_UNMET
+
+------------------------------------------------------------
+
+### FeasibilityStatus.FEASIBLE
+Emitted places in src/: 17
+Command (src): git grep -n "FEASIBLE" -- src/
+Raw output (src):
+src/planning/feasibility.py:8:    FEASIBLE = "FEASIBLE"
+src/planning/feasibility.py:9:    INFEASIBLE_PROVED = "INFEASIBLE_PROVED"
+src/planning/feasibility.py:28:    1. Per-activity check: if any required activity duration > budget, returns INFEASIBLE_PROVED
+src/planning/feasibility.py:30:    2. Aggregate capacity check: if total work W_req > deadline_days * budget, returns INFEASIBLE_PROVED
+src/planning/feasibility.py:48:        return FeasibilityStatus.INFEASIBLE_PROVED, {
+src/planning/feasibility.py:49:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/feasibility.py:58:        return FeasibilityStatus.INFEASIBLE_PROVED, {
+src/planning/feasibility.py:59:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/feasibility.py:74:        return FeasibilityStatus.INFEASIBLE_PROVED, {
+src/planning/feasibility.py:75:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/replan.py:214:    if status == FeasibilityStatus.INFEASIBLE_PROVED:
+src/planning/replan.py:227:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/replan.py:436:        final_status = FeasibilityStatus.FEASIBLE
+src/planning/replan.py:437:        feasibility_info["status"] = FeasibilityStatus.FEASIBLE
+src/planning/static_baseline.py:43:    if status == FeasibilityStatus.INFEASIBLE_PROVED:
+src/planning/static_baseline.py:61:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/static_baseline.py:261:        final_status = FeasibilityStatus.FEASIBLE
+src/planning/static_baseline.py:262:        feasibility_info["status"] = FeasibilityStatus.FEASIBLE
+
+Referenced places in tests/: 14
+Command (tests): git grep -n "FEASIBLE" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:30:        assert plan["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m3_path_planning.py:34:        assert plan["status"] in [FeasibilityStatus.FEASIBLE, FeasibilityStatus.HEURISTIC_NO_PLAN]
+tests/test_m3_path_planning.py:53:    assert plan["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m3_states_feasibility.py:39:    # 1. check_feasibility must return CAPACITY_CHECK_PASSED, not public FEASIBLE
+tests/test_m6_replanning_events.py:49:    assert result["status"] == FeasibilityStatus.FEASIBLE
+tests/test_m6_replanning_events.py:194:    assert result_inf["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m6_replanning_events.py:217:    assert result_fea["status"] == FeasibilityStatus.FEASIBLE
+tests/test_m6_replanning_events.py:242:    assert result_inf["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m6_replanning_events.py:259:    assert result_fea["status"] == FeasibilityStatus.FEASIBLE
+tests/test_m7_explainability.py:92:    assert plan["status"] == "INFEASIBLE_PROVED"
+tests/test_m7_trace_contract.py:93:        "status": "INFEASIBLE_PROVED",
+tests/test_m7_trace_contract.py:104:        "status": "INFEASIBLE_PROVED",
+tests/test_m7_trace_contract.py:119:        check_no_plan_trace({"status": "INFEASIBLE_PROVED", "constraints": {"budget": 5}})
+tests/test_m7_trace_contract.py:123:        check_no_plan_trace({"status": "INFEASIBLE_PROVED", "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET"})
+
+------------------------------------------------------------
+
+### FeasibilityStatus.INFEASIBLE_PROVED
+Emitted places in src/: 12
+Command (src): git grep -n "INFEASIBLE_PROVED" -- src/
+Raw output (src):
+src/planning/feasibility.py:9:    INFEASIBLE_PROVED = "INFEASIBLE_PROVED"
+src/planning/feasibility.py:28:    1. Per-activity check: if any required activity duration > budget, returns INFEASIBLE_PROVED
+src/planning/feasibility.py:30:    2. Aggregate capacity check: if total work W_req > deadline_days * budget, returns INFEASIBLE_PROVED
+src/planning/feasibility.py:48:        return FeasibilityStatus.INFEASIBLE_PROVED, {
+src/planning/feasibility.py:49:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/feasibility.py:58:        return FeasibilityStatus.INFEASIBLE_PROVED, {
+src/planning/feasibility.py:59:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/feasibility.py:74:        return FeasibilityStatus.INFEASIBLE_PROVED, {
+src/planning/feasibility.py:75:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/replan.py:214:    if status == FeasibilityStatus.INFEASIBLE_PROVED:
+src/planning/replan.py:227:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+src/planning/static_baseline.py:43:    if status == FeasibilityStatus.INFEASIBLE_PROVED:
+src/planning/static_baseline.py:61:            "status": FeasibilityStatus.INFEASIBLE_PROVED,
+
+Referenced places in tests/: 9
+Command (tests): git grep -n "INFEASIBLE_PROVED" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:30:        assert plan["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m3_path_planning.py:53:    assert plan["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m6_replanning_events.py:194:    assert result_inf["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m6_replanning_events.py:242:    assert result_inf["status"] == FeasibilityStatus.INFEASIBLE_PROVED
+tests/test_m7_explainability.py:92:    assert plan["status"] == "INFEASIBLE_PROVED"
+tests/test_m7_trace_contract.py:93:        "status": "INFEASIBLE_PROVED",
+tests/test_m7_trace_contract.py:104:        "status": "INFEASIBLE_PROVED",
+tests/test_m7_trace_contract.py:119:        check_no_plan_trace({"status": "INFEASIBLE_PROVED", "constraints": {"budget": 5}})
+tests/test_m7_trace_contract.py:123:        check_no_plan_trace({"status": "INFEASIBLE_PROVED", "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET"})
+
+------------------------------------------------------------
+
+### FeasibilityStatus.HEURISTIC_NO_PLAN
+Emitted places in src/: 4
+Command (src): git grep -n "HEURISTIC_NO_PLAN" -- src/
+Raw output (src):
+src/planning/feasibility.py:10:    HEURISTIC_NO_PLAN = "HEURISTIC_NO_PLAN"
+src/planning/replan.py:432:        final_status = FeasibilityStatus.HEURISTIC_NO_PLAN
+src/planning/replan.py:433:        feasibility_info["status"] = FeasibilityStatus.HEURISTIC_NO_PLAN
+src/planning/static_baseline.py:257:        final_status = FeasibilityStatus.HEURISTIC_NO_PLAN
+src/planning/static_baseline.py:258:        feasibility_info["status"] = FeasibilityStatus.HEURISTIC_NO_PLAN
+
+Referenced places in tests/: 7
+Command (tests): git grep -n "HEURISTIC_NO_PLAN" -- tests/
+Raw output (tests):
+tests/test_m3_path_planning.py:34:        assert plan["status"] in [FeasibilityStatus.FEASIBLE, FeasibilityStatus.HEURISTIC_NO_PLAN]
+tests/test_m3_states_feasibility.py:31:    """Defect 4 & Defect 9: three 6-minute tasks on budget 10 across 2 days return HEURISTIC_NO_PLAN with consistent nested status and SCHEDULING_CONSTRAINTS_UNMET."""
+tests/test_m3_states_feasibility.py:44:    # 2. Planner returns HEURISTIC_NO_PLAN and nested explanation agrees with SCHEDULING_CONSTRAINTS_UNMET
+tests/test_m3_states_feasibility.py:48:    assert plan["status"] == FeasibilityStatus.HEURISTIC_NO_PLAN
+tests/test_m3_states_feasibility.py:49:    assert plan["feasibility_explanation"]["status"] == FeasibilityStatus.HEURISTIC_NO_PLAN
+tests/test_m3_states_feasibility.py:104:    assert plan["status"] == FeasibilityStatus.HEURISTIC_NO_PLAN
+tests/test_m6_replanning_events.py:87:    assert result["status"] == FeasibilityStatus.HEURISTIC_NO_PLAN
+
+------------------------------------------------------------
+
+### FeasibilityStatus.CAPACITY_CHECK_PASSED
+Emitted places in src/: 4
+Command (src): git grep -n "CAPACITY_CHECK_PASSED" -- src/
+Raw output (src):
+src/planning/feasibility.py:11:    CAPACITY_CHECK_PASSED = "CAPACITY_CHECK_PASSED"
+src/planning/feasibility.py:32:    3. Otherwise returns CAPACITY_CHECK_PASSED pending solver execution.
+src/planning/feasibility.py:35:        return FeasibilityStatus.CAPACITY_CHECK_PASSED, {"status": FeasibilityStatus.CAPACITY_CHECK_PASSED, "message": "No required activities."}
+src/planning/feasibility.py:86:    return FeasibilityStatus.CAPACITY_CHECK_PASSED, {
+src/planning/feasibility.py:87:        "status": FeasibilityStatus.CAPACITY_CHECK_PASSED,
+
+Referenced places in tests/: 3
+Command (tests): git grep -n "CAPACITY_CHECK_PASSED" -- tests/
+Raw output (tests):
+tests/test_m3_states_feasibility.py:39:    # 1. check_feasibility must return CAPACITY_CHECK_PASSED, not public FEASIBLE
+tests/test_m3_states_feasibility.py:41:    assert status == FeasibilityStatus.CAPACITY_CHECK_PASSED
+tests/test_m3_states_feasibility.py:42:    assert info["status"] == FeasibilityStatus.CAPACITY_CHECK_PASSED
+
+------------------------------------------------------------
