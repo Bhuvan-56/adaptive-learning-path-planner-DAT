@@ -1,35 +1,8 @@
 # Week 3 AI Interaction Log
 
-## Entry: Task w3/b1-validation-config (Defects 5, 6, 7)
-- **Date & Time:** 2026-10-12
-- **Tool:** Antigravity IDE (Gemini agent)
-- **Model:** Gemini 3.7 Flash
-- **Task:** Fix validation and configuration entry points (Defects 5, 6, 7: PolicyConfig extraction, dynamic window/quorum, configuration loader validation, non-finite graph validation, feasibility deadline guard, and planning service boundary).
-- **Branch:** `w3/b1-validation-config`
-- **Files Changed:**
-  - `src/state/policy.py` (created: `PolicyConfig` frozen dataclass, derived quorum, `load_policy`, `default_policy`)
-  - `src/state/learner_state.py` (updated: `ConceptState` using `PolicyConfig`, dynamic windowing, quorum evaluation, input validation in construction/update, `load_profiles`)
-  - `src/curriculum/errors.py` (updated: added `NON_FINITE_VALUE` error code)
-  - `src/curriculum/graph.py` (updated: `validate_graph` checks for NaN/inf duration and difficulty)
-  - `src/planning/feasibility.py` (updated: guarded `deadline_days <= 0` against ZeroDivisionError)
-  - `src/planning/static_baseline.py` (updated: disallow fallback plan on cyclic graph)
-  - `src/planning/service.py` (created: `plan_request` boundary validation and structured `PlanResult`)
-  - `tests/fixtures/graphs/non_finite_value.json` (created: non-finite duration fixture)
-  - `tests/test_m1_curriculum_graph.py` (updated: added `non_finite_value.json` to malformed graph suite)
-  - `tests/test_m1_learner_state.py` (updated: tests for Defect 5 and Defect 6)
-  - `tests/test_m3_path_planning.py` (updated: tests for Defect 7 four sub-cases)
-  - `evaluation/results/w3/before_defect5.txt`
-  - `evaluation/results/w3/after_defect5.txt`
-  - `evaluation/results/w3/before_defect6.txt`
-  - `evaluation/results/w3/after_defect6.txt`
-  - `evaluation/results/w3/before_defect7.txt`
-  - `evaluation/results/w3/after_defect7.txt`
-  - `evaluation/results/w3/sequences_before.txt`
-  - `evaluation/results/w3/sequences_after.txt`
-- **Checks Run:**
-  - `.\.venv_w2\Scripts\python.exe -m pytest tests/test_m1_learner_state.py -k test_defect_5 -rs -v` (xfail before, pass after)
-  - `.\.venv_w2\Scripts\python.exe -m pytest tests/test_m1_learner_state.py -k test_defect_6 -rs -v` (xfail before, pass after)
-  - `.\.venv_w2\Scripts\python.exe -m pytest tests/test_m3_path_planning.py -k test_defect_7 -rs -v` (4 xfail before, 4 pass after)
-  - Sequence comparison diff script: `difflib.unified_diff(sequences_before, sequences_after)` -> empty diff (100% exact numerical match across all 6 sequences)
-  - Full suite: `.\.venv_w2\Scripts\python.exe -m pytest -q -rs` -> 42 passed, 9 skipped (0 failures)
-- **Reviewer Name:** 
+| Date | Tool | Model | Task | Files Changed | Checks Run | Reviewer Name |
+|---|---|---|---|---|---|---|
+| 2026-10-12 | Antigravity IDE | Gemini 3.7 Flash | Repair src/planning/oracle.py (Defect 1: input order dependency in run_exact_dp_oracle), rename to run_exhaustive_oracle with backward-compatible deprecated alias, update call sites, add independent brute-force reference check over 200 random instances and permutations, add cap/timeout/zero-item edge tests. | src/planning/oracle.py, src/planning/benchmark.py, tests/test_m3_oracle_order.py, tests/test_m3_oracle_bruteforce.py, tests/test_m3_path_planning.py, evaluation/results/w3/before_defect1.txt, evaluation/results/w3/after_defect1.txt | .venv_w2\Scripts\python.exe -m pytest tests/test_m3_oracle_order.py -v -rxX (XFAIL observed before fix)<br>.venv_w2\Scripts\python.exe -m pytest tests/test_m3_oracle_order.py -v (PASSED after fix)<br>.venv_w2\Scripts\python.exe -m pytest tests/test_m3_oracle_bruteforce.py -v (6 passed: 200/200 brute-force agreement, 2-item & 4-item permutations, caps, timeout, zero feasible)<br>.venv_w2\Scripts\python.exe -m pytest -q -rs (42 passed, 9 skipped) | |
+| 2026-10-12 | Antigravity IDE (Gemini agent) | Gemini 3.7 Flash | Fix validation and configuration entry points (Defects 5, 6, 7: PolicyConfig extraction, dynamic window/quorum, configuration loader validation, non-finite graph validation, feasibility deadline guard, and planning service boundary). | src/state/policy.py, src/state/learner_state.py, src/curriculum/errors.py, src/curriculum/graph.py, src/planning/feasibility.py, src/planning/static_baseline.py, src/planning/service.py, tests/fixtures/graphs/non_finite_value.json, tests/test_m1_curriculum_graph.py, tests/test_m1_learner_state.py, tests/test_m3_path_planning.py, evaluation/results/w3/before_defect5.txt, evaluation/results/w3/after_defect5.txt, evaluation/results/w3/before_defect6.txt, evaluation/results/w3/after_defect6.txt, evaluation/results/w3/before_defect7.txt, evaluation/results/w3/after_defect7.txt, evaluation/results/w3/sequences_before.txt, evaluation/results/w3/sequences_after.txt | .\.venv_w2\Scripts\python.exe -m pytest tests/test_m1_learner_state.py -k test_defect_5 -rs -v (xfail before, pass after)<br>.\.venv_w2\Scripts\python.exe -m pytest tests/test_m1_learner_state.py -k test_defect_6 -rs -v (xfail before, pass after)<br>.\.venv_w2\Scripts\python.exe -m pytest tests/test_m3_path_planning.py -k test_defect_7 -rs -v (4 xfail before, 4 pass after)<br>Sequence comparison diff script: difflib.unified_diff(sequences_before, sequences_after) -> empty diff (100% exact numerical match across all 6 sequences)<br>Full suite: .\.venv_w2\Scripts\python.exe -m pytest -q -rs -> 42 passed, 9 skipped (0 failures) | |
+
+A1 first commit (bfebda6) is labelled Defect 1 but the oracle repair is Defect 3.

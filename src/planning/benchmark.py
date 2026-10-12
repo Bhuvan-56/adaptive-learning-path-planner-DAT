@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 import numpy as np
 
 from src.planning.greedy import run_greedy_scheduler
-from src.planning.oracle import run_exact_dp_oracle
+from src.planning.oracle import run_exhaustive_oracle
 
 SEEDS = [7, 17, 27, 37, 47]
 INSTANCES_PER_SEED = 50  # 250 total benchmark instances
@@ -66,7 +66,7 @@ def run_benchmark(output_dir: str = "evaluation/results") -> Dict[str, Any]:
             t_greedy = time.perf_counter() - t0
 
             t0 = time.perf_counter()
-            oracle_score = run_exact_dp_oracle(items, budget)
+            oracle_score = run_exhaustive_oracle(items, budget)
             t_oracle = time.perf_counter() - t0
 
             if oracle_score == 0:
