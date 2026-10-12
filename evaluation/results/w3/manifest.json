@@ -3,14 +3,14 @@
   "data_route": "synthetic_dag_generator",
   "dirty": true,
   "experiment_name": "w2_scheduling_benchmark",
-  "git_sha": "cfa2f773174ba3db7358a3c44ed4dbba4aacb9d5",
+  "git_sha": "324c9d937771d2dd82485ade486a06377bda61e4",
   "package_versions": {
     "networkx": "3.1",
     "numpy": "1.24.3",
     "pytest": "7.3.1",
     "yaml": "6.0.1"
   },
-  "python_version": "3.11.4",
+  "python_version": "3.11.3",
   "seeds": [
     7,
     17,
@@ -18,5 +18,5 @@
     37,
     47
   ],
-  "timestamp": "2026-10-12T08:03:06.457809+00:00"
+  "timestamp": "2026-10-12T10:01:56.628130+00:00"
 }
