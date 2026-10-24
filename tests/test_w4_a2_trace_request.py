@@ -124,3 +124,65 @@ def test_w4_d4_remaining_budget_exceeds_budget_param():
     entry["constraints"]["remaining_budget"] = 20
     with pytest.raises(ValueError, match="exceeding daily budget"):
         check_trace(universe, [entry], num_days=1, budget=15)
+
+
+# ==============================================================================
+# D6 Reproduction Tests
+# ==============================================================================
+from src.cli import run_demo
+from src.curriculum.graph import load_graph
+from src.planning.service import plan_request
+from src.state.learner_state import ConceptState
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D6: demo budget 5 fails with TRACE_CHECK_FAILED on valid no-plan")
+def test_w4_d6_demo_budgets_exit_by_status(tmp_path, capsys):
+    out_dir = str(tmp_path / "budget_5")
+    ret = run_demo(out_dir=out_dir, budget=5, curriculum_path="data/curricula/demo_curriculum.json")
+    captured = capsys.readouterr()
+    assert "TRACE_CHECK_FAILED" not in captured.err
+    assert ret == 0
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D6: plan_request with multiple targets silently plans only first target")
+def test_w4_d6_multiple_targets_rejected():
+    g = load_graph("data/curricula/demo_curriculum.json")
+    states = {nid: ConceptState.cold_start() for nid in g.nodes}
+    res = plan_request(
+        graph=g,
+        learner_states=states,
+        budget=10,
+        deadline_days=3,
+        targets=["A", "B"]
+    )
+    assert not res.is_valid
+    assert res.status == "INVALID_INPUT"
+    assert "MULTIPLE_TARGETS_UNSUPPORTED" in res.error_codes
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D6: missing/invalid policy path handling")
+def test_w4_d6_policy_path_handling(tmp_path, capsys):
+    # Non-existent policy path should fail cleanly with a useful message
+    out_dir = str(tmp_path / "bad_policy")
+    ret = run_demo(out_dir=out_dir, budget=10, policy_path="non_existent_policy.yaml")
+    captured = capsys.readouterr()
+    assert ret != 0
+    assert "MISSING_POLICY_FILE" in captured.err or "Policy file does not exist" in captured.err
+
+    # Default policy path should state in human output that declared default was used
+    out_default = str(tmp_path / "default_policy")
+    ret_default = run_demo(out_dir=out_default, budget=10)
+    captured_default = capsys.readouterr()
+    assert ret_default == 0
+    assert "declared default" in captured_default.out.lower()
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D6: demo output text is hardcoded instead of derived from emitted state")
+def test_w4_d6_outcome_text_derived_from_state(tmp_path, capsys):
+    out_15 = str(tmp_path / "out_15")
+    ret = run_demo(out_dir=out_15, budget=15)
+    captured = capsys.readouterr()
+    assert ret == 0
+    assert "Reduced from 15m to 5m" in captured.out
+    assert "Reduced from 10m to 5m" not in captured.out
+
