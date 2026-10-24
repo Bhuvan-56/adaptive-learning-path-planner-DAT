@@ -1,0 +1,33 @@
+{
+  "dataset_type": "SYNTHETIC",
+  "label": "SYNTHETIC",
+  "description": "Synthetic 2PL IRT item bank and Q-matrix for adaptive diagnostic evaluation",
+  "seed": 42,
+  "model": "2PL",
+  "item_count": 24,
+  "concepts_in_curriculum": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "probed_concepts": [
+    "A",
+    "B",
+    "C"
+  ],
+  "unprobed_concepts": [
+    "D"
+  ],
+  "generator_parameters": {
+    "items_per_concept": 8,
+    "discrimination_a": "Normal(mean=1.20, std=0.25), clipped to [0.50, 2.50]",
+    "difficulty_b": "Normal(mean=0.0, std=1.0), clipped to [-2.50, 2.50]",
+    "pseudo_guessing_c": 0.0,
+    "upper_asymptote_d": 1.0
+  },
+  "files": {
+    "item_bank": "item_bank_synthetic.csv",
+    "q_matrix": "q_matrix_synthetic.csv"
+  }
+}
