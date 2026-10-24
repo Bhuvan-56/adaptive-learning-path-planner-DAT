@@ -19,6 +19,7 @@ def load_bkt_params(config_path: Optional[str] = None) -> Dict[str, Any]:
         "p_G": policy.p_G,
         "p_T": policy.p_T,
         "window_size": policy.window_size,
+        "defaulted_fields": list(policy.defaulted_fields),
     }
 
 

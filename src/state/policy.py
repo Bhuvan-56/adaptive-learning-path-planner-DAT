@@ -23,9 +23,14 @@ class PolicyConfig:
     sigma2_max: float = 0.05
     min_obs: int = 3
     kappa0: float = 2.0
+    defaulted_fields: Tuple[str, ...] = ()
     quorum: int = field(init=False)
 
     def __post_init__(self):
+        # Ensure defaulted_fields is a tuple
+        if not isinstance(self.defaulted_fields, tuple):
+            object.__setattr__(self, "defaulted_fields", tuple(self.defaulted_fields))
+
         # Validate probabilities: finite and in [0, 1]
         for name in ("p_S", "p_G", "p_T", "mastered_p", "weak_p"):
             val = getattr(self, name)
@@ -68,6 +73,48 @@ class DefaultPolicyResult(tuple):
         return self[1]
 
 
+REQUIRED_POLICY_KEYS = {"p_S", "p_G", "p_T", "window_size"}
+OPTIONAL_POLICY_FIELDS = {
+    "mastered_p": 0.85,
+    "weak_p": 0.40,
+    "sigma2_max": 0.05,
+    "min_obs": 3,
+    "kappa0": 2.0,
+}
+ALLOWED_POLICY_KEYS = REQUIRED_POLICY_KEYS | set(OPTIONAL_POLICY_FIELDS.keys())
+
+
+def validate_policy_dict(data: Any) -> Tuple[Dict[str, Any], Tuple[str, ...]]:
+    """
+    Validates a dictionary against the strict PolicyConfig schema.
+    Returns (cleaned_dict, defaulted_fields).
+    Raises ValueError with descriptive messages for missing or unknown keys.
+    """
+    if not isinstance(data, dict):
+        raise ValueError(f"Policy YAML must contain a mapping/dictionary, got {type(data)}")
+
+    data_keys = set(data.keys())
+    unknown_keys = sorted(data_keys - ALLOWED_POLICY_KEYS)
+    missing_keys = sorted(REQUIRED_POLICY_KEYS - data_keys)
+
+    errs = []
+    if missing_keys:
+        errs.append(f"Missing required key(s) in configuration: {', '.join(missing_keys)}")
+    if unknown_keys:
+        errs.append(f"Unknown key(s) in configuration: {', '.join(unknown_keys)}")
+    if errs:
+        raise ValueError(". ".join(errs))
+
+    defaulted = []
+    cleaned = dict(data)
+    for opt_key, def_val in OPTIONAL_POLICY_FIELDS.items():
+        if opt_key not in cleaned:
+            cleaned[opt_key] = def_val
+            defaulted.append(opt_key)
+
+    return cleaned, tuple(defaulted)
+
+
 def default_policy(log: Optional[Any] = None) -> DefaultPolicyResult:
     """
     Explicit opt-in function that returns declared default PolicyConfig
@@ -79,7 +126,8 @@ def default_policy(log: Optional[Any] = None) -> DefaultPolicyResult:
         warnings = log
     else:
         warnings = [msg]
-    return DefaultPolicyResult((PolicyConfig(), warnings))
+    all_defaulted = ("p_S", "p_G", "p_T", "window_size") + tuple(OPTIONAL_POLICY_FIELDS.keys())
+    return DefaultPolicyResult((PolicyConfig(defaulted_fields=all_defaulted), warnings))
 
 
 def load_policy(path: str) -> PolicyConfig:
@@ -97,13 +145,6 @@ def load_policy(path: str) -> PolicyConfig:
     except Exception as e:
         raise ValueError(f"Malformed YAML in policy file: {e}") from e
 
-    if not isinstance(data, dict):
-        raise ValueError(f"Policy YAML must contain a mapping/dictionary, got {type(data)}")
+    cleaned, defaulted = validate_policy_dict(data)
+    return PolicyConfig(**cleaned, defaulted_fields=defaulted)
 
-    allowed_fields = {
-        "p_S", "p_G", "p_T", "window_size",
-        "mastered_p", "weak_p", "sigma2_max",
-        "min_obs", "kappa0"
-    }
-    filtered = {k: v for k, v in data.items() if k in allowed_fields}
-    return PolicyConfig(**filtered)

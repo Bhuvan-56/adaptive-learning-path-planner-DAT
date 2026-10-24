@@ -11,7 +11,6 @@ BKT_PARAMS_PATH = os.path.join(REPO_ROOT, "config", "bkt_params.yaml")
 BKT_FITTED_PATH = os.path.join(REPO_ROOT, "config", "bkt_fitted.yaml")
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D3: only-typo file silently loads default policy instead of raising missing required keys")
 def test_w4_d3_only_typo_raises_and_names_missing_keys(tmp_path):
     typo_file = tmp_path / "only_typo.yaml"
     typo_file.write_text("p_GG: 0.9\n", encoding="utf-8")
@@ -22,7 +21,6 @@ def test_w4_d3_only_typo_raises_and_names_missing_keys(tmp_path):
         assert req in msg
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D3: complete file plus unknown key drops unknown key instead of raising")
 def test_w4_d3_complete_file_plus_unknown_key_raises_and_names_key(tmp_path):
     extra_file = tmp_path / "extra_key.yaml"
     extra_file.write_text(
@@ -38,7 +36,6 @@ def test_w4_d3_complete_file_plus_unknown_key_raises_and_names_key(tmp_path):
     assert "unknown_extra_key" in str(excinfo.value)
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D3: misspelled key p_s silently falls back instead of raising")
 def test_w4_d3_misspelled_key_raises(tmp_path):
     misspelled_file = tmp_path / "misspelled.yaml"
     misspelled_file.write_text(
@@ -84,7 +81,6 @@ def test_w4_d3_shipped_bkt_fitted_loads_through_fitted_path():
     assert fitted["kappa0"] == 2.0
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D3: loaders do not report defaulted fields to caller")
 def test_w4_d3_defaulted_fields_reported_to_caller(tmp_path):
     policy = load_policy(BKT_PARAMS_PATH)
     assert hasattr(policy, "defaulted_fields")
@@ -113,7 +109,6 @@ def test_w4_d3_defaulted_fields_reported_to_caller(tmp_path):
     assert list(full_policy.defaulted_fields) == []
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D3: bad file fails inconsistently or silently across the three loaders")
 def test_w4_d3_bad_file_fails_consistently_across_three_loaders(tmp_path):
     bad_file = tmp_path / "bad_policy.yaml"
     bad_file.write_text(
@@ -141,3 +136,4 @@ def test_w4_d3_bad_file_fails_consistently_across_three_loaders(tmp_path):
     assert "unexpected_field" in err2
     assert "unexpected_field" in err3
     assert err1 == err2 == err3
+
