@@ -143,7 +143,6 @@ from src.curriculum.graph import load_graph, validate_graph
 from src.curriculum.errors import GraphErrorCode
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D5: validate_graph returns [] for NaN edge importance in fixture")
 def test_w4_d5_nan_edge_importance_fixture_returns_non_finite_value():
     fixture_path = os.path.join(REPO_ROOT, "tests", "fixtures", "graphs", "non_finite_edge_importance.json")
     g = load_graph(fixture_path)
@@ -151,7 +150,6 @@ def test_w4_d5_nan_edge_importance_fixture_returns_non_finite_value():
     assert errors == [GraphErrorCode.NON_FINITE_VALUE]
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D5: validate_graph returns [] for infinite edge importance")
 def test_w4_d5_inf_edge_importance_returns_non_finite_value():
     g = nx.DiGraph()
     g.add_node("A", baseline_duration=10.0, base_difficulty=0.20)
@@ -169,5 +167,6 @@ def test_w4_d5_inf_edge_importance_returns_non_finite_value():
     g2.graph["raw_edges"] = [("A", "B", float("-inf"))]
     errors2 = validate_graph(g2)
     assert errors2 == [GraphErrorCode.NON_FINITE_VALUE]
+
 
 
