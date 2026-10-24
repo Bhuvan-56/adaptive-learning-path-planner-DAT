@@ -21,8 +21,30 @@ def _normalize_obj(obj: Any) -> Any:
     if isinstance(obj, float):
         if obj.is_integer():
             return int(obj)
-        return round(obj, 8)
+        return float(obj)
     return obj
+
+
+def compute_file_sha256(filepath: str) -> str:
+    """Computes deterministic SHA-256 hex digest of a file's raw bytes."""
+    hasher = hashlib.sha256()
+    with open(filepath, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
+def compute_directory_checksums(dir_path: str, exclude_files: Optional[List[str]] = None) -> Dict[str, str]:
+    """Computes SHA-256 checksums for all files directly inside dir_path, excluding specified files."""
+    excludes = set(exclude_files or [])
+    checksums = {}
+    if not os.path.exists(dir_path):
+        return checksums
+    for entry in sorted(os.listdir(dir_path)):
+        full_path = os.path.join(dir_path, entry)
+        if os.path.isfile(full_path) and entry not in excludes:
+            checksums[entry] = compute_file_sha256(full_path)
+    return checksums
 
 
 def resolved_config_hash(obj: Any) -> str:
@@ -90,6 +112,10 @@ def write_manifest(
     data_route: str,
     dataset_provenance: Optional[Dict[str, Any]] = None,
     dirty: Optional[bool] = None,
+    curriculum_path: Optional[str] = None,
+    input_hashes: Optional[Dict[str, str]] = None,
+    output_checksums: Optional[Dict[str, str]] = None,
+    model_versions: Optional[Dict[str, str]] = None,
 ) -> Dict[str, Any]:
     """
     Writes a structured execution provenance manifest to path.
@@ -111,6 +137,18 @@ def write_manifest(
         "data_route": data_route,
     }
 
+    if curriculum_path is not None:
+        manifest["curriculum_path"] = curriculum_path
+
+    if input_hashes is not None:
+        manifest["input_hashes"] = input_hashes
+
+    if output_checksums is not None:
+        manifest["output_checksums"] = output_checksums
+
+    if model_versions is not None:
+        manifest["model_versions"] = model_versions
+
     if dataset_provenance is not None:
         manifest["dataset_provenance"] = dataset_provenance
 
@@ -119,3 +157,4 @@ def write_manifest(
         json.dump(manifest, f, indent=2, sort_keys=True)
 
     return manifest
+

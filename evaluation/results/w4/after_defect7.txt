@@ -1,0 +1,13 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 5 items
+
+tests/test_w4_b2_provenance_profiles.py::test_w4_d7_changing_node_duration_changes_hash PASSED [ 20%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d7_manifest_records_curriculum_path_and_hashes PASSED [ 40%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d7_ninth_decimal_difference_hashes_differently PASSED [ 60%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d7_timestamp_does_not_affect_config_hash PASSED [ 80%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d7_dirty_tree_recorded_as_dirty PASSED [100%]
+
+============================== 5 passed in 1.67s ==============================

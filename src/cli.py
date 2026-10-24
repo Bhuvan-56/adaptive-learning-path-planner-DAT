@@ -1,4 +1,5 @@
 import argparse
+import dataclasses
 from datetime import datetime, timezone
 import json
 import os
@@ -19,6 +20,8 @@ from src.planning.replan import (
 from src.planning.service import plan_request
 from src.provenance import (
     _normalize_obj,
+    compute_directory_checksums,
+    compute_file_sha256,
     get_git_info,
     get_package_versions,
     resolved_config_hash,
@@ -373,12 +376,18 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
 
     # Provenance manifest
     git_sha, dirty = get_git_info()
+    curriculum_hash = compute_file_sha256(curriculum_path) if os.path.exists(curriculum_path) else "unknown"
+    profiles_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config", "profiles.yaml"))
+    profiles_hash = compute_file_sha256(profiles_path) if os.path.exists(profiles_path) else "unknown"
+    policy_hash = compute_file_sha256(bkt_policy_path) if os.path.exists(bkt_policy_path) else resolved_config_hash(dataclasses.asdict(policy))
+
     resolved_config = {
         "budget": budget,
         "reduced_budget": reduced_budget,
         "deadline_days": deadline_days,
         "seed": seed,
-        "curriculum_path": "data/curricula/demo_curriculum.json",
+        "curriculum_path": curriculum_path,
+        "curriculum_hash": curriculum_hash,
         "policy": {
             "p_S": policy.p_S,
             "p_G": policy.p_G,
@@ -394,6 +403,18 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
     }
     cfg_hash = resolved_config_hash(resolved_config)
 
+    input_hashes = {
+        "curriculum": curriculum_hash,
+        "profiles": profiles_hash,
+        "policy": policy_hash,
+    }
+    output_checksums = compute_directory_checksums(out_dir, exclude_files=["manifest.json"])
+    model_versions = {
+        "pyBKT": "1.4.3",
+        "bkt_policy": "v2.0",
+        "planner": "v1.0",
+    }
+
     write_manifest(
         path=os.path.join(out_dir, "manifest.json"),
         experiment_name="cli_demo",
@@ -405,8 +426,13 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         timestamp=datetime.now(timezone.utc).isoformat(),
         data_route="synthetic_demo_curriculum",
         dataset_provenance=None,
-        dirty=dirty
+        dirty=dirty,
+        curriculum_path=curriculum_path,
+        input_hashes=input_hashes,
+        output_checksums=output_checksums,
+        model_versions=model_versions,
     )
+
 
     # ---------------------------------------------------------
     # 7. Print Human Summary

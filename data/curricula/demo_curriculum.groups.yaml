@@ -1,0 +1,8 @@
+# Group mapping for demo_curriculum concepts
+# Used by SimulatedLearner to expand profile initial states into concept-level priors
+curriculum: demo_curriculum
+groups:
+  A: prerequisites
+  B: prerequisites
+  C: downstream
+  D: downstream
