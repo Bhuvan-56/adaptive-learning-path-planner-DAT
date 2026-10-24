@@ -1,7 +1,6 @@
 import json
 import os
 import networkx as nx
-import pytest
 
 from src.cli import run_demo
 from src.planning.replan import replan, assessment_result
