@@ -188,15 +188,6 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         "sigma2": c_state_pass.sigma2,
         "state": c_state_pass.classify()
     }
-    for resp in responses_pass:
-        c_state_pass.update(resp, policy=policy)
-    after_pass = {
-        "p": c_state_pass.p,
-        "kappa": c_state_pass.kappa,
-        "n": c_state_pass.n,
-        "sigma2": c_state_pass.sigma2,
-        "state": c_state_pass.classify()
-    }
 
     replan_state_pass = ReplanState(
         graph=g,
@@ -207,6 +198,14 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         current_day=1
     )
     plan_passed = replan(replan_state_pass, assessment_result("A", responses_pass))
+    c_state_pass_after = plan_passed["learner_states"]["A"]
+    after_pass = {
+        "p": c_state_pass_after.p,
+        "kappa": c_state_pass_after.kappa,
+        "n": c_state_pass_after.n,
+        "sigma2": c_state_pass_after.sigma2,
+        "state": c_state_pass_after.classify()
+    }
     try:
         check_trace(candidate_universe, plan_passed["trace"], num_days=deadline_days)
     except ValueError as e:
@@ -234,15 +233,6 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         "sigma2": c_state_fail.sigma2,
         "state": c_state_fail.classify()
     }
-    for resp in responses_fail:
-        c_state_fail.update(resp, policy=policy)
-    after_fail = {
-        "p": c_state_fail.p,
-        "kappa": c_state_fail.kappa,
-        "n": c_state_fail.n,
-        "sigma2": c_state_fail.sigma2,
-        "state": c_state_fail.classify()
-    }
 
     replan_state_fail = ReplanState(
         graph=g,
@@ -253,6 +243,14 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         current_day=1
     )
     plan_failed = replan(replan_state_fail, assessment_result("A", responses_fail))
+    c_state_fail_after = plan_failed["learner_states"]["A"]
+    after_fail = {
+        "p": c_state_fail_after.p,
+        "kappa": c_state_fail_after.kappa,
+        "n": c_state_fail_after.n,
+        "sigma2": c_state_fail_after.sigma2,
+        "state": c_state_fail_after.classify()
+    }
     try:
         check_trace(candidate_universe, plan_failed["trace"], num_days=deadline_days)
     except ValueError as e:

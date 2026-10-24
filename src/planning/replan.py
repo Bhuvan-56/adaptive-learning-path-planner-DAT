@@ -108,6 +108,8 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     3. changed_budget(new_budget): updates daily budget and rechecks feasibility.
     4. changed_deadline(new_days): updates deadline days and rechecks feasibility.
 
+    Replay rule: an event is applied once per call, and passing the same event twice applies it twice.
+
     Returns plan dictionary with days, trace (passing check_trace), and feasibility explanation.
     """
     ctx = _extract_state(state)

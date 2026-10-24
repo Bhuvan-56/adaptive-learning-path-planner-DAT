@@ -1,12 +1,12 @@
 import json
 import os
-import pytest
+import networkx as nx
 
 from src.cli import run_demo
+from src.planning.replan import replan, assessment_result
 from src.state.learner_state import ConceptState
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D1: assessment responses applied twice in CLI demo and replan")
 def test_w4_d1_assessment_applied_once_in_cli_and_artifacts(tmp_path):
     """
     D1: For both pass and fail scenarios, n after minus n before must equal the number of responses.
@@ -76,3 +76,29 @@ def test_w4_d1_assessment_applied_once_in_cli_and_artifacts(tmp_path):
         assert ru_state == plan_state == trace_state, (
             f"Mismatch in state for {sc_key}: response_updates={ru_state}, plan={plan_state}, trace={trace_state}"
         )
+
+
+def test_w4_d1_replay_rule_event_applied_once_per_call_and_twice_if_passed_twice():
+    """
+    Replay rule: an event is applied once per call, and passing the same event twice applies it twice.
+    No event-ID de-duplication is performed.
+    """
+    g = nx.DiGraph()
+    g.add_node("A", baseline_duration=5)
+    states = {"A": ConceptState.cold_start()}
+    state = {
+        "graph": g,
+        "learner_states": states,
+        "budget": 10,
+        "deadline_days": 1,
+        "target_node": "A",
+        "current_day": 1
+    }
+    evt = assessment_result("A", [1, 1])
+
+    res1 = replan(state, evt)
+    assert res1["learner_states"]["A"].n == 2
+
+    # Passing the exact same event again applies it a second time (n becomes 4)
+    res2 = replan(state, evt)
+    assert res2["learner_states"]["A"].n == 4
