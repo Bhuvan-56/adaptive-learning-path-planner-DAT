@@ -1,0 +1,166 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collected 10 items
+
+tests\test_w4_a2_trace_request.py FFFFFFFFFF                             [100%]
+
+================================== FAILURES ===================================
+________________________ test_w4_d4_concept_state_none ________________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts concept_state=None")
+    def test_w4_d4_concept_state_none():
+        universe = {"A"}
+        entry = make_valid_entry(node_id="A", day=1)
+        entry["concept_state"] = None
+>       with pytest.raises(ValueError, match="concept_state"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_a2_trace_request.py:34: Failed
+_________________________ test_w4_d4_constraints_none _________________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts constraints=None")
+    def test_w4_d4_constraints_none():
+        universe = {"A"}
+        entry = make_valid_entry(node_id="A", day=1)
+        entry["constraints"] = None
+>       with pytest.raises(ValueError, match="constraints"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_a2_trace_request.py:43: Failed
+_________________________ test_w4_d4_score_terms_none _________________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts score_terms=None")
+    def test_w4_d4_score_terms_none():
+        universe = {"A"}
+        entry = make_valid_entry(node_id="A", day=1)
+        entry["score_terms"] = None
+>       with pytest.raises(ValueError, match="score_terms"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_a2_trace_request.py:52: Failed
+____________________ test_w4_d4_negative_remaining_budget _____________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts negative remaining_budget")
+    def test_w4_d4_negative_remaining_budget():
+        universe = {"A"}
+        entry = make_valid_entry(node_id="A", day=1)
+        entry["constraints"]["remaining_budget"] = -5
+>       with pytest.raises(ValueError, match="remaining_budget"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_a2_trace_request.py:61: Failed
+_____________________________ test_w4_d4_day_zero _____________________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts day 0 entry")
+    def test_w4_d4_day_zero():
+        universe = {"A"}
+        trace = [
+            make_valid_entry(node_id="A", day=1),
+            make_valid_entry(node_id="A", day=0),
+        ]
+>       with pytest.raises(ValueError, match="day"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_a2_trace_request.py:72: Failed
+__________________________ test_w4_d4_day_d_plus_one __________________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts day D+1 entry")
+    def test_w4_d4_day_d_plus_one():
+        universe = {"A"}
+        trace = [
+            make_valid_entry(node_id="A", day=1),
+            make_valid_entry(node_id="A", day=2),
+        ]
+>       with pytest.raises(ValueError, match="day"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_a2_trace_request.py:83: Failed
+__________________________ test_w4_d4_non_dict_entry __________________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D4: check_trace raises AttributeError on non-dict entry")
+    def test_w4_d4_non_dict_entry():
+        universe = {"A"}
+        with pytest.raises(ValueError, match="dictionary"):
+>           check_trace(universe, ["not_a_dict"], num_days=1)
+
+tests\test_w4_a2_trace_request.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+candidate_universe = {'A'}, trace = ['not_a_dict'], num_days = 1
+
+    def check_trace(candidate_universe: Set[str], trace: List[Dict[str, Any]], num_days: int = 1) -> bool:
+        """
+        Validates automated trace completeness (TC-7.3).
+    
+        Trace check FAILS if:
+        1. Trace is empty while candidate_universe is non-empty.
+        2. Any day in 1..num_days has no entries.
+        3. Any duplicate node appears on a given day.
+        4. Any candidate in candidate_universe is missing or extra on a given day.
+        5. Any decision is not in {"SELECTED", "FILTERED"}.
+        6. Any reason code is not in ReasonCode.
+        7. Decision and reason code mismatch (SELECTED must have SELECTED, FILTERED must have filtering reason).
+        8. Any of the 8 schema fields is missing from an entry.
+        9. Reason ALREADY_MASTERED contradicts concept_state (concept_state must be Mastered).
+    
+        Returns True if valid; raises ValueError if invalid.
+        """
+        if not trace and candidate_universe:
+            raise ValueError("Trace is empty while candidate universe is non-empty.")
+    
+        if not isinstance(trace, list):
+            raise ValueError("Trace must be a list of trace entry dictionaries.")
+    
+        # Group entries by day
+        entries_by_day: Dict[int, List[Dict[str, Any]]] = {}
+        for entry in trace:
+>           day = entry.get("day")
+E           AttributeError: 'str' object has no attribute 'get'
+
+src\trace\checker.py:44: AttributeError
+________________________ test_w4_d4_non_finite_number _________________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts non-finite numbers in concept_state or score_terms")
+    def test_w4_d4_non_finite_number():
+        universe = {"A"}
+        entry1 = make_valid_entry(node_id="A", day=1)
+        entry1["concept_state"]["p"] = float("nan")
+>       with pytest.raises(ValueError, match="finite"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_a2_trace_request.py:99: Failed
+______________ test_w4_d4_concept_state_p_outside_unit_interval _______________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts concept_state p outside [0,1]")
+    def test_w4_d4_concept_state_p_outside_unit_interval():
+        universe = {"A"}
+        entry_high = make_valid_entry(node_id="A", day=1)
+        entry_high["concept_state"]["p"] = 1.5
+>       with pytest.raises(ValueError, match=r"p.*\[0.*1\]|probability"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_a2_trace_request.py:113: Failed
+_____________________ test_w4_d4_concept_state_n_negative _____________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts negative n in concept_state")
+    def test_w4_d4_concept_state_n_negative():
+        universe = {"A"}
+        entry = make_valid_entry(node_id="A", day=1)
+        entry["concept_state"]["n"] = -1
+>       with pytest.raises(ValueError, match=r"n.*negative|n.*>= 0"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_a2_trace_request.py:127: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d4_concept_state_none - Fai...
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d4_constraints_none - Faile...
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d4_score_terms_none - Faile...
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d4_negative_remaining_budget
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d4_day_zero - Failed: DID N...
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d4_day_d_plus_one - Failed:...
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d4_non_dict_entry - Attribu...
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d4_non_finite_number - Fail...
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d4_concept_state_p_outside_unit_interval
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d4_concept_state_n_negative
+============================= 10 failed in 0.35s ==============================
