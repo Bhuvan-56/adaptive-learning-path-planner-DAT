@@ -1,0 +1,56 @@
+{
+  "config_hash": "bcf05f5f321a6a6a6a8d13bfe5b46b7c2bba4ef8a9099c7deb363cadad87e167",
+  "curriculum_path": "data/curricula/demo_curriculum.json",
+  "data_route": "synthetic_demo_curriculum",
+  "dirty": true,
+  "experiment_name": "cli_slice",
+  "git_sha": "8331bde2ca0b0fcd7e97f65466c3a02439b7243f",
+  "input_hashes": {
+    "adaptive_config": "f930134cc404d14ee6fb9629d12ab02ab3671c4f926b11e892d06baf361062da",
+    "curriculum": "36c8fcca4c0adfe00aa53a3664b7a501c179b6eeb6c502811699bd9765e817d4",
+    "groups": "7fab468eb277636e173a3c9aee1687786a11b7582364c4951f2a6c33015d386a",
+    "item_bank": "e40ffdebe931d155cc5d9b6c9451f3aaf270231f2c50a81f6cdd54851af2f9e5",
+    "policy": "bdf32c8323b77381ccc77a1c357b92d8e9d179473ecaebc7f7bb766da6e36d40",
+    "profiles": "5e001c16c68f105b30fde6cf7eb7e3116c5ce0496773d341aa55e2b35a9d312f",
+    "q_matrix": "1ed05f59ac73f8c4ecd3f937c8ed5ed414f12324b8760ede234266cf0decc39e"
+  },
+  "model_versions": {
+    "bkt_policy": "v2.0",
+    "catsim": "0.21.0",
+    "planner": "v1.0",
+    "pyBKT": "1.4.3"
+  },
+  "output_checksums": {
+    "diagnostic_record.json": "f0dec45a4347be49097e5d3e396abb9b429eea4880e4d22a973ad65f084cbc34",
+    "plan_assessment_failed.json": "488bdc3ed3bc3acb33713870ad21d6402104f7588f078ed872b18fbb8c96d6c2",
+    "plan_assessment_passed.json": "3249577b0f645e2f22786bee1f98163e9ea6e8e5998d696276a8abb193127eba",
+    "plan_learner1_day1.json": "558f84b6b5d506ce0ab43994d9cf232c39463b9ffee4b3da38055225543e8373",
+    "plan_learner2_day1.json": "32a163bd5720237f4b271616ec3692182206667b2a06c353fd487e2d6b2e6c8c",
+    "plan_missed_day.json": "7447cf1755b6d388d9f792ba981e79cca54a69f58eac0a9b4e03e10c4551f517",
+    "plan_reduced_budget.json": "79efb87a102e4bbcf89c49f6ecc81602c2ce8818785264e093197372e2ab8495",
+    "plan_remediation.json": "6e974bc6e77bd7691b318f0b220e70fb739b38bfc437a9b8d573a2a64931ab7f",
+    "plan_review_due.json": "f866502be896f5627d6d5ee5aea174b9bdc8c09fe2b71896e053d747ac02c3e8",
+    "plan_shortened_deadline.json": "9d40a7432ad30f2b6b4a9d1273c4f45e0a339a59a663e12df75857782745a622",
+    "response_updates.json": "5b046c077bc0d9a7f53a31d9ede9fa159f96b1d843381a1c831f2dece6a26b4c",
+    "trace_assessment_failed.json": "093474a3ef430bc31dc99430676f71ceb6e33d5371a6bff3e8e6a1c11e1afd9b",
+    "trace_assessment_passed.json": "52abd88401c6ea72b042f47155e779fb0f283efdb0fe75afd3c6f70c43b2696b",
+    "trace_learner1_day1.json": "64d1c9ee386a6b2621206b1a0a490254de1810d9303426da856a307a27202747",
+    "trace_learner2_day1.json": "2a14ac7bf326054e663681a73a9b549a352cc3ca46e39f8b359433d2ac2d32a6",
+    "trace_missed_day.json": "95f56550bc62a868a01f5bccdd3afe618e7c3cf772747f01683f4fa3efcae4cb",
+    "trace_reduced_budget.json": "f6cc453c7caecca86eae9cbfd86046f5aefbc4684d0d0c84e231b6f1a432dd29",
+    "trace_remediation.json": "89003859647b57919cae9f4dec183a127361d5946715e3b614d2a5429af2869f",
+    "trace_review_due.json": "e682625e90c10f35e2fb158f8f045725b8f1415044cd654f0a3f4ae03fe29e24",
+    "trace_shortened_deadline.json": "1f9a34af1d29a8714f4bf828206d2c6338e7b143f47db03923427345c0f0dc40"
+  },
+  "package_versions": {
+    "networkx": "3.1",
+    "numpy": "1.26.4",
+    "pytest": "7.3.1",
+    "yaml": "6.0.1"
+  },
+  "python_version": "3.11.3 | packaged by Anaconda, Inc. | (main, Apr 19 2023, 23:46:34) [MSC v.1916 64 bit (AMD64)]",
+  "seeds": [
+    20261024
+  ],
+  "timestamp": "2026-10-24T15:11:35.042331+00:00"
+}

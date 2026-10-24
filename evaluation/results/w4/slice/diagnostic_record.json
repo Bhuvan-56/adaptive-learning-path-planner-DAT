@@ -1,0 +1,96 @@
+{
+  "learner_1": {
+    "initial_priors": {
+      "A": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5464691114135164
+      },
+      "B": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5464691114135164
+      },
+      "C": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5464691114135164
+      },
+      "D": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5
+      }
+    },
+    "items_asked": [
+      "item_016",
+      "item_012",
+      "item_010",
+      "item_024",
+      "item_014",
+      "item_021",
+      "item_015",
+      "item_006",
+      "item_023",
+      "item_002"
+    ],
+    "num_items_asked": 10,
+    "profile_id": "profile_1",
+    "theta_hat": 0.18641440649291474,
+    "variance": 0.21815808549714916
+  },
+  "learner_2": {
+    "initial_priors": {
+      "A": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.7176660984494699
+      },
+      "B": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.7176660984494699
+      },
+      "C": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.7176660984494699
+      },
+      "D": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5
+      }
+    },
+    "items_asked": [
+      "item_016",
+      "item_012",
+      "item_010",
+      "item_024",
+      "item_014",
+      "item_021",
+      "item_015",
+      "item_006",
+      "item_002",
+      "item_018"
+    ],
+    "num_items_asked": 10,
+    "profile_id": "profile_2",
+    "theta_hat": 0.9329139983819248,
+    "variance": 0.25553730671377745
+  },
+  "metadata": {
+    "description": "CAT adaptive diagnostic assessment records fitted to synthetic data",
+    "item_bank": "data/processed/item_bank_synthetic.csv",
+    "q_matrix": "data/processed/q_matrix_synthetic.csv",
+    "stopping_variance": 0.15
+  }
+}

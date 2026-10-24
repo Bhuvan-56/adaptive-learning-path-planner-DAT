@@ -1,0 +1,289 @@
+[
+  {
+    "concept_state": {
+      "class": "Weak",
+      "kappa": 6,
+      "n": 4,
+      "p": 0.13452634030871988,
+      "sigma2": 0.01663271486740891
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {},
+      "remaining_budget": 10,
+      "revalidate_before_execution": false
+    },
+    "day": 1,
+    "decision": "SELECTED",
+    "node_id": "A",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "SELECTED",
+    "score_terms": {
+      "exercise_difficulty": 0.05
+    }
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "A": false
+      },
+      "remaining_budget": 5,
+      "revalidate_before_execution": false
+    },
+    "day": 1,
+    "decision": "FILTERED",
+    "node_id": "B",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "PREREQUISITE_UNMET",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "A": false
+      },
+      "remaining_budget": 5,
+      "revalidate_before_execution": false
+    },
+    "day": 1,
+    "decision": "FILTERED",
+    "node_id": "C",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "PREREQUISITE_UNMET",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5,
+      "sigma2": 0.08333333333333333
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "B": false,
+        "C": false
+      },
+      "remaining_budget": 5,
+      "revalidate_before_execution": false
+    },
+    "day": 1,
+    "decision": "FILTERED",
+    "node_id": "D",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Weak",
+      "kappa": 6,
+      "n": 4,
+      "p": 0.13452634030871988,
+      "sigma2": 0.01663271486740891
+    },
+    "constraints": {
+      "budget": 10,
+      "prerequisites": {},
+      "remaining_budget": 10
+    },
+    "day": 2,
+    "decision": "FILTERED",
+    "node_id": "A",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "ALREADY_SCHEDULED",
+    "score_terms": {
+      "exercise_difficulty": 0.05
+    }
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "A": false
+      },
+      "remaining_budget": 10,
+      "revalidate_before_execution": false
+    },
+    "day": 2,
+    "decision": "FILTERED",
+    "node_id": "B",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "PREREQUISITE_UNMET",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "A": false
+      },
+      "remaining_budget": 10,
+      "revalidate_before_execution": false
+    },
+    "day": 2,
+    "decision": "FILTERED",
+    "node_id": "C",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "PREREQUISITE_UNMET",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5,
+      "sigma2": 0.08333333333333333
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "B": false,
+        "C": false
+      },
+      "remaining_budget": 10,
+      "revalidate_before_execution": false
+    },
+    "day": 2,
+    "decision": "FILTERED",
+    "node_id": "D",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Weak",
+      "kappa": 6,
+      "n": 4,
+      "p": 0.13452634030871988,
+      "sigma2": 0.01663271486740891
+    },
+    "constraints": {
+      "budget": 10,
+      "prerequisites": {},
+      "remaining_budget": 10
+    },
+    "day": 3,
+    "decision": "FILTERED",
+    "node_id": "A",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "ALREADY_SCHEDULED",
+    "score_terms": {
+      "exercise_difficulty": 0.05
+    }
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "A": false
+      },
+      "remaining_budget": 10,
+      "revalidate_before_execution": false
+    },
+    "day": 3,
+    "decision": "FILTERED",
+    "node_id": "B",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "PREREQUISITE_UNMET",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "A": false
+      },
+      "remaining_budget": 10,
+      "revalidate_before_execution": false
+    },
+    "day": 3,
+    "decision": "FILTERED",
+    "node_id": "C",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "PREREQUISITE_UNMET",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5,
+      "sigma2": 0.08333333333333333
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "B": false,
+        "C": false
+      },
+      "remaining_budget": 10,
+      "revalidate_before_execution": false
+    },
+    "day": 3,
+    "decision": "FILTERED",
+    "node_id": "D",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+    "score_terms": {}
+  }
+]

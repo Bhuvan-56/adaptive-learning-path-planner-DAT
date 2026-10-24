@@ -1,0 +1,8 @@
+{
+  "constraints": {
+    "budget": 5,
+    "deadline_days": 2
+  },
+  "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
+  "status": "INFEASIBLE_PROVED"
+}
