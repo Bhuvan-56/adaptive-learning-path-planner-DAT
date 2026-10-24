@@ -98,6 +98,14 @@ def plan_request(
             message="Targets list cannot be empty"
         )
 
+    if len(target_list) > 1:
+        return PlanResult(
+            is_valid=False,
+            status="INVALID_INPUT",
+            error_codes=["MULTIPLE_TARGETS_UNSUPPORTED"],
+            message=f"Multiple targets are not supported: {target_list}"
+        )
+
     missing = [t for t in target_list if t not in graph.nodes]
     if missing:
         return PlanResult(

@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import json
 import os
 import sys
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Set, Optional
 
 import networkx as nx
 
@@ -39,7 +39,18 @@ def _save_json(path: str, data: Any) -> None:
         json.dump(normalized, f, indent=2, sort_keys=True)
 
 
-def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_path: str = "data/curricula/demo_curriculum.json") -> int:
+def _check_result_trace(plan_dict: Dict[str, Any], candidate_universe: Set[str], num_days: int, budget: Optional[int] = None) -> None:
+    """Routes plan trace to check_no_plan_trace if status is infeasible/no-plan or dict, else to check_trace."""
+    status = plan_dict.get("status")
+    status_str = status.value if hasattr(status, "value") else str(status)
+    trace = plan_dict.get("trace")
+    if status_str in ("INFEASIBLE_PROVED", "INVALID_INPUT") or isinstance(trace, dict):
+        check_no_plan_trace(trace)
+    else:
+        check_trace(candidate_universe, trace, num_days=num_days, budget=budget)
+
+
+def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_path: str = "data/curricula/demo_curriculum.json", policy_path: Optional[str] = None) -> int:
     """
     Executes the end-to-end multi-scenario CLI demonstration:
     1. Loads and validates the curriculum DAG.
@@ -100,8 +111,25 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
     # 2. Simulated Learners Setup (Matched Simulator)
     # ---------------------------------------------------------
     deadline_days = 3
-    bkt_policy_path = os.path.join(os.path.dirname(__file__), "..", "config", "bkt_params.yaml")
-    policy = load_policy(bkt_policy_path) if os.path.exists(bkt_policy_path) else PolicyConfig()
+    if policy_path is not None:
+        if not os.path.exists(policy_path):
+            err = {
+                "status": "FILE_NOT_FOUND",
+                "error_codes": ["MISSING_POLICY_FILE"],
+                "message": f"Policy file does not exist: {policy_path}"
+            }
+            print(json.dumps(err, indent=2), file=sys.stderr)
+            return 1
+        policy = load_policy(policy_path)
+        policy_desc = f"loaded from {policy_path}"
+    else:
+        bkt_policy_path = os.path.join(os.path.dirname(__file__), "..", "config", "bkt_params.yaml")
+        if os.path.exists(bkt_policy_path):
+            policy = load_policy(bkt_policy_path)
+            policy_desc = f"declared default ({bkt_policy_path})"
+        else:
+            policy = PolicyConfig()
+            policy_desc = "declared default (built-in PolicyConfig)"
 
     # Novice Learner: unprobed state (n=0, cold_start for all concepts)
     learner_novice = SimulatedLearner(
@@ -158,8 +186,8 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         return 1
 
     try:
-        check_trace(candidate_universe, res_novice.plan["trace"], num_days=deadline_days)
-        check_trace(candidate_universe, res_intermediate.plan["trace"], num_days=deadline_days)
+        _check_result_trace(res_novice.plan, candidate_universe, num_days=deadline_days, budget=budget)
+        _check_result_trace(res_intermediate.plan, candidate_universe, num_days=deadline_days, budget=budget)
     except ValueError as e:
         err = {"status": "TRACE_CHECK_FAILED", "error_codes": ["TRACE_CONTRACT_VIOLATION"], "message": str(e)}
         print(json.dumps(err, indent=2), file=sys.stderr)
@@ -208,7 +236,7 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         "state": c_state_pass_after.classify(policy)
     }
     try:
-        check_trace(candidate_universe, plan_passed["trace"], num_days=deadline_days)
+        _check_result_trace(plan_passed, candidate_universe, num_days=deadline_days, budget=budget)
     except ValueError as e:
         err = {"status": "TRACE_CHECK_FAILED", "error_codes": ["TRACE_CONTRACT_VIOLATION"], "message": str(e)}
         print(json.dumps(err, indent=2), file=sys.stderr)
@@ -254,7 +282,7 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         "state": c_state_fail_after.classify(policy)
     }
     try:
-        check_trace(candidate_universe, plan_failed["trace"], num_days=deadline_days)
+        _check_result_trace(plan_failed, candidate_universe, num_days=deadline_days, budget=budget)
     except ValueError as e:
         err = {"status": "TRACE_CHECK_FAILED", "error_codes": ["TRACE_CONTRACT_VIOLATION"], "message": str(e)}
         print(json.dumps(err, indent=2), file=sys.stderr)
@@ -275,7 +303,7 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
     )
     plan_missed = replan(replan_state_inter, missed_day())
     try:
-        check_trace(candidate_universe, plan_missed["trace"], num_days=deadline_days)
+        _check_result_trace(plan_missed, candidate_universe, num_days=deadline_days, budget=budget)
     except ValueError as e:
         err = {"status": "TRACE_CHECK_FAILED", "error_codes": ["TRACE_CONTRACT_VIOLATION"], "message": str(e)}
         print(json.dumps(err, indent=2), file=sys.stderr)
@@ -283,21 +311,27 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
 
     # Budget reduction from 10 to 5
     reduced_budget = 5
+    past_days = plan_missed.get("days", [])[:1] if isinstance(plan_missed.get("days"), list) else []
+    if isinstance(plan_missed.get("trace"), list):
+        past_trace = plan_missed["trace"][:len(candidate_universe)]
+    else:
+        past_trace = []
+
     replan_state_reduced = ReplanState(
         graph=g,
-        learner_states=dict(plan_missed["learner_states"]),
-        budget=plan_missed["budget"],
-        deadline_days=plan_missed["deadline_days"],
+        learner_states=dict(plan_missed.get("learner_states", states_intermediate)),
+        budget=plan_missed.get("budget", budget),
+        deadline_days=plan_missed.get("deadline_days", deadline_days),
         target_node=target_node,
-        current_day=plan_missed["current_day"],
-        completed_nodes=set(plan_missed["completed_nodes"]),
-        past_days=plan_missed["days"][:1],
-        past_trace=plan_missed["trace"][:len(candidate_universe)],
+        current_day=plan_missed.get("current_day", 1),
+        completed_nodes=set(plan_missed.get("completed_nodes", {"A", "B"})),
+        past_days=past_days,
+        past_trace=past_trace,
         policy=policy
     )
     plan_reduced = replan(replan_state_reduced, changed_budget(reduced_budget))
     try:
-        check_no_plan_trace(plan_reduced["trace"])
+        _check_result_trace(plan_reduced, candidate_universe, num_days=deadline_days, budget=reduced_budget)
     except ValueError as e:
         err = {"status": "TRACE_CHECK_FAILED", "error_codes": ["NO_PLAN_TRACE_CONTRACT_VIOLATION"], "message": str(e)}
         print(json.dumps(err, indent=2), file=sys.stderr)
@@ -381,37 +415,60 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
     print("ADAPTIVE LEARNING ENGINE: END-TO-END DEMONSTRATION SUMMARY")
     print("=" * 70)
     print(f"Curriculum: {curriculum_path} (Target: {target_node}, Horizon: {deadline_days} days, Daily Budget: {budget} min)")
+    print(f"Policy: using {policy_desc}")
     print(f"Seed: {seed} | Config Hash: {cfg_hash[:16]}... | Git SHA: {git_sha[:7]}{' (dirty)' if dirty else ''}\n")
 
     print("[1] Learner Profiles & Day 1 Plan Divergence:")
+    novice_days = res_novice.plan.get("days", [])
+    novice_act = novice_days[0]["activities"] if novice_days else []
+    novice_cond = novice_days[0]["conditional_activities"] if novice_days else []
     print(f"  * Novice Learner (Budget {budget}m):")
-    print(f"    - Scheduled Activities Day 1: {res_novice.plan['days'][0]['activities']}")
-    print(f"    - Conditional Activities Day 1: {res_novice.plan['days'][0]['conditional_activities']}")
-    print(f"    - Gating Rationale: Foundational concept 'A' is unprobed (Uncertain).")
-    print(f"      Dependent concept 'D' is FILTERED with reason UNCERTAIN_NEEDS_ASSESSMENT.")
+    print(f"    - Scheduled Activities Day 1: {novice_act}")
+    print(f"    - Conditional Activities Day 1: {novice_cond}")
+    if res_novice.plan.get("status") == "FEASIBLE" or novice_act:
+        print(f"    - Gating Rationale: Foundational concept 'A' is unprobed (Uncertain).")
+        print(f"      Dependent concept 'D' is FILTERED with reason UNCERTAIN_NEEDS_ASSESSMENT.")
+    else:
+        print(f"    - Gating Rationale: Status is {res_novice.status} with reason {res_novice.plan.get('feasibility_explanation', {}).get('reason_code')}.")
+
+    inter_days = res_intermediate.plan.get("days", [])
+    inter_act = inter_days[0]["activities"] if inter_days else []
     print(f"  * Intermediate Learner (Budget {budget}m):")
-    print(f"    - Scheduled Activities Day 1: {res_intermediate.plan['days'][0]['activities']}")
-    print(f"    - Gating Rationale: Prerequisites 'A' and 'B' are ALREADY_MASTERED and filtered.")
-    print(f"      Unlocked downstream concept 'C' (10 min) is SELECTED for Day 1.\n")
+    print(f"    - Scheduled Activities Day 1: {inter_act}")
+    if inter_act:
+        print(f"    - Gating Rationale: Prerequisites 'A' and 'B' are ALREADY_MASTERED and filtered.")
+        print(f"      Unlocked downstream concept 'C' (10 min) is SELECTED for Day 1.\n")
+    else:
+        print(f"    - Gating Rationale: Status is {res_intermediate.status} with reason {res_intermediate.plan.get('feasibility_explanation', {}).get('reason_code')}.\n")
 
     print("[2] Dynamic Assessment & Replanning Scenarios (Concept 'A'):")
     print(f"  * Scenario A (Assessment Passed - Unblocked):")
     print(f"    - Response Sequence: {responses_pass} -> p: {before_pass['p']:.2f} -> {after_pass['p']:.4f} ({after_pass['state']})")
-    print(f"    - Outcome: Prerequisite 'A' becomes evidence-Mastered.")
-    print(f"      Dependent concept 'B' becomes unconditionally admissible and is SELECTED on Day 1.")
+    pass_days = plan_passed.get("days", [])
+    pass_act = pass_days[0]["activities"] if pass_days else []
+    if "B" in pass_act:
+        print(f"    - Outcome: Prerequisite 'A' becomes evidence-{after_pass['state']}.")
+        print(f"      Dependent concept 'B' becomes unconditionally admissible and is SELECTED on Day 1.")
+    else:
+        print(f"    - Outcome: Prerequisite 'A' classified as {after_pass['state']}, Day 1 activities: {pass_act}.")
+
     print(f"  * Scenario B (Assessment Failed - Stays Blocked):")
     print(f"    - Response Sequence: {responses_fail} -> p: {before_fail['p']:.2f} -> {after_fail['p']:.4f} ({after_fail['state']})")
-    print(f"    - Outcome: Concept 'A' classifies as Weak.")
+    print(f"    - Outcome: Concept 'A' classifies as {after_fail['state']}.")
     print(f"      Dependent concepts 'B' and 'D' remain FILTERED with reason PREREQUISITE_UNMET.")
-    print(f"      Planner status resolves to HEURISTIC_NO_PLAN (target unreachable within horizon).\n")
+    plan_fail_status = plan_failed.get("status")
+    status_str = plan_fail_status.value if hasattr(plan_fail_status, "value") else str(plan_fail_status)
+    print(f"      Planner status resolves to {status_str} (target unreachable within horizon).\n")
 
     print("[3] Missed Day & Budget Infeasibility Handling:")
-    print(f"  * Missed Day: Day 1 recorded as missed (minutes_used=0). Completed nodes {plan_missed['completed_nodes']} preserved.")
-    print(f"  * Budget Reduction: Reduced from 10m to 5m/day.")
+    missed_days = plan_missed.get("days", [])
+    missed_used = missed_days[0]["minutes_used"] if missed_days else 0
+    print(f"  * Missed Day: Day 1 recorded as missed (minutes_used={missed_used}). Completed nodes {plan_missed.get('completed_nodes', set())} preserved.")
+    print(f"  * Budget Reduction: Reduced from {budget}m to {reduced_budget}m/day.")
     print(f"    - Planner Status: {plan_reduced['status'].value if hasattr(plan_reduced['status'], 'value') else plan_reduced['status']}")
-    print(f"    - Reason Code: {plan_reduced['feasibility_explanation'].get('reason_code')}")
-    print(f"    - Proved Infeasibility: {plan_reduced['feasibility_explanation'].get('notes')}")
-    print(f"    - Actionable Minimum Fix: {plan_reduced['feasibility_explanation'].get('minimum_fix')}\n")
+    print(f"    - Reason Code: {plan_reduced.get('feasibility_explanation', {}).get('reason_code')}")
+    print(f"    - Proved Infeasibility: {plan_reduced.get('feasibility_explanation', {}).get('notes')}")
+    print(f"    - Actionable Minimum Fix: {plan_reduced.get('feasibility_explanation', {}).get('minimum_fix')}\n")
 
     print("[4] Latent Cognitive State Invariant Verification (EvaluatorView):")
     ev_novice = learner_novice.evaluator_view()
@@ -424,6 +481,142 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
     return 0
 
 
+def run_plan(
+    curriculum_path: str,
+    target: str,
+    budget: int,
+    deadline_days: int,
+    out_dir: str,
+    policy_path: Optional[str] = None,
+    states_path: Optional[str] = None,
+) -> int:
+    """Executes a single plan request from data and writes plan and trace artifacts."""
+    if not os.path.exists(curriculum_path):
+        err = {
+            "status": "FILE_NOT_FOUND",
+            "error_codes": ["MISSING_CURRICULUM_FILE"],
+            "message": f"Curriculum file does not exist: {curriculum_path}"
+        }
+        print(json.dumps(err, indent=2), file=sys.stderr)
+        return 1
+
+    try:
+        g: nx.DiGraph = load_graph(curriculum_path)
+    except Exception as e:
+        err = {
+            "status": "VALIDATION_ERROR",
+            "error_codes": ["MALFORMED_GRAPH_FILE"],
+            "message": f"Failed to parse graph JSON: {e}"
+        }
+        print(json.dumps(err, indent=2), file=sys.stderr)
+        return 1
+
+    validation_errors = validate_graph(g)
+    if validation_errors:
+        codes = [e.value if hasattr(e, "value") else str(e) for e in validation_errors]
+        err = {
+            "status": "VALIDATION_ERROR",
+            "error_codes": codes,
+            "message": f"Graph validation failed: {codes}"
+        }
+        print(json.dumps(err, indent=2), file=sys.stderr)
+        return 1
+
+    # Resolve policy
+    if policy_path is not None:
+        if not os.path.exists(policy_path):
+            err = {
+                "status": "FILE_NOT_FOUND",
+                "error_codes": ["MISSING_POLICY_FILE"],
+                "message": f"Policy file does not exist: {policy_path}"
+            }
+            print(json.dumps(err, indent=2), file=sys.stderr)
+            return 1
+        policy = load_policy(policy_path)
+        policy_desc = f"loaded from {policy_path}"
+    else:
+        bkt_policy_path = os.path.join(os.path.dirname(__file__), "..", "config", "bkt_params.yaml")
+        if os.path.exists(bkt_policy_path):
+            policy = load_policy(bkt_policy_path)
+            policy_desc = f"declared default ({bkt_policy_path})"
+        else:
+            policy = PolicyConfig()
+            policy_desc = "declared default (built-in PolicyConfig)"
+
+    # Resolve learner states
+    learner_states: Dict[str, ConceptState] = {}
+    if states_path is not None:
+        if not os.path.exists(states_path):
+            err = {
+                "status": "FILE_NOT_FOUND",
+                "error_codes": ["MISSING_STATES_FILE"],
+                "message": f"States file does not exist: {states_path}"
+            }
+            print(json.dumps(err, indent=2), file=sys.stderr)
+            return 1
+        try:
+            with open(states_path, "r", encoding="utf-8") as f:
+                raw_states = json.load(f)
+            for nid, sdata in raw_states.items():
+                if isinstance(sdata, dict):
+                    if "A" in sdata and "B" in sdata:
+                        learner_states[nid] = ConceptState(
+                            A=float(sdata["A"]),
+                            B=float(sdata["B"]),
+                            n=int(sdata.get("n", 0)),
+                            history=sdata.get("history", [])
+                        )
+                    elif "p" in sdata:
+                        learner_states[nid] = ConceptState.init_from_ability(float(sdata["p"]))
+                    else:
+                        learner_states[nid] = ConceptState.cold_start()
+                else:
+                    learner_states[nid] = ConceptState.cold_start()
+        except Exception as e:
+            err = {
+                "status": "VALIDATION_ERROR",
+                "error_codes": ["MALFORMED_STATES_FILE"],
+                "message": f"Failed to parse states JSON: {e}"
+            }
+            print(json.dumps(err, indent=2), file=sys.stderr)
+            return 1
+
+    for nid in g.nodes:
+        if nid not in learner_states:
+            learner_states[nid] = ConceptState.cold_start()
+
+    res = plan_request(
+        graph=g,
+        learner_states=learner_states,
+        budget=budget,
+        deadline_days=deadline_days,
+        targets=target,
+        policy=policy
+    )
+
+    if not res.is_valid:
+        err = {"status": "VALIDATION_ERROR", "error_codes": res.error_codes, "message": res.message}
+        print(json.dumps(err, indent=2), file=sys.stderr)
+        return 1
+
+    candidate_universe = get_candidate_universe(g, target)
+    try:
+        _check_result_trace(res.plan, candidate_universe, num_days=deadline_days, budget=budget)
+    except ValueError as e:
+        err = {"status": "TRACE_CHECK_FAILED", "error_codes": ["TRACE_CONTRACT_VIOLATION"], "message": str(e)}
+        print(json.dumps(err, indent=2), file=sys.stderr)
+        return 1
+
+    os.makedirs(out_dir, exist_ok=True)
+    _save_json(os.path.join(out_dir, "plan.json"), res.plan)
+    _save_json(os.path.join(out_dir, "trace.json"), res.plan["trace"])
+
+    print(f"Plan request succeeded. Target: {target}, Status: {res.status}")
+    print(f"Policy: using {policy_desc}")
+    print(f"Artifacts written to '{out_dir}'.")
+    return 0
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Adaptive Learning Engine CLI")
     subparsers = parser.add_subparsers(dest="command")
@@ -433,6 +626,16 @@ def main() -> None:
     demo_parser.add_argument("--seed", type=int, default=20261012, help="Random seed")
     demo_parser.add_argument("--budget", type=int, default=10, help="Daily study budget in minutes")
     demo_parser.add_argument("--curriculum", type=str, default="data/curricula/demo_curriculum.json", help="Path to curriculum JSON file")
+    demo_parser.add_argument("--policy", type=str, default=None, help="Path to policy YAML file")
+
+    plan_parser = subparsers.add_parser("plan", help="Generate and validate a single plan request")
+    plan_parser.add_argument("--curriculum", type=str, required=True, help="Path to curriculum JSON file")
+    plan_parser.add_argument("--target", type=str, required=True, help="Target node ID")
+    plan_parser.add_argument("--budget", type=int, required=True, help="Daily study budget in minutes")
+    plan_parser.add_argument("--deadline-days", type=int, required=True, help="Planning horizon in days")
+    plan_parser.add_argument("--out", type=str, required=True, help="Output directory")
+    plan_parser.add_argument("--policy", type=str, default=None, help="Path to policy YAML file")
+    plan_parser.add_argument("--states", type=str, default=None, help="Path to learner states JSON file")
 
     args = parser.parse_args()
 
@@ -441,7 +644,19 @@ def main() -> None:
         seed = getattr(args, "seed", 20261012)
         budget = getattr(args, "budget", 10)
         curriculum = getattr(args, "curriculum", "data/curricula/demo_curriculum.json")
-        code = run_demo(out_dir=out_dir, seed=seed, budget=budget, curriculum_path=curriculum)
+        policy = getattr(args, "policy", None)
+        code = run_demo(out_dir=out_dir, seed=seed, budget=budget, curriculum_path=curriculum, policy_path=policy)
+        sys.exit(code)
+    elif args.command == "plan":
+        code = run_plan(
+            curriculum_path=args.curriculum,
+            target=args.target,
+            budget=args.budget,
+            deadline_days=args.deadline_days,
+            out_dir=args.out,
+            policy_path=args.policy,
+            states_path=args.states,
+        )
         sys.exit(code)
     else:
         parser.print_help()
