@@ -1,0 +1,65 @@
+# Week 4 Comparative Evaluation Configuration (w4/b4-comparison)
+# Master specification for diagnostic comparison and planner controls.
+
+experiment_name: "w4_comparison"
+version: "1.0"
+status: "BENCHMARK_SPECIFICATION"
+
+# Random seeds for reproducibility across matched learner cohorts
+seeds:
+  - 42
+  - 101
+  - 2024
+  - 777
+  - 999
+
+evaluation_scale:
+  # Evaluation cohort size (number of synthetic learners)
+  # Matches experiments/m8_learner_eval.yaml line 17
+  num_synthetic_learners: 200
+  # Number of seed runs
+  num_seed_runs: 5
+
+diagnostic:
+  # Item cap for all diagnostic arms (matches experiments/m8_learner_eval.yaml line 28)
+  item_cap: 10
+  # CAT early stopping variance threshold (matches experiments/m8_learner_eval.yaml line 27)
+  stopping_variance: 0.15
+  # Synthetic relation for latent concept mastery from latent ability theta:
+  # latent_mastery = theta >= b_concept [PROPOSED]
+  latent_mastery_rule: "theta >= b_concept"  # [PROPOSED]
+  concept_difficulties:
+    # b_concept threshold per concept in demo curriculum for latent mastery check [PROPOSED]
+    A: -0.20
+    B: -0.20
+    C: 0.15
+    D: 0.50
+  # Number of held-out items per concept/learner for log-loss prediction
+  # docs/EVALUATION_PROTOCOL.md line 63, 72: N = 5 items per concept [PROPOSED]
+  held_out_items_per_concept: 5  # [PROPOSED] docs/EVALUATION_PROTOCOL.md line 63
+
+statistics:
+  # docs/EVALUATION_PROTOCOL.md line 87, 94: B = 1000 bootstrap resamples [PROPOSED]
+  bootstrap_resamples: 1000  # [PROPOSED] docs/EVALUATION_PROTOCOL.md line 87
+  confidence_level: 0.95
+
+planner_controls:
+  # Planning horizon in days for planner comparison
+  horizon_days: 5
+  # Daily study budget in minutes
+  daily_budget: 10
+  # docs/EVALUATION_PROTOCOL.md line 65, 73: D = 7 days delay before retention quiz [PROPOSED]
+  # Note: Retained recall is not measured this week because the simulator has no forgetting.
+  retention_delay_days: 7  # [PROPOSED] docs/EVALUATION_PROTOCOL.md line 65
+  target_node: "D"
+
+baselines:
+  diagnostic_arms:
+    - "adaptive"            # MaxInfoSelector without early stopping (runs to item_cap)
+    - "adaptive_early_stop" # MaxInfoSelector with MinErrorStopper (variance <= 0.15 or item_cap)
+    - "fixed"               # Items administered in ascending item_id order up to item_cap
+    - "random"              # Items administered in seeded random order up to item_cap
+  planner_arms:
+    - "static_prerequisite_order"
+    - "non_adaptive_greedy"
+    - "adaptive_replan"
