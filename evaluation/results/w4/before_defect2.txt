@@ -1,0 +1,153 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collected 6 items / 2 deselected / 4 selected
+
+tests\test_w4_a1_evidence_policy.py FFFF                                 [100%]
+
+================================== FAILURES ===================================
+_________ test_w4_d2_a_mastered_p_different_decisions_in_plan_request _________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D2: plan_request ignores policy when calling generate_static_plan")
+    def test_w4_d2_a_mastered_p_different_decisions_in_plan_request():
+        """
+        (a) mastered_p 0.99 against default 0.85 gives different decisions for the same learner through plan_request.
+        """
+        g = nx.DiGraph()
+        g.add_node("A", baseline_duration=5, base_difficulty=0.2)
+        g.add_node("B", baseline_duration=5, base_difficulty=0.2)
+        g.add_edge("A", "B")
+    
+        # Concept A: p=0.90, n=5. Classifies as Mastered under default (0.85), but Developing under 0.99.
+        states_def = {"A": ConceptState(A=9.0, B=1.0, n=5, history=[1, 1, 1, 1]), "B": ConceptState.cold_start()}
+        states_99 = {"A": ConceptState(A=9.0, B=1.0, n=5, history=[1, 1, 1, 1]), "B": ConceptState.cold_start()}
+    
+        pol_def = PolicyConfig(mastered_p=0.85)
+        pol_99 = PolicyConfig(mastered_p=0.99)
+    
+        res_def = plan_request(g, states_def, budget=10, deadline_days=1, targets="B", policy=pol_def)
+        res_99 = plan_request(g, states_99, budget=10, deadline_days=1, targets="B", policy=pol_99)
+    
+        assert res_def.is_valid and res_99.is_valid
+        # Under default policy, A is already mastered, so Day 1 schedules ['B'].
+        # Under 0.99 policy, A is not mastered (Developing), so Day 1 cannot just skip A and schedule B.
+        def_acts = res_def.plan["days"][0]["activities"]
+        acts_99 = res_99.plan["days"][0]["activities"]
+>       assert def_acts != acts_99, (
+            f"Expected different decisions under mastered_p=0.99 vs default 0.85, got {def_acts} for both"
+        )
+E       AssertionError: Expected different decisions under mastered_p=0.99 vs default 0.85, got ['B'] for both
+E       assert ['B'] != ['B']
+
+tests\test_w4_a1_evidence_policy.py:135: AssertionError
+_________ test_w4_d2_b_window_size_changes_quorum_and_classification __________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D2: replan does not pass policy window_size into state classification")
+    def test_w4_d2_b_window_size_changes_quorum_and_classification():
+        """
+        (b) window_size 6 against 4 changes the quorum and the classification after the same response sequence.
+        """
+        pol4 = PolicyConfig(window_size=4)
+        pol6 = PolicyConfig(window_size=6)
+        assert pol4.quorum == 3
+        assert pol6.quorum == 5
+    
+        g = nx.DiGraph()
+        g.add_node("A", baseline_duration=5, base_difficulty=0.2)
+        states4 = {"A": ConceptState.cold_start()}
+        states6 = {"A": ConceptState.cold_start()}
+        evt = assessment_result("A", [1, 1, 1, 1])
+    
+        res4 = replan({"graph": g, "learner_states": states4, "budget": 10, "deadline_days": 1, "target_node": "A", "policy": pol4}, evt)
+        res6 = replan({"graph": g, "learner_states": states6, "budget": 10, "deadline_days": 1, "target_node": "A", "policy": pol6}, evt)
+    
+        # After 4 responses, window is full for size 4 (quorum 3 met -> Mastered),
+        # but not full for size 6 (len 4 < 6 -> Developing).
+        class4 = res4["learner_states"]["A"].classify(pol4)
+        class6 = res6["learner_states"]["A"].classify(pol6)
+        assert class4 == "Mastered"
+        assert class6 == "Developing"
+    
+        # Replan trace concept_state must also reflect the different classifications
+        trace4_class = next(e for e in res4["trace"] if e["node_id"] == "A")["concept_state"]["class"]
+        trace6_class = next(e for e in res6["trace"] if e["node_id"] == "A")["concept_state"]["class"]
+        assert trace4_class == "Mastered"
+>       assert trace6_class == "Developing"
+E       AssertionError: assert 'Mastered' == 'Developing'
+E         - Developing
+E         + Mastered
+
+tests\test_w4_a1_evidence_policy.py:170: AssertionError
+______________ test_w4_d2_c_bkt_params_different_p_inside_replan ______________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D2: replan does not use policy BKT parameters p_T, p_S, p_G for update")
+    def test_w4_d2_c_bkt_params_different_p_inside_replan():
+        """
+        (c) different p_T, p_S or p_G give different p after the same responses inside replan.
+        """
+        g = nx.DiGraph()
+        g.add_node("A", baseline_duration=5, base_difficulty=0.2)
+        states1 = {"A": ConceptState.cold_start()}
+        states2 = {"A": ConceptState.cold_start()}
+        pol1 = PolicyConfig(p_T=0.10, p_S=0.10, p_G=0.25)
+        pol2 = PolicyConfig(p_T=0.30, p_S=0.05, p_G=0.10)
+        evt = assessment_result("A", [1, 1])
+    
+        res1 = replan({"graph": g, "learner_states": states1, "budget": 10, "deadline_days": 1, "target_node": "A", "policy": pol1}, evt)
+        res2 = replan({"graph": g, "learner_states": states2, "budget": 10, "deadline_days": 1, "target_node": "A", "policy": pol2}, evt)
+    
+        p1 = res1["learner_states"]["A"].p
+        p2 = res2["learner_states"]["A"].p
+>       assert p1 != p2, f"Expected different p under different BKT params, but both got {p1}"
+E       AssertionError: Expected different p under different BKT params, but both got 0.9430379746835443
+E       assert 0.9430379746835443 != 0.9430379746835443
+
+tests\test_w4_a1_evidence_policy.py:191: AssertionError
+____ test_w4_d2_d_replan_trace_class_equals_state_classify_for_every_node _____
+
+    @pytest.mark.xfail(strict=True, reason="W4 D2: replan trace concept_state class does not use supplied policy")
+    def test_w4_d2_d_replan_trace_class_equals_state_classify_for_every_node():
+        """
+        (d) after a replan event the trace's concept_state class equals state.classify(policy) for every node.
+        """
+        g = nx.DiGraph()
+        g.add_node("A", baseline_duration=5, base_difficulty=0.2)
+        g.add_node("B", baseline_duration=5, base_difficulty=0.2)
+        g.add_edge("A", "B")
+    
+        # A has p=0.90, n=5 -> Developing under mastered_p=0.99
+        pol = PolicyConfig(mastered_p=0.99)
+        states = {
+            "A": ConceptState(A=9.0, B=1.0, n=5, history=[1, 1, 1, 1]),
+            "B": ConceptState.cold_start()
+        }
+        state = {
+            "graph": g,
+            "learner_states": states,
+            "budget": 10,
+            "deadline_days": 1,
+            "target_node": "B",
+            "policy": pol
+        }
+        evt = assessment_result("A", [1])
+        res = replan(state, evt)
+    
+        for entry in res["trace"]:
+            nid = entry["node_id"]
+            expected_class = res["learner_states"][nid].classify(pol)
+            actual_class = entry["concept_state"]["class"]
+>           assert actual_class == expected_class, (
+                f"Node '{nid}' trace class '{actual_class}' != expected '{expected_class}' under policy {pol}"
+            )
+E           AssertionError: Node 'A' trace class 'Mastered' != expected 'Developing' under policy PolicyConfig(p_S=0.1, p_G=0.25, p_T=0.1, window_size=4, mastered_p=0.99, weak_p=0.4, sigma2_max=0.05, min_obs=3, kappa0=2.0, quorum=3)
+E           assert 'Mastered' == 'Developing'
+E             - Developing
+E             + Mastered
+
+tests\test_w4_a1_evidence_policy.py:225: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_w4_a1_evidence_policy.py::test_w4_d2_a_mastered_p_different_decisions_in_plan_request
+FAILED tests/test_w4_a1_evidence_policy.py::test_w4_d2_b_window_size_changes_quorum_and_classification
+FAILED tests/test_w4_a1_evidence_policy.py::test_w4_d2_c_bkt_params_different_p_inside_replan
+FAILED tests/test_w4_a1_evidence_policy.py::test_w4_d2_d_replan_trace_class_equals_state_classify_for_every_node
+======================= 4 failed, 2 deselected in 2.23s =======================

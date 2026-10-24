@@ -3,6 +3,7 @@ from typing import Dict, List, Any, Set, Optional, Union
 import networkx as nx
 
 from src.state.learner_state import ConceptState
+from src.state.policy import PolicyConfig, default_policy
 from src.planning.feasibility import check_feasibility, FeasibilityStatus, InfeasibilityReason
 from src.trace.schema import TraceEntry, ReasonCode
 from src.trace.universe import get_candidate_universe
@@ -64,6 +65,7 @@ class ReplanState:
     past_days: List[Dict[str, Any]] = field(default_factory=list)
     past_trace: List[Dict[str, Any]] = field(default_factory=list)
     policy_version: str = "static_baseline_v0"
+    policy: Optional[PolicyConfig] = None
 
 
 def _extract_state(state: Any) -> Dict[str, Any]:
@@ -80,7 +82,8 @@ def _extract_state(state: Any) -> Dict[str, Any]:
             "completed_nodes": set(state.get("completed_nodes", set())),
             "past_days": [dict(d) for d in state.get("past_days", [])],
             "past_trace": [dict(t) for t in state.get("past_trace", [])],
-            "policy_version": state.get("policy_version", "static_baseline_v0")
+            "policy_version": state.get("policy_version", "static_baseline_v0"),
+            "policy": state.get("policy")
         }
     else:
         g = getattr(state, "graph", getattr(state, "g", None))
@@ -95,7 +98,8 @@ def _extract_state(state: Any) -> Dict[str, Any]:
             "completed_nodes": set(getattr(state, "completed_nodes", set())),
             "past_days": [dict(d) for d in getattr(state, "past_days", [])],
             "past_trace": [dict(t) for t in getattr(state, "past_trace", [])],
-            "policy_version": getattr(state, "policy_version", "static_baseline_v0")
+            "policy_version": getattr(state, "policy_version", "static_baseline_v0"),
+            "policy": getattr(state, "policy", None)
         }
 
 
@@ -107,6 +111,8 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     2. missed_day: records missed day without deleting or overwriting completed work.
     3. changed_budget(new_budget): updates daily budget and rechecks feasibility.
     4. changed_deadline(new_days): updates deadline days and rechecks feasibility.
+
+    Replay rule: an event is applied once per call, and passing the same event twice applies it twice.
 
     Returns plan dictionary with days, trace (passing check_trace), and feasibility explanation.
     """
@@ -121,6 +127,15 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     past_days: List[Dict[str, Any]] = ctx["past_days"]
     past_trace: List[Dict[str, Any]] = ctx["past_trace"]
     policy_version: str = ctx["policy_version"]
+    raw_policy = ctx.get("policy")
+
+    active_policy: PolicyConfig
+    if raw_policy is None:
+        active_policy, _ = default_policy()
+    elif isinstance(raw_policy, tuple) and hasattr(raw_policy, "policy"):
+        active_policy = raw_policy.policy
+    else:
+        active_policy = raw_policy
 
     candidate_universe = get_candidate_universe(g, target_node)
 
@@ -133,7 +148,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
             learner_states[node] = ConceptState.cold_start()
         c_state = learner_states[node]
         for f in flags:
-            c_state.update(f)
+            c_state.update(f, policy=active_policy)
 
     elif isinstance(event, MissedDayEvent) or event == "missed_day" or (isinstance(event, dict) and event.get("type") == "missed_day"):
         # Record current day as missed
@@ -151,8 +166,8 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
         for nid in sorted(list(candidate_universe)):
             st = learner_states.get(nid, ConceptState.cold_start())
             prereqs = set(g.predecessors(nid)).intersection(candidate_universe)
-            prereq_status = {p: (p in completed_nodes or learner_states.get(p, ConceptState.cold_start()).classify() == "Mastered") for p in prereqs}
-            if learner_states.get(nid, ConceptState.cold_start()).classify() == "Mastered":
+            prereq_status = {p: (p in completed_nodes or learner_states.get(p, ConceptState.cold_start()).classify(active_policy) == "Mastered") for p in prereqs}
+            if learner_states.get(nid, ConceptState.cold_start()).classify(active_policy) == "Mastered":
                 rc = ReasonCode.ALREADY_MASTERED
             elif nid in completed_nodes:
                 rc = ReasonCode.COMPLETED
@@ -169,7 +184,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                     "kappa": st.kappa,
                     "sigma2": st.sigma2,
                     "n": st.n,
-                    "class": st.classify()
+                    "class": st.classify(active_policy)
                 },
                 constraints={
                     "budget": budget,
@@ -197,7 +212,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     # 2. Recompute only future plan from current_day to deadline_days
     evidence_mastered = {
         nid for nid in candidate_universe
-        if learner_states.get(nid, ConceptState.cold_start()).classify() == "Mastered"
+        if learner_states.get(nid, ConceptState.cold_start()).classify(active_policy) == "Mastered"
     }
 
     # Required remaining nodes (excluding already completed progress and evidence-Mastered nodes)
@@ -229,7 +244,8 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
             "days": past_days,
             "trace": no_plan_trace,
             "completed_nodes": completed_nodes,
-            "learner_states": learner_states
+            "learner_states": learner_states,
+            "policy": active_policy
         }
 
     # Deterministic topological sort of remaining required nodes
@@ -266,7 +282,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                         "kappa": st.kappa,
                         "sigma2": st.sigma2,
                         "n": st.n,
-                        "class": st.classify()
+                        "class": st.classify(active_policy)
                     },
                     constraints={
                         "budget": budget,
@@ -288,7 +304,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                         "kappa": st.kappa,
                         "sigma2": st.sigma2,
                         "n": st.n,
-                        "class": st.classify()
+                        "class": st.classify(active_policy)
                     },
                     constraints={
                         "budget": budget,
@@ -310,7 +326,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                         "kappa": st.kappa,
                         "sigma2": st.sigma2,
                         "n": st.n,
-                        "class": st.classify()
+                        "class": st.classify(active_policy)
                     },
                     constraints={
                         "budget": budget,
@@ -338,7 +354,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
 
             for p in prereqs:
                 p_st = learner_states.get(p, ConceptState.cold_start())
-                p_class = p_st.classify()
+                p_class = p_st.classify(active_policy)
 
                 if p in evidence_mastered:
                     prereq_status[p] = True
@@ -400,7 +416,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                     "kappa": st.kappa,
                     "sigma2": st.sigma2,
                     "n": st.n,
-                    "class": st.classify()
+                    "class": st.classify(active_policy)
                 },
                 constraints={
                     "budget": budget,
@@ -446,5 +462,6 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
         "assessment_candidates": sorted(list(assessment_candidates)),
         "current_day": current_day,
         "budget": budget,
-        "deadline_days": deadline_days
+        "deadline_days": deadline_days,
+        "policy": active_policy
     }

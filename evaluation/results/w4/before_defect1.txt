@@ -1,0 +1,126 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collected 1 item
+
+tests\test_w4_a1_evidence_policy.py F                                    [100%]
+
+================================== FAILURES ===================================
+___________ test_w4_d1_assessment_applied_once_in_cli_and_artifacts ___________
+
+tmp_path = WindowsPath('C:/Users/bhuva/AppData/Local/Temp/pytest-of-bhuva/pytest-57/test_w4_d1_assessment_applied_0')
+
+    @pytest.mark.xfail(strict=True, reason="W4 D1: assessment responses applied twice in CLI demo and replan")
+    def test_w4_d1_assessment_applied_once_in_cli_and_artifacts(tmp_path):
+        """
+        D1: For both pass and fail scenarios, n after minus n before must equal the number of responses.
+        n, p, and state must be identical in response_updates.json, the saved plan's learner_states for A,
+        and the trace entry for A.
+        """
+        out_dir = str(tmp_path / "cli_demo_d1")
+        ret = run_demo(out_dir=out_dir, seed=20261012, budget=10, curriculum_path="data/curricula/demo_curriculum.json")
+        assert ret == 0
+    
+        ru_path = os.path.join(out_dir, "response_updates.json")
+        with open(ru_path, "r", encoding="utf-8") as f:
+            ru_data = json.load(f)
+    
+        scenarios = [
+            ("scenario_assessment_passed", "plan_assessment_passed.json", "trace_assessment_passed.json"),
+            ("scenario_assessment_failed", "plan_assessment_failed.json", "trace_assessment_failed.json"),
+        ]
+    
+        for sc_key, plan_filename, trace_filename in scenarios:
+            sc = ru_data[sc_key]
+            concept = sc["concept"]
+            assert concept == "A"
+            responses = sc["responses"]
+            n_responses = len(responses)
+            before = sc["before"]
+            after = sc["after"]
+    
+            assert after["n"] - before["n"] == n_responses
+    
+            plan_path = os.path.join(out_dir, plan_filename)
+            with open(plan_path, "r", encoding="utf-8") as f:
+                plan_data = json.load(f)
+            plan_a = plan_data["learner_states"]["A"]
+    
+            trace_path = os.path.join(out_dir, trace_filename)
+            with open(trace_path, "r", encoding="utf-8") as f:
+                trace_data = json.load(f)
+            trace_a_entries = [e for e in trace_data if e.get("node_id") == "A"]
+            assert len(trace_a_entries) > 0
+            trace_a = trace_a_entries[0]["concept_state"]
+    
+            ru_n = after["n"]
+            ru_p = round(after["p"], 8)
+            ru_state = after["state"]
+    
+            plan_n = plan_a["n"]
+            plan_p = round(plan_a["p"], 8)
+            plan_cs = ConceptState(
+                A=plan_a["A"],
+                B=plan_a["B"],
+                n=plan_a["n"],
+                history=plan_a["history"]
+            )
+            plan_state = plan_cs.classify()
+    
+            trace_n = trace_a["n"]
+            trace_p = round(trace_a["p"], 8)
+            trace_state = trace_a["class"]
+    
+>           assert ru_n == plan_n == trace_n, (
+                f"Mismatch in n for {sc_key}: response_updates={ru_n}, plan={plan_n}, trace={trace_n}"
+            )
+E           AssertionError: Mismatch in n for scenario_assessment_passed: response_updates=4, plan=8, trace=8
+E           assert 4 == 8
+
+tests\test_w4_a1_evidence_policy.py:70: AssertionError
+---------------------------- Captured stdout call -----------------------------
+======================================================================
+ADAPTIVE LEARNING ENGINE: END-TO-END DEMONSTRATION SUMMARY
+======================================================================
+Curriculum: data/curricula/demo_curriculum.json (Target: D, Horizon: 3 days, Daily Budget: 10 min)
+Seed: 20261012 | Config Hash: 6d44dca9483a5b39... | Git SHA: 67088aa (dirty)
+
+[1] Learner Profiles & Day 1 Plan Divergence:
+  * Novice Learner (Budget 10m):
+    - Scheduled Activities Day 1: ['A', 'B']
+    - Conditional Activities Day 1: ['B']
+    - Gating Rationale: Foundational concept 'A' is unprobed (Uncertain).
+      Dependent concept 'D' is FILTERED with reason UNCERTAIN_NEEDS_ASSESSMENT.
+  * Intermediate Learner (Budget 10m):
+    - Scheduled Activities Day 1: ['C']
+    - Gating Rationale: Prerequisites 'A' and 'B' are ALREADY_MASTERED and filtered.
+      Unlocked downstream concept 'C' (10 min) is SELECTED for Day 1.
+
+[2] Dynamic Assessment & Replanning Scenarios (Concept 'A'):
+  * Scenario A (Assessment Passed - Unblocked):
+    - Response Sequence: [1, 1, 1, 1] -> p: 0.50 -> 0.9962 (Mastered)
+    - Outcome: Prerequisite 'A' becomes evidence-Mastered.
+      Dependent concept 'B' becomes unconditionally admissible and is SELECTED on Day 1.
+  * Scenario B (Assessment Failed - Stays Blocked):
+    - Response Sequence: [0, 0, 0, 0] -> p: 0.50 -> 0.1157 (Weak)
+    - Outcome: Concept 'A' classifies as Weak.
+      Dependent concepts 'B' and 'D' remain FILTERED with reason PREREQUISITE_UNMET.
+      Planner status resolves to HEURISTIC_NO_PLAN (target unreachable within horizon).
+
+[3] Missed Day & Budget Infeasibility Handling:
+  * Missed Day: Day 1 recorded as missed (minutes_used=0). Completed nodes {'B', 'A'} preserved.
+  * Budget Reduction: Reduced from 10m to 5m/day.
+    - Planner Status: INFEASIBLE_PROVED
+    - Reason Code: InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+    - Proved Infeasibility: Adding extra days will not resolve an indivisible activity duration constraint.
+    - Actionable Minimum Fix: raise daily budget to at least 10 minutes
+
+[4] Latent Cognitive State Invariant Verification (EvaluatorView):
+  * True Latent Mastery (Novice):       {'A': False, 'B': False, 'C': False, 'D': False}
+  * True Latent Mastery (Intermediate): {'A': True, 'B': True, 'C': False, 'D': False}
+  * Invariant: Latent states remained strictly inaccessible to planning & state code.
+======================================================================
+SUCCESS: All 12 plan and trace artifacts successfully written to 'C:\Users\bhuva\AppData\Local\Temp\pytest-of-bhuva\pytest-57\test_w4_d1_assessment_applied_0\cli_demo_d1'.
+=========================== short test summary info ===========================
+FAILED tests/test_w4_a1_evidence_policy.py::test_w4_d1_assessment_applied_once_in_cli_and_artifacts
+============================== 1 failed in 3.10s ==============================

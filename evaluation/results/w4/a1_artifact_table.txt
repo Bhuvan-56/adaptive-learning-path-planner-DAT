@@ -1,0 +1,22 @@
+====================================================================================================
+WEEK 4 TASK A1: ARTIFACT CONSISTENCY TABLE (CONCEPT A)
+====================================================================================================
+Stage        | Scenario                       | Artifact           | n    | p            | class     
+----------------------------------------------------------------------------------------------------
+BEFORE FIX   | Assessment Passed (Unblocked)  | response_updates   | 4    | 0.99624687   | Mastered  
+BEFORE FIX   | Assessment Passed (Unblocked)  | saved_plan         | 8    | 0.99990000   | Mastered  
+BEFORE FIX   | Assessment Passed (Unblocked)  | trace              | 8    | 0.99990000   | Mastered  
+----------------------------------------------------------------------------------------------------
+BEFORE FIX   | Assessment Failed (Blocked)    | response_updates   | 4    | 0.11571228   | Weak      
+BEFORE FIX   | Assessment Failed (Blocked)    | saved_plan         | 8    | 0.11538477   | Weak      
+BEFORE FIX   | Assessment Failed (Blocked)    | trace              | 8    | 0.11538477   | Weak      
+----------------------------------------------------------------------------------------------------
+AFTER FIX    | Assessment Passed (Unblocked)  | response_updates   | 4    | 0.99624687   | Mastered  
+AFTER FIX    | Assessment Passed (Unblocked)  | saved_plan         | 4    | 0.99624687   | Mastered  
+AFTER FIX    | Assessment Passed (Unblocked)  | trace              | 4    | 0.99624687   | Mastered  
+----------------------------------------------------------------------------------------------------
+AFTER FIX    | Assessment Failed (Blocked)    | response_updates   | 4    | 0.11571228   | Weak      
+AFTER FIX    | Assessment Failed (Blocked)    | saved_plan         | 4    | 0.11571228   | Weak      
+AFTER FIX    | Assessment Failed (Blocked)    | trace              | 4    | 0.11571228   | Weak      
+----------------------------------------------------------------------------------------------------
+====================================================================================================
