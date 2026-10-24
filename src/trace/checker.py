@@ -107,14 +107,19 @@ def check_trace(
                     f"Entry for node '{node_id}' on day {day} filtered with invalid reason code '{reason_code}'."
                 )
 
-            if decision == "SELECTED" and reason_code != ReasonCode.SELECTED.value:
+            SELECTED_REASON_CODES = {
+                ReasonCode.SELECTED.value,
+                ReasonCode.REVIEW_DUE.value,
+                ReasonCode.REMEDIATION_TRIGGERED.value,
+            }
+            if decision == "SELECTED" and reason_code not in SELECTED_REASON_CODES:
                 raise ValueError(
-                    f"Selected entry for node '{node_id}' on day {day} must carry reason SELECTED, got '{reason_code}'."
+                    f"Selected entry for node '{node_id}' on day {day} must carry reason SELECTED, REVIEW_DUE, or REMEDIATION_TRIGGERED, got '{reason_code}'."
                 )
 
-            if decision == "FILTERED" and reason_code == ReasonCode.SELECTED.value:
+            if decision == "FILTERED" and reason_code in SELECTED_REASON_CODES:
                 raise ValueError(
-                    f"Filtered entry for node '{node_id}' on day {day} cannot carry reason SELECTED."
+                    f"Filtered entry for node '{node_id}' on day {day} cannot carry selected reason '{reason_code}'."
                 )
 
             for field in REQUIRED_SCHEMA_FIELDS:
@@ -185,6 +190,28 @@ def check_trace(
                 if concept_class != "Mastered":
                     raise ValueError(
                         f"Entry for node '{node_id}' on day {day} has reason ALREADY_MASTERED but concept state '{concept_class}' (expected 'Mastered')."
+                    )
+
+            if reason_code == ReasonCode.REVIEW_DUE.value:
+                concept_class = (
+                    concept_state.get("class")
+                    if isinstance(concept_state, dict)
+                    else getattr(concept_state, "class", None)
+                )
+                if concept_class != "Mastered":
+                    raise ValueError(
+                        f"Entry for node '{node_id}' on day {day} has reason REVIEW_DUE but concept state '{concept_class}' (expected 'Mastered')."
+                    )
+
+            if reason_code == ReasonCode.REMEDIATION_TRIGGERED.value:
+                concept_class = (
+                    concept_state.get("class")
+                    if isinstance(concept_state, dict)
+                    else getattr(concept_state, "class", None)
+                )
+                if concept_class == "Mastered":
+                    raise ValueError(
+                        f"Entry for node '{node_id}' on day {day} has reason REMEDIATION_TRIGGERED but concept state is 'Mastered'."
                     )
 
     return True

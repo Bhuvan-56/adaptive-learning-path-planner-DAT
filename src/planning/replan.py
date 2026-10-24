@@ -8,6 +8,16 @@ from src.planning.feasibility import check_feasibility, FeasibilityStatus, Infea
 from src.trace.schema import TraceEntry, ReasonCode
 from src.trace.universe import get_candidate_universe
 from src.planning.difficulty import DifficultyState, step_difficulty
+from src.planning.review import (
+    ReviewLog,
+    ReviewRecord,
+    is_review_eligible,
+    calculate_recall_decay,
+    get_remediation_ancestors,
+    load_review_eval_config,
+    load_remediation_config,
+    DECAY_BASELINE,
+)
 
 
 @dataclass
@@ -68,12 +78,23 @@ class ReplanState:
     policy_version: str = "static_baseline_v0"
     policy: Optional[PolicyConfig] = None
     difficulty_states: Dict[str, DifficultyState] = field(default_factory=dict)
+    review_log: Optional[ReviewLog] = None
 
 
 def _extract_state(state: Any) -> Dict[str, Any]:
     if isinstance(state, dict):
         g = state.get("graph") or state.get("g")
         l_states = dict(state.get("learner_states") or state.get("states", {}))
+        raw_rl = state.get("review_log")
+        if raw_rl is None:
+            review_log = ReviewLog()
+        elif isinstance(raw_rl, ReviewLog):
+            review_log = raw_rl
+        elif isinstance(raw_rl, dict):
+            review_log = ReviewLog(records=dict(raw_rl))
+        else:
+            review_log = raw_rl
+
         return {
             "graph": g,
             "learner_states": l_states,
@@ -86,11 +107,22 @@ def _extract_state(state: Any) -> Dict[str, Any]:
             "past_trace": [dict(t) for t in state.get("past_trace", [])],
             "policy_version": state.get("policy_version", "static_baseline_v0"),
             "policy": state.get("policy"),
-            "difficulty_states": dict(state.get("difficulty_states") or {})
+            "difficulty_states": dict(state.get("difficulty_states") or {}),
+            "review_log": review_log,
         }
     else:
         g = getattr(state, "graph", getattr(state, "g", None))
         l_states = dict(getattr(state, "learner_states", getattr(state, "states", {})))
+        raw_rl = getattr(state, "review_log", None)
+        if raw_rl is None:
+            review_log = ReviewLog()
+        elif isinstance(raw_rl, ReviewLog):
+            review_log = raw_rl
+        elif isinstance(raw_rl, dict):
+            review_log = ReviewLog(records=dict(raw_rl))
+        else:
+            review_log = raw_rl
+
         return {
             "graph": g,
             "learner_states": l_states,
@@ -103,7 +135,8 @@ def _extract_state(state: Any) -> Dict[str, Any]:
             "past_trace": [dict(t) for t in getattr(state, "past_trace", [])],
             "policy_version": getattr(state, "policy_version", "static_baseline_v0"),
             "policy": getattr(state, "policy", None),
-            "difficulty_states": dict(getattr(state, "difficulty_states", {}) or {})
+            "difficulty_states": dict(getattr(state, "difficulty_states", {}) or {}),
+            "review_log": review_log,
         }
 
 
@@ -111,12 +144,16 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     """
     Executes dynamic replanning for a single event:
     1. assessment_result(node, correct_flags): updates BKT learner state;
-       dependents become admissible only after positive assessment.
+       records attempts in review_log; steps exercise difficulty;
+       if k consecutive failures occur, triggers prerequisite remediation.
     2. missed_day: records missed day without deleting or overwriting completed work.
     3. changed_budget(new_budget): updates daily budget and rechecks feasibility.
     4. changed_deadline(new_days): updates deadline days and rechecks feasibility.
 
-    Replay rule: an event is applied once per call, and passing the same event twice applies it twice.
+    Daily Budget Rule (PROPOSED):
+    Remediation first, then planned work toward the target, then due reviews
+    fill the leftover budget, lowest recall first. A review that does not fit
+    is traced with the existing BUDGET_EXCEEDED code. Reviews never displace required work.
 
     Returns plan dictionary with days, trace (passing check_trace), and feasibility explanation.
     """
@@ -133,6 +170,20 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     policy_version: str = ctx["policy_version"]
     raw_policy = ctx.get("policy")
     difficulty_states: Dict[str, DifficultyState] = ctx["difficulty_states"]
+    review_log: ReviewLog = ctx["review_log"]
+
+    try:
+        remediation_k = load_remediation_config()
+    except Exception:
+        remediation_k = 2
+
+    try:
+        eval_cfg = load_review_eval_config()
+        h_days = eval_cfg["half_life_prior_days"]
+        review_thresh = eval_cfg["review_eligibility_recall_threshold"]
+    except Exception:
+        h_days = 14.0
+        review_thresh = 0.85
 
     active_policy: PolicyConfig
     if raw_policy is None:
@@ -145,6 +196,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     candidate_universe = get_candidate_universe(g, target_node)
 
     # 1. Process Event
+    remediation_ancestors: List[str] = []
     if isinstance(event, AssessmentResultEvent) or (isinstance(event, dict) and event.get("type") == "assessment_result") or hasattr(event, "correct_flags"):
         node = event.node if hasattr(event, "node") else event["node"]
         flags = event.correct_flags if hasattr(event, "correct_flags") else event["correct_flags"]
@@ -154,6 +206,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
         c_state = learner_states[node]
         for f in flags:
             c_state.update(f, policy=active_policy)
+            review_log.record_attempt(node, time_in_days=float(current_day), correct=bool(f))
 
         if node not in difficulty_states:
             base_diff = g.nodes[node].get("base_difficulty", 0.5) if (g is not None and node in g) else 0.5
@@ -162,6 +215,12 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
         for f in flags:
             d_state = step_difficulty(d_state, f)
         difficulty_states[node] = d_state
+
+        # Check prerequisite remediation trigger on k consecutive failures
+        if review_log.get_consecutive_failures(node) >= remediation_k:
+            remediation_ancestors = get_remediation_ancestors(
+                g, node, learner_states, policy=active_policy, completed_nodes=completed_nodes
+            )
 
     elif isinstance(event, MissedDayEvent) or event == "missed_day" or (isinstance(event, dict) and event.get("type") == "missed_day"):
         # Record current day as missed
@@ -222,6 +281,38 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     else:
         raise ValueError(f"Unknown event type: {event}")
 
+    # Check if any remediation ancestor fundamentally cannot fit into any day's budget
+    for r_anc in remediation_ancestors:
+        dur = g.nodes[r_anc].get("baseline_duration", 0)
+        if dur > budget:
+            reason_str = ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET.value
+            no_plan_trace = {
+                "status": FeasibilityStatus.INFEASIBLE_PROVED.value,
+                "reason_code": reason_str,
+                "constraints": {
+                    "budget": budget,
+                    "deadline_days": deadline_days
+                }
+            }
+            return {
+                "status": FeasibilityStatus.INFEASIBLE_PROVED,
+                "feasibility_explanation": {
+                    "status": FeasibilityStatus.INFEASIBLE_PROVED.value,
+                    "reason_code": reason_str,
+                    "blocking_node": r_anc,
+                    "node_duration": dur,
+                    "budget": budget
+                },
+                "days": past_days,
+                "trace": no_plan_trace,
+                "completed_nodes": completed_nodes,
+                "learner_states": learner_states,
+                "difficulty_states": difficulty_states,
+                "review_log": review_log,
+                "policy": active_policy,
+                "target_node": target_node
+            }
+
     # 2. Recompute only future plan from current_day to deadline_days
     evidence_mastered = {
         nid for nid in candidate_universe
@@ -229,10 +320,11 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     }
 
     # Required remaining nodes (excluding already completed progress and evidence-Mastered nodes)
+    # plus any triggered remediation ancestors
     required_nodes = {
         nid for nid in candidate_universe
         if nid not in evidence_mastered and nid not in completed_nodes
-    }
+    } | set(remediation_ancestors)
 
     remaining_days = max(0, deadline_days - (current_day - 1))
 
@@ -259,6 +351,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
             "completed_nodes": completed_nodes,
             "learner_states": learner_states,
             "difficulty_states": difficulty_states,
+            "review_log": review_log,
             "policy": active_policy,
             "target_node": target_node
         }
@@ -271,7 +364,8 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
         raise ValueError("Cyclic graph detected; cannot produce fallback plan.") from e
 
     planned: Dict[str, int] = {}
-    remaining_nodes = list(topo_order)
+    remaining_nodes = [nid for nid in topo_order if nid not in remediation_ancestors]
+    remed_queue = list(remediation_ancestors)
     future_days = []
     future_trace = []
     assessment_candidates = set()
@@ -281,16 +375,30 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
         day_activities = []
         conditional_activities = []
         scheduled_today = set()
+        day_trace_map: Dict[str, Dict[str, Any]] = {}
 
-        # Prior entries for nodes already mastered, completed, or scheduled on prior days
-        for node_id in sorted(list(candidate_universe)):
-            st = learner_states.get(node_id, ConceptState.cold_start())
-            prereqs = set(g.predecessors(node_id)).intersection(candidate_universe)
-            prereq_status = {p: True for p in prereqs}
+        # -------------------------------------------------------------
+        # Part 1: Remediation first inside the daily budget
+        # -------------------------------------------------------------
+        for r_node in list(remed_queue):
+            if r_node in scheduled_today or r_node in completed_nodes:
+                continue
 
-            if node_id in evidence_mastered:
-                t_entry = TraceEntry(
-                    node_id=node_id,
+            dur = g.nodes[r_node].get("baseline_duration", 0)
+            prereqs = set(g.predecessors(r_node)).intersection(candidate_universe)
+            prereq_status = {
+                p: (p in evidence_mastered or p in completed_nodes or p in scheduled_today or (p in planned and planned[p] < day_num))
+                for p in prereqs
+            }
+            prereqs_met = all(prereq_status.values())
+            cur_rem = rem_budget
+            st = learner_states.get(r_node, ConceptState.cold_start())
+
+            if not prereqs_met:
+                decision = "FILTERED"
+                reason = ReasonCode.PREREQUISITE_UNMET
+                day_trace_map[r_node] = TraceEntry(
+                    node_id=r_node,
                     day=day_num,
                     concept_state={
                         "p": st.p,
@@ -301,18 +409,19 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                     },
                     constraints={
                         "budget": budget,
-                        "remaining_budget": rem_budget,
+                        "remaining_budget": cur_rem,
                         "prerequisites": prereq_status
                     },
-                    score_terms={"exercise_difficulty": difficulty_states[node_id].difficulty} if node_id in difficulty_states else {},
-                    decision="FILTERED",
-                    reason_code=ReasonCode.ALREADY_MASTERED,
+                    score_terms={"exercise_difficulty": difficulty_states[r_node].difficulty} if r_node in difficulty_states else {},
+                    decision=decision,
+                    reason_code=reason,
                     policy_version=policy_version
-                )
-                future_trace.append(t_entry.to_dict())
-            elif node_id in completed_nodes:
-                t_entry = TraceEntry(
-                    node_id=node_id,
+                ).to_dict()
+            elif dur > rem_budget:
+                decision = "FILTERED"
+                reason = ReasonCode.BLOCK_EXCEEDS_DAILY_BUDGET if dur > budget else ReasonCode.BUDGET_EXCEEDED
+                day_trace_map[r_node] = TraceEntry(
+                    node_id=r_node,
                     day=day_num,
                     concept_state={
                         "p": st.p,
@@ -323,40 +432,54 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                     },
                     constraints={
                         "budget": budget,
-                        "remaining_budget": rem_budget,
+                        "remaining_budget": cur_rem,
                         "prerequisites": prereq_status
                     },
-                    score_terms={"exercise_difficulty": difficulty_states[node_id].difficulty} if node_id in difficulty_states else {},
-                    decision="FILTERED",
-                    reason_code=ReasonCode.COMPLETED,
+                    score_terms={"exercise_difficulty": difficulty_states[r_node].difficulty} if r_node in difficulty_states else {},
+                    decision=decision,
+                    reason_code=reason,
                     policy_version=policy_version
-                )
-                future_trace.append(t_entry.to_dict())
-            elif node_id in planned and planned[node_id] < day_num:
-                t_entry = TraceEntry(
-                    node_id=node_id,
-                    day=day_num,
-                    concept_state={
-                        "p": st.p,
-                        "kappa": st.kappa,
-                        "sigma2": st.sigma2,
-                        "n": st.n,
-                        "class": st.classify(active_policy)
-                    },
-                    constraints={
-                        "budget": budget,
-                        "remaining_budget": rem_budget,
-                        "prerequisites": prereq_status
-                    },
-                    score_terms={"exercise_difficulty": difficulty_states[node_id].difficulty} if node_id in difficulty_states else {},
-                    decision="FILTERED",
-                    reason_code=ReasonCode.ALREADY_SCHEDULED,
-                    policy_version=policy_version
-                )
-                future_trace.append(t_entry.to_dict())
+                ).to_dict()
+                break
+            else:
+                decision = "SELECTED"
+                reason = ReasonCode.REMEDIATION_TRIGGERED
+                day_activities.append(r_node)
+                scheduled_today.add(r_node)
+                planned[r_node] = day_num
+                rem_budget -= dur
+                remed_queue.remove(r_node)
+                if r_node in remaining_nodes:
+                    remaining_nodes.remove(r_node)
 
-        # Evaluate remaining nodes in topological order
+                day_trace_map[r_node] = TraceEntry(
+                    node_id=r_node,
+                    day=day_num,
+                    concept_state={
+                        "p": st.p,
+                        "kappa": st.kappa,
+                        "sigma2": st.sigma2,
+                        "n": st.n,
+                        "class": st.classify(active_policy)
+                    },
+                    constraints={
+                        "budget": budget,
+                        "remaining_budget": cur_rem,
+                        "prerequisites": prereq_status
+                    },
+                    score_terms={"exercise_difficulty": difficulty_states[r_node].difficulty} if r_node in difficulty_states else {},
+                    decision=decision,
+                    reason_code=reason,
+                    policy_version=policy_version
+                ).to_dict()
+
+        # -------------------------------------------------------------
+        # Part 2: Planned work toward the target
+        # -------------------------------------------------------------
         for node_id in list(remaining_nodes):
+            if node_id in day_trace_map:
+                continue
+
             st = learner_states.get(node_id, ConceptState.cold_start())
             dur = g.nodes[node_id].get("baseline_duration", 0)
             prereqs = set(g.predecessors(node_id)).intersection(candidate_universe)
@@ -423,7 +546,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                 rem_budget -= dur
                 remaining_nodes.remove(node_id)
 
-            t_entry = TraceEntry(
+            day_trace_map[node_id] = TraceEntry(
                 node_id=node_id,
                 day=day_num,
                 concept_state={
@@ -444,8 +567,114 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                 decision=decision,
                 reason_code=reason,
                 policy_version=policy_version
+            ).to_dict()
+
+        # -------------------------------------------------------------
+        # Part 3: Due reviews fill leftover budget, lowest recall first
+        # -------------------------------------------------------------
+        due_candidates: List[Tuple[float, str]] = []
+        for nid in candidate_universe:
+            if nid not in evidence_mastered or nid in scheduled_today or nid in day_trace_map:
+                continue
+            is_elig, recall_val = is_review_eligible(
+                nid,
+                learner_states.get(nid, ConceptState.cold_start()),
+                review_log,
+                current_day=float(day_num),
+                policy=active_policy,
+                half_life_days=h_days,
+                threshold=review_thresh
             )
-            future_trace.append(t_entry.to_dict())
+            if is_elig:
+                due_candidates.append((recall_val, nid))
+
+        # Lowest recall first, tie-break by node_id alphabetically
+        due_candidates.sort(key=lambda x: (x[0], x[1]))
+
+        for recall_val, r_nid in due_candidates:
+            st = learner_states.get(r_nid, ConceptState.cold_start())
+            dur = g.nodes[r_nid].get("baseline_duration", 0)
+            prereqs = set(g.predecessors(r_nid)).intersection(candidate_universe)
+            prereq_status = {p: True for p in prereqs}
+            cur_rem = rem_budget
+
+            if dur <= rem_budget:
+                decision = "SELECTED"
+                reason = ReasonCode.REVIEW_DUE
+                day_activities.append(r_nid)
+                scheduled_today.add(r_nid)
+                rem_budget -= dur
+                # In simulation, record review attempt so it won't be immediately due next day
+                review_log.record_attempt(r_nid, time_in_days=float(day_num), correct=True)
+            else:
+                decision = "FILTERED"
+                reason = ReasonCode.BUDGET_EXCEEDED
+
+            day_trace_map[r_nid] = TraceEntry(
+                node_id=r_nid,
+                day=day_num,
+                concept_state={
+                    "p": st.p,
+                    "kappa": st.kappa,
+                    "sigma2": st.sigma2,
+                    "n": st.n,
+                    "class": st.classify(active_policy)
+                },
+                constraints={
+                    "budget": budget,
+                    "remaining_budget": cur_rem,
+                    "prerequisites": prereq_status
+                },
+                score_terms={"exercise_difficulty": difficulty_states[r_nid].difficulty} if r_nid in difficulty_states else {},
+                decision=decision,
+                reason_code=reason,
+                policy_version=policy_version
+            ).to_dict()
+
+        # -------------------------------------------------------------
+        # Part 4: Remaining candidate universe nodes for today
+        # -------------------------------------------------------------
+        for nid in sorted(list(candidate_universe)):
+            if nid in day_trace_map:
+                continue
+
+            st = learner_states.get(nid, ConceptState.cold_start())
+            prereqs = set(g.predecessors(nid)).intersection(candidate_universe)
+            prereq_status = {p: True for p in prereqs}
+
+            if nid in evidence_mastered:
+                rc = ReasonCode.ALREADY_MASTERED
+            elif nid in completed_nodes:
+                rc = ReasonCode.COMPLETED
+            elif nid in planned and planned[nid] < day_num:
+                rc = ReasonCode.ALREADY_SCHEDULED
+            else:
+                rc = ReasonCode.PREREQUISITE_UNMET
+
+            day_trace_map[nid] = TraceEntry(
+                node_id=nid,
+                day=day_num,
+                concept_state={
+                    "p": st.p,
+                    "kappa": st.kappa,
+                    "sigma2": st.sigma2,
+                    "n": st.n,
+                    "class": st.classify(active_policy)
+                },
+                constraints={
+                    "budget": budget,
+                    "remaining_budget": rem_budget,
+                    "prerequisites": prereq_status
+                },
+                score_terms={"exercise_difficulty": difficulty_states[nid].difficulty} if nid in difficulty_states else {},
+                decision="FILTERED",
+                reason_code=rc,
+                policy_version=policy_version
+            ).to_dict()
+
+        # Append all entries in sorted candidate universe order for this day
+        for nid in sorted(list(candidate_universe)):
+            future_trace.append(day_trace_map[nid])
 
         future_days.append({
             "day": day_num,
@@ -459,7 +688,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     all_days = past_days + future_days
     all_trace = past_trace + future_trace
 
-    if remaining_nodes:
+    if remaining_nodes or remed_queue:
         final_status = FeasibilityStatus.HEURISTIC_NO_PLAN
         feasibility_info["status"] = FeasibilityStatus.HEURISTIC_NO_PLAN
         feasibility_info["reason_code"] = InfeasibilityReason.SCHEDULING_CONSTRAINTS_UNMET
@@ -475,6 +704,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
         "completed_nodes": completed_nodes,
         "learner_states": learner_states,
         "difficulty_states": difficulty_states,
+        "review_log": review_log,
         "assessment_candidates": sorted(list(assessment_candidates)),
         "current_day": current_day,
         "budget": budget,

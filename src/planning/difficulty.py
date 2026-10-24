@@ -17,7 +17,7 @@ from src.curriculum.graph import MIN_DIFFICULTY, MAX_DIFFICULTY
 DEFAULT_CONFIG_PATH = "config/adaptive.yaml"
 
 
-def load_adaptive_config(path: Optional[str] = None) -> Dict[str, float]:
+def load_adaptive_config(path: Optional[str] = None) -> Dict[str, Any]:
     """
     Strict loader for adaptive configuration (config/adaptive.yaml).
 
@@ -27,6 +27,7 @@ def load_adaptive_config(path: Optional[str] = None) -> Dict[str, float]:
     - Required key 'step' must be present (missing key raises KeyError or ValueError).
     - Unknown keys are disallowed (raises ValueError).
     - Value of 'step' must be a finite numerical value with 0.0 < step <= 0.9.
+    - Optional key 'remediation' must be a dict with key 'consecutive_failures' (int >= 1).
     """
     cfg_path = path if path is not None else DEFAULT_CONFIG_PATH
     if not os.path.exists(cfg_path):
@@ -38,7 +39,7 @@ def load_adaptive_config(path: Optional[str] = None) -> Dict[str, float]:
     if not isinstance(data, dict):
         raise ValueError(f"Adaptive config at {cfg_path} must be a dictionary mapping.")
 
-    allowed_keys = {"step"}
+    allowed_keys = {"step", "remediation"}
     unknown_keys = set(data.keys()) - allowed_keys
     if unknown_keys:
         raise ValueError(f"Unknown key(s) in adaptive configuration: {sorted(list(unknown_keys))}")
@@ -54,7 +55,31 @@ def load_adaptive_config(path: Optional[str] = None) -> Dict[str, float]:
     if not (0.0 < step_val <= 0.9):
         raise ValueError(f"Adaptive step must be in (0, 0.9], got {step_val}")
 
-    return {"step": step_val}
+    result: Dict[str, Any] = {"step": step_val}
+    if "remediation" in data:
+        rem = data["remediation"]
+        if not isinstance(rem, dict):
+            raise ValueError(f"Remediation block must be a dictionary mapping, got {type(rem)}")
+        rem_allowed = {"consecutive_failures"}
+        rem_unknown = set(rem.keys()) - rem_allowed
+        if rem_unknown:
+            raise ValueError(f"Unknown key(s) in remediation configuration: {sorted(list(rem_unknown))}")
+        if "consecutive_failures" not in rem:
+            raise KeyError("Missing required key 'consecutive_failures' in remediation configuration.")
+        k = rem["consecutive_failures"]
+        if isinstance(k, bool) or not isinstance(k, int) or k < 1:
+            raise ValueError(f"Remediation consecutive_failures must be an integer >= 1, got {k!r}")
+        result["remediation"] = {"consecutive_failures": int(k)}
+
+    return result
+
+
+def load_remediation_config(path: Optional[str] = None) -> int:
+    """Convenience helper returning consecutive_failures threshold k for remediation."""
+    cfg = load_adaptive_config(path)
+    if "remediation" not in cfg or "consecutive_failures" not in cfg["remediation"]:
+        raise KeyError("Remediation configuration not present in adaptive config.")
+    return int(cfg["remediation"]["consecutive_failures"])
 
 
 def get_step_size(path: Optional[str] = None) -> float:
