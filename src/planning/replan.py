@@ -7,6 +7,7 @@ from src.state.policy import PolicyConfig, default_policy
 from src.planning.feasibility import check_feasibility, FeasibilityStatus, InfeasibilityReason
 from src.trace.schema import TraceEntry, ReasonCode
 from src.trace.universe import get_candidate_universe
+from src.planning.difficulty import DifficultyState, step_difficulty
 
 
 @dataclass
@@ -66,6 +67,7 @@ class ReplanState:
     past_trace: List[Dict[str, Any]] = field(default_factory=list)
     policy_version: str = "static_baseline_v0"
     policy: Optional[PolicyConfig] = None
+    difficulty_states: Dict[str, DifficultyState] = field(default_factory=dict)
 
 
 def _extract_state(state: Any) -> Dict[str, Any]:
@@ -83,7 +85,8 @@ def _extract_state(state: Any) -> Dict[str, Any]:
             "past_days": [dict(d) for d in state.get("past_days", [])],
             "past_trace": [dict(t) for t in state.get("past_trace", [])],
             "policy_version": state.get("policy_version", "static_baseline_v0"),
-            "policy": state.get("policy")
+            "policy": state.get("policy"),
+            "difficulty_states": dict(state.get("difficulty_states") or {})
         }
     else:
         g = getattr(state, "graph", getattr(state, "g", None))
@@ -99,7 +102,8 @@ def _extract_state(state: Any) -> Dict[str, Any]:
             "past_days": [dict(d) for d in getattr(state, "past_days", [])],
             "past_trace": [dict(t) for t in getattr(state, "past_trace", [])],
             "policy_version": getattr(state, "policy_version", "static_baseline_v0"),
-            "policy": getattr(state, "policy", None)
+            "policy": getattr(state, "policy", None),
+            "difficulty_states": dict(getattr(state, "difficulty_states", {}) or {})
         }
 
 
@@ -128,6 +132,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     past_trace: List[Dict[str, Any]] = ctx["past_trace"]
     policy_version: str = ctx["policy_version"]
     raw_policy = ctx.get("policy")
+    difficulty_states: Dict[str, DifficultyState] = ctx["difficulty_states"]
 
     active_policy: PolicyConfig
     if raw_policy is None:
@@ -149,6 +154,14 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
         c_state = learner_states[node]
         for f in flags:
             c_state.update(f, policy=active_policy)
+
+        if node not in difficulty_states:
+            base_diff = g.nodes[node].get("base_difficulty", 0.5) if (g is not None and node in g) else 0.5
+            difficulty_states[node] = DifficultyState(difficulty=base_diff)
+        d_state = difficulty_states[node]
+        for f in flags:
+            d_state = step_difficulty(d_state, f)
+        difficulty_states[node] = d_state
 
     elif isinstance(event, MissedDayEvent) or event == "missed_day" or (isinstance(event, dict) and event.get("type") == "missed_day"):
         # Record current day as missed
@@ -191,7 +204,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                     "remaining_budget": 0,
                     "prerequisites": prereq_status
                 },
-                score_terms={},
+                score_terms={"exercise_difficulty": difficulty_states[nid].difficulty} if nid in difficulty_states else {},
                 decision="FILTERED",
                 reason_code=rc,
                 policy_version=policy_version
@@ -245,7 +258,9 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
             "trace": no_plan_trace,
             "completed_nodes": completed_nodes,
             "learner_states": learner_states,
-            "policy": active_policy
+            "difficulty_states": difficulty_states,
+            "policy": active_policy,
+            "target_node": target_node
         }
 
     # Deterministic topological sort of remaining required nodes
@@ -289,7 +304,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                         "remaining_budget": rem_budget,
                         "prerequisites": prereq_status
                     },
-                    score_terms={},
+                    score_terms={"exercise_difficulty": difficulty_states[node_id].difficulty} if node_id in difficulty_states else {},
                     decision="FILTERED",
                     reason_code=ReasonCode.ALREADY_MASTERED,
                     policy_version=policy_version
@@ -311,7 +326,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                         "remaining_budget": rem_budget,
                         "prerequisites": prereq_status
                     },
-                    score_terms={},
+                    score_terms={"exercise_difficulty": difficulty_states[node_id].difficulty} if node_id in difficulty_states else {},
                     decision="FILTERED",
                     reason_code=ReasonCode.COMPLETED,
                     policy_version=policy_version
@@ -333,7 +348,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                         "remaining_budget": rem_budget,
                         "prerequisites": prereq_status
                     },
-                    score_terms={},
+                    score_terms={"exercise_difficulty": difficulty_states[node_id].difficulty} if node_id in difficulty_states else {},
                     decision="FILTERED",
                     reason_code=ReasonCode.ALREADY_SCHEDULED,
                     policy_version=policy_version
@@ -425,7 +440,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                     "conditional": is_conditional,
                     "revalidate_before_execution": is_conditional
                 },
-                score_terms={},
+                score_terms={"exercise_difficulty": difficulty_states[node_id].difficulty} if node_id in difficulty_states else {},
                 decision=decision,
                 reason_code=reason,
                 policy_version=policy_version
@@ -459,9 +474,11 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
         "trace": all_trace,
         "completed_nodes": completed_nodes,
         "learner_states": learner_states,
+        "difficulty_states": difficulty_states,
         "assessment_candidates": sorted(list(assessment_candidates)),
         "current_day": current_day,
         "budget": budget,
         "deadline_days": deadline_days,
-        "policy": active_policy
+        "policy": active_policy,
+        "target_node": target_node
     }
