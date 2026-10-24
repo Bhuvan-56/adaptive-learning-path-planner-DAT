@@ -151,3 +151,26 @@ graph TD
    - No module in `src/planning/` or `src/state/` may import `EvaluatorView`.
    - No module in `src/planning/` or `src/state/` may read or write latent variables.
 4. **Automated Verification:** Verified continuously via automated AST / import analysis in `tests/test_simulation.py::test_planner_and_state_modules_contain_no_import_of_evaluator_view`.
+
+---
+
+## 7. Acceptance Groups & Protocol Implementation Status (Week 4 Reconciliation)
+
+The current implementation status of each evaluation and acceptance group across modules M1–M8 is summarized below with Week 4 evidence:
+
+| Acceptance Group | Scope & Invariant | Current Status | Week 4 Implementation & Verification |
+|---|---|---|---|
+| **M1-a to M1-d** | Curriculum DAG validation, BKT numerical parity with `pyBKT 1.4.3`, variance/window classification, zero prerequisite violations | `passing` | Verified in unit and acceptance suites; zero prerequisite violations strictly enforced. |
+| **M2-a, M2-b** | Adaptive Diagnostic Policy (CAT/IRT): Maximum Fisher Information item selection, stopping rule ($\operatorname{Var} \le 0.15$ or 10 items), ability-to-prior mapping via logistic link | `passing` | Verified against synthetic item bank (`data/processed/item_bank_synthetic.csv`) and Q-matrix in `tests/test_m2_adaptive_diagnostic.py` and `tests/test_w4_b3_diagnostic.py`. |
+| **M3-a to M3-c** | Zero daily budget overruns, 250-instance greedy benchmark vs. exact oracle ($\bar{\rho} \ge 0.95$, 12/18 counterexample), order-invariant exhaustive oracle | `passing` | Zero budget violations strictly enforced; benchmark reports $\bar{\rho} = 0.9737$. |
+| **M4-a** | Infeasibility Detection & Repair Guidance: Partition into `FEASIBLE`, `INFEASIBLE_PROVED`, `HEURISTIC_NO_PLAN` | `partial` | **Partial (mentor confirmed).** Strict mathematical infeasibility proves single-block ($> B$) and capacity ($> DB$) violations with actionable repairs; heuristic packing dead-ends return `HEURISTIC_NO_PLAN` without dynamic constraint relaxation. |
+| **M4-b** | 2-Up / 1-Down Dynamic Exercise Adaptation: Step $\pm 0.10$ bounded in $[0.05, 0.95]$ | `passing` | Implemented in `src/planning/difficulty.py` using `config/adaptive.yaml`; verified in `tests/test_m4_difficulty_adaptation.py` and `tests/test_w4_a3_difficulty_gate.py`. |
+| **M5-a** | Remediation Trigger on Repeated Assessment Failure | `passing` | Implemented in `src/planning/replan.py`; repeated failures trigger lowest-mastery unmet prerequisite scheduling inside budget. |
+| **M5-b** | HLR Spaced Review Scheduling: Exponential recall decay $R_c = 2^{-\Delta t / 14.0} < 0.85$ | `passing` | Implemented in `src/planning/replan.py` via `ReviewLog`; verified in `tests/test_m5_spaced_review_remediation.py` and `tests/test_w4_a4_review_remediation.py`. |
+| **M6-a, M6-b** | Dynamic Event Replanning: External events preserve completed progress; budget reduction produces compressed plan or capacity infeasibility | `passing` | Implemented in `src/planning/replan.py`; verified in `tests/test_m6_replanning_events.py` and `tests/test_m6_dynamic_replanning.py`. |
+| **M7-a, M7-b** | Explainability Framework: 100% candidate universe coverage per day, 8 schema fields, valid reason codes | `passing` | Verified in `tests/test_m7_explainability.py` and `tests/test_m7_trace_contract.py`. |
+| **M8-a** | Learner Profile Plan Differentiation | `partial` | **Partial (mentor confirmed).** Multi-profile differentiation verified in `tests/test_w4_b2_provenance_profiles.py` and `tests/test_w4_t2_slice.py`; legacy stub `tests/test_m8_evaluation.py::test_tc_8_1` remains skipped. |
+| **M8-b** | Single Runnable End-to-End Command | `passing` | **Passing.** The standalone CLI exists now in `src/cli.py` with `demo`, `plan`, and `slice` subcommands. Full verification runs via `scripts/clean_run.ps1` with exit code 0. |
+| **M8-c** | Latent Mastery Simulator Invisibility Invariant | `passing` | AST analysis confirms zero imports or reads of `EvaluatorView` in `src/planning/` and `src/state/`. |
+| **M8-d** | Independent Retained-Recall Outcome Evaluation | `partial` | **Partial (mentor confirmed).** Multi-arm comparative evaluation across diagnostic arms (Random, Static, CAT) and planner arms (Static, Greedy, Adaptive) is executed in `src/evaluation/compare.py`, while delayed retention quiz under `MismatchedPFAOrLogisticGenerator` remains deferred. |
+

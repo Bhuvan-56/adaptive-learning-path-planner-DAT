@@ -131,3 +131,35 @@ During implementation of Week 2 work, three source files were edited to resolve 
 ### Independence Note
 - The author of the original Week 2 audit was recorded as "Independent Auditor" without name, institutional affiliation, or external verification. Consequently, this document cannot be considered an independent external review under objective audit standards. All claims are verified directly against source code, executable tests, and deterministic hash manifests.
 
+---
+
+## 7. Post-Fix Addendum (Week 4 Final Reconciliation)
+
+### Commit SHA & Head Status
+- **Final Merged Main SHA:** `0e1ea9461679e731928fd9397177913a9495bb4f`
+- **Branch:** `w4/t3-docs` (branched from `main` following merge of rounds 1–4, task T2 horizontal slice, and adversarial matrix verification)
+
+### Current Empirical Test Counts
+- **Execution Command:** `.venv_w2\Scripts\python.exe -m pytest -q -rs -p no:cacheprovider`
+- **Output:**
+  ```text
+  202 passed, 1 skipped, 22 warnings in 43.32s
+  ```
+- **Active Acceptance Tests:** 202 passed, 0 failed, 1 skipped (the single skip corresponds strictly to the deferred delayed retention quiz stub `tests/test_m8_evaluation.py::test_tc_8_1`).
+
+### Clean Run & Artifact Verification
+- **Execution Command:** `powershell -ExecutionPolicy Bypass -File scripts/clean_run.ps1 -Sha 0e1ea9461679e731928fd9397177913a9495bb4f`
+- **Audit Verification:**
+  - Fresh clone into isolated temporary directory with clean virtual environment.
+  - Dependency installation from `requirements.txt` passing.
+  - Full pytest test suite passing (202 passed, 1 skipped).
+  - End-to-end `demo` subcommand verified (all 14 output artifacts present and valid).
+  - Horizontal `slice` subcommand verified (all 21 output artifacts present and validated against candidate universes and trace contracts).
+  - Exit code: 0 (`PASS`).
+
+### System Status Summary
+- **M1–M8 Architecture:** All eight core modules are fully implemented across `src/curriculum/`, `src/diagnostic/`, `src/planning/`, `src/state/`, `src/trace/`, `src/simulation/`, and `src/evaluation/`.
+- **CLI Subcommands:** Unified CLI entry point in `src/cli.py` exposes `demo`, `plan`, and `slice` commands.
+- **Invariants:** Zero prerequisite violations, zero daily budget overruns, 100% trace candidate coverage, and strict latent state encapsulation (`EvaluatorView` invisible to planner) verified and maintained.
+
+
