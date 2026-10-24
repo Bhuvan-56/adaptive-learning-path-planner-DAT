@@ -1,0 +1,83 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collected 15 items / 11 deselected / 4 selected
+
+tests\test_w4_a2_trace_request.py FFFF                                   [100%]
+
+================================== FAILURES ===================================
+___________________ test_w4_d6_demo_budgets_exit_by_status ____________________
+
+tmp_path = WindowsPath('C:/Users/bhuva/AppData/Local/Temp/pytest-of-bhuva/pytest-72/test_w4_d6_demo_budgets_exit_b0')
+capsys = <_pytest.capture.CaptureFixture object at 0x000001F8211E3610>
+
+    @pytest.mark.xfail(strict=True, reason="W4 D6: demo budget 5 fails with TRACE_CHECK_FAILED on valid no-plan")
+    def test_w4_d6_demo_budgets_exit_by_status(tmp_path, capsys):
+        out_dir = str(tmp_path / "budget_5")
+        ret = run_demo(out_dir=out_dir, budget=5, curriculum_path="data/curricula/demo_curriculum.json")
+        captured = capsys.readouterr()
+>       assert "TRACE_CHECK_FAILED" not in captured.err
+E       assert 'TRACE_CHECK_FAILED' not in '{\n  "statu...aries."\n}\n'
+E         'TRACE_CHECK_FAILED' is contained here:
+E           {
+E             "status": "TRACE_CHECK_FAILED",
+E             "error_codes": [
+E               "TRACE_CONTRACT_VIOLATION"
+E             ],
+E             "message": "Trace must be a list of trace entry dictionaries."
+E           }
+
+tests\test_w4_a2_trace_request.py:143: AssertionError
+____________________ test_w4_d6_multiple_targets_rejected _____________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D6: plan_request with multiple targets silently plans only first target")
+    def test_w4_d6_multiple_targets_rejected():
+        g = load_graph("data/curricula/demo_curriculum.json")
+        states = {nid: ConceptState.cold_start() for nid in g.nodes}
+        res = plan_request(
+            graph=g,
+            learner_states=states,
+            budget=10,
+            deadline_days=3,
+            targets=["A", "B"]
+        )
+>       assert not res.is_valid
+E       AssertionError: assert not True
+E        +  where True = PlanResult(is_valid=True, status='FEASIBLE', error_codes=[], message='Plan generated successfully', plan={'status': <F...'FILTERED', 'reason_code': 'ALREADY_SCHEDULED', 'policy_version': 'static_baseline_v0'}], 'assessment_candidates': []}).is_valid
+
+tests\test_w4_a2_trace_request.py:158: AssertionError
+_______________________ test_w4_d6_policy_path_handling _______________________
+
+tmp_path = WindowsPath('C:/Users/bhuva/AppData/Local/Temp/pytest-of-bhuva/pytest-72/test_w4_d6_policy_path_handlin0')
+capsys = <_pytest.capture.CaptureFixture object at 0x000001F841CE9350>
+
+    @pytest.mark.xfail(strict=True, reason="W4 D6: missing/invalid policy path handling")
+    def test_w4_d6_policy_path_handling(tmp_path, capsys):
+        # Non-existent policy path should fail cleanly with a useful message
+        out_dir = str(tmp_path / "bad_policy")
+>       ret = run_demo(out_dir=out_dir, budget=10, policy_path="non_existent_policy.yaml")
+E       TypeError: run_demo() got an unexpected keyword argument 'policy_path'
+
+tests\test_w4_a2_trace_request.py:167: TypeError
+_________________ test_w4_d6_outcome_text_derived_from_state __________________
+
+tmp_path = WindowsPath('C:/Users/bhuva/AppData/Local/Temp/pytest-of-bhuva/pytest-72/test_w4_d6_outcome_text_derive0')
+capsys = <_pytest.capture.CaptureFixture object at 0x000001F841D60090>
+
+    @pytest.mark.xfail(strict=True, reason="W4 D6: demo output text is hardcoded instead of derived from emitted state")
+    def test_w4_d6_outcome_text_derived_from_state(tmp_path, capsys):
+        out_15 = str(tmp_path / "out_15")
+        ret = run_demo(out_dir=out_15, budget=15)
+        captured = capsys.readouterr()
+        assert ret == 0
+>       assert "Reduced from 15m to 5m" in captured.out
+E       assert 'Reduced from 15m to 5m' in "======================================================================\nADAPTIVE LEARNING ENGINE: END-TO-END DEMONSTR...en to 'C:\\Users\\bhuva\\AppData\\Local\\Temp\\pytest-of-bhuva\\pytest-72\\test_w4_d6_outcome_text_derive0\\out_15'.\n"
+E        +  where "======================================================================\nADAPTIVE LEARNING ENGINE: END-TO-END DEMONSTR...en to 'C:\\Users\\bhuva\\AppData\\Local\\Temp\\pytest-of-bhuva\\pytest-72\\test_w4_d6_outcome_text_derive0\\out_15'.\n" = CaptureResult(out="======================================================================\nADAPTIVE LEARNING ENGINE: E...\\Users\\bhuva\\AppData\\Local\\Temp\\pytest-of-bhuva\\pytest-72\\test_w4_d6_outcome_text_derive0\\out_15'.\n", err='').out
+
+tests\test_w4_a2_trace_request.py:186: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d6_demo_budgets_exit_by_status
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d6_multiple_targets_rejected
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d6_policy_path_handling - T...
+FAILED tests/test_w4_a2_trace_request.py::test_w4_d6_outcome_text_derived_from_state
+====================== 4 failed, 11 deselected in 2.56s =======================

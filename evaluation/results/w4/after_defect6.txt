@@ -1,0 +1,14 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\bhuva\Downloads\DAT11\.venv_w2\Scripts\python.exe
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collecting ... collected 18 items / 11 deselected / 7 selected
+
+tests/test_w4_a2_trace_request.py::test_w4_d6_demo_budgets_exit_by_status PASSED [ 14%]
+tests/test_w4_a2_trace_request.py::test_w4_d6_multiple_targets_rejected PASSED [ 28%]
+tests/test_w4_a2_trace_request.py::test_w4_d6_policy_path_handling PASSED [ 42%]
+tests/test_w4_a2_trace_request.py::test_w4_d6_outcome_text_derived_from_state PASSED [ 57%]
+tests/test_w4_a2_trace_request.py::test_w4_d6_plan_subcommand_budgets PASSED [ 71%]
+tests/test_w4_a2_trace_request.py::test_w4_d6_plan_subcommand_renamed_curriculum PASSED [ 85%]
+tests/test_w4_a2_trace_request.py::test_w4_d6_cli_plan_subprocess PASSED [100%]
+
+====================== 7 passed, 11 deselected in 6.36s =======================

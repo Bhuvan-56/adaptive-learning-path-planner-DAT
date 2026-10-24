@@ -113,6 +113,24 @@ This runs the complete workflow:
 - Simulates a missed day and subsequent budget reduction proving block infeasibility.
 - Writes all plan and trace JSON files, state transitions (`response_updates.json`), and provenance manifest (`manifest.json`) to `--out`.
 
+## Plan Subcommand
+
+Generate and trace a single plan request from data:
+
+```bash
+python -m src.cli plan --curriculum data/curricula/demo_curriculum.json --target D --budget 10 --deadline-days 3 --out evaluation/results/plan_run
+```
+
+Options:
+- `--curriculum <file>`: Path to curriculum DAG JSON definition (required).
+- `--target <id>`: Target concept node ID (required).
+- `--budget <int>`: Daily study budget in minutes (required).
+- `--deadline-days <int>`: Horizon in days (required).
+- `--policy <yaml>`: Optional path to BKT/classification policy YAML file.
+- `--states <json>`: Optional path to initial learner states JSON file.
+- `--out <dir>`: Output directory for `plan.json` and `trace.json` (required).
+
+
 
 ## Bayesian Knowledge Tracing (pyBKT) Integration
 
