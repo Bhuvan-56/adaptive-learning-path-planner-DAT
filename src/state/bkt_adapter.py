@@ -21,13 +21,17 @@ import math
 from typing import Dict, Any, Optional, Union, Tuple
 import yaml
 
-from src.state.policy import PolicyConfig, load_policy
+from src.state.policy import PolicyConfig, load_policy, OPTIONAL_POLICY_FIELDS, ALLOWED_POLICY_KEYS
 from src.state.learner_state import ConceptState
 
 
 DEFAULT_FITTED_CONFIG_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "config", "bkt_fitted.yaml")
 )
+
+ALLOWED_FITTED_METADATA_KEYS = {"dataset_type", "description", "skill_name"}
+REQUIRED_FITTED_PARAMS = {"p_S", "p_G", "p_T", "prior", "forget"}
+ALLOWED_FITTED_TOP_LEVEL = ALLOWED_FITTED_METADATA_KEYS | {"fitted_parameters"} | ALLOWED_POLICY_KEYS
 
 
 def load_fitted_bkt_params(config_path: Optional[str] = None) -> Dict[str, Any]:
@@ -41,33 +45,94 @@ def load_fitted_bkt_params(config_path: Optional[str] = None) -> Dict[str, Any]:
       - prior: Initial mastery probability
       - forget: Forget rate (strictly 0.0)
       - window_size, mastered_p, weak_p, sigma2_max, min_obs, kappa0
+      - skill_name
+      - defaulted_fields
     """
     path = config_path or DEFAULT_FITTED_CONFIG_PATH
     if not os.path.exists(path):
         raise FileNotFoundError(f"Fitted BKT configuration file not found at: {path}")
 
-    with open(path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+    except Exception as e:
+        raise ValueError(f"Malformed YAML in fitted BKT configuration file: {e}") from e
 
     if not isinstance(data, dict):
         raise ValueError(f"Fitted BKT configuration must be a mapping, got {type(data)}")
 
-    params_dict = data.get("fitted_parameters", data)
+    data_keys = set(data.keys())
+    unknown_top = sorted(data_keys - ALLOWED_FITTED_TOP_LEVEL)
+    if unknown_top:
+        raise ValueError(f"Unknown key(s) in configuration: {', '.join(unknown_top)}")
+
+    if "fitted_parameters" not in data:
+        raise ValueError("Missing required key(s) in configuration: fitted_parameters")
+
+    params_dict = data["fitted_parameters"]
+    if not isinstance(params_dict, dict):
+        raise ValueError(f"'fitted_parameters' must be a mapping, got {type(params_dict)}")
+
+    fitted_keys = set(params_dict.keys())
+    unknown_nested = sorted(fitted_keys - REQUIRED_FITTED_PARAMS)
+    missing_nested = sorted(REQUIRED_FITTED_PARAMS - fitted_keys)
+
+    errs = []
+    if missing_nested:
+        errs.append(f"Missing required key(s) in configuration: {', '.join(missing_nested)}")
+    if unknown_nested:
+        errs.append(f"Unknown key(s) in configuration: {', '.join(unknown_nested)}")
+    if errs:
+        raise ValueError(". ".join(errs))
+
+    forget_val = float(params_dict["forget"])
+    if forget_val != 0.0:
+        raise ValueError(
+            f"Standard BKT requires forget == 0.0 (got {forget_val}). "
+            "Non-zero forgetting is not supported by the online state engine."
+        )
+
+    defaulted_fields = []
+    window_size = data.get("window_size", 4)
+    if "window_size" not in data:
+        defaulted_fields.append("window_size")
+
+    mastered_p = data.get("mastered_p", OPTIONAL_POLICY_FIELDS["mastered_p"])
+    if "mastered_p" not in data:
+        defaulted_fields.append("mastered_p")
+
+    weak_p = data.get("weak_p", OPTIONAL_POLICY_FIELDS["weak_p"])
+    if "weak_p" not in data:
+        defaulted_fields.append("weak_p")
+
+    sigma2_max = data.get("sigma2_max", OPTIONAL_POLICY_FIELDS["sigma2_max"])
+    if "sigma2_max" not in data:
+        defaulted_fields.append("sigma2_max")
+
+    min_obs = data.get("min_obs", OPTIONAL_POLICY_FIELDS["min_obs"])
+    if "min_obs" not in data:
+        defaulted_fields.append("min_obs")
+
+    kappa0 = data.get("kappa0", OPTIONAL_POLICY_FIELDS["kappa0"])
+    if "kappa0" not in data:
+        defaulted_fields.append("kappa0")
 
     return {
         "p_S": float(params_dict["p_S"]),
         "p_G": float(params_dict["p_G"]),
         "p_T": float(params_dict["p_T"]),
-        "prior": float(params_dict.get("prior", 0.5)),
-        "forget": float(params_dict.get("forget", 0.0)),
-        "window_size": int(data.get("window_size", 4)),
-        "mastered_p": float(data.get("mastered_p", 0.85)),
-        "weak_p": float(data.get("weak_p", 0.40)),
-        "sigma2_max": float(data.get("sigma2_max", 0.05)),
-        "min_obs": int(data.get("min_obs", 3)),
-        "kappa0": float(data.get("kappa0", 2.0)),
+        "prior": float(params_dict["prior"]),
+        "forget": forget_val,
+        "window_size": int(window_size),
+        "mastered_p": float(mastered_p),
+        "weak_p": float(weak_p),
+        "sigma2_max": float(sigma2_max),
+        "min_obs": int(min_obs),
+        "kappa0": float(kappa0),
         "skill_name": data.get("skill_name", "default"),
+        "defaulted_fields": defaulted_fields,
     }
+
 
 
 class BKTOnlineAdapter:

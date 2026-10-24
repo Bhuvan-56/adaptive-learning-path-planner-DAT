@@ -1,0 +1,25 @@
+{
+  "nodes": [
+    {
+      "node_id": "A",
+      "concept_name": "Addition",
+      "baseline_duration": 10.0,
+      "exercises": ["synthetic_ex_a1"],
+      "base_difficulty": 0.20
+    },
+    {
+      "node_id": "B",
+      "concept_name": "Subtraction",
+      "baseline_duration": 15.0,
+      "exercises": ["synthetic_ex_b1"],
+      "base_difficulty": 0.35
+    }
+  ],
+  "edges": [
+    {
+      "source": "A",
+      "target": "B",
+      "importance": NaN
+    }
+  ]
+}
