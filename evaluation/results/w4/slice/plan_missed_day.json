@@ -1,0 +1,626 @@
+{
+  "assessment_candidates": [
+    "C"
+  ],
+  "budget": 10,
+  "completed_nodes": [
+    "A"
+  ],
+  "current_day": 2,
+  "days": [
+    {
+      "activities": [],
+      "conditional_activities": [],
+      "day": 1,
+      "minutes_remaining": 10,
+      "minutes_used": 0,
+      "missed": true
+    },
+    {
+      "activities": [
+        "B"
+      ],
+      "conditional_activities": [],
+      "day": 2,
+      "minutes_remaining": 5,
+      "minutes_used": 5
+    },
+    {
+      "activities": [
+        "C"
+      ],
+      "conditional_activities": [],
+      "day": 3,
+      "minutes_remaining": 0,
+      "minutes_used": 10
+    },
+    {
+      "activities": [
+        "D"
+      ],
+      "conditional_activities": [
+        "D"
+      ],
+      "day": 4,
+      "minutes_remaining": 0,
+      "minutes_used": 10
+    },
+    {
+      "activities": [
+        "A"
+      ],
+      "conditional_activities": [],
+      "day": 5,
+      "minutes_remaining": 5,
+      "minutes_used": 5
+    }
+  ],
+  "deadline_days": 5,
+  "difficulty_states": {},
+  "feasibility_explanation": {
+    "status": "FEASIBLE",
+    "total_capacity": 40,
+    "w_req": 25
+  },
+  "learner_states": {
+    "A": {
+      "A": 5.990925209024675,
+      "B": 0.009074790975325264,
+      "history": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "kappa": 6,
+      "n": 4,
+      "p": 0.9984875348374458,
+      "policy": {
+        "defaulted_fields": [
+          "mastered_p",
+          "weak_p",
+          "sigma2_max",
+          "min_obs",
+          "kappa0"
+        ],
+        "kappa0": 2,
+        "mastered_p": 0.85,
+        "min_obs": 3,
+        "p_G": 0.25,
+        "p_S": 0.1,
+        "p_T": 0.1,
+        "quorum": 3,
+        "sigma2_max": 0.05,
+        "weak_p": 0.4,
+        "window_size": 4
+      }
+    },
+    "B": {
+      "A": 2.7340126798204034,
+      "B": 0.2659873201795967,
+      "history": [
+        1
+      ],
+      "kappa": 3,
+      "n": 1,
+      "p": 0.9113375599401344,
+      "policy": {
+        "defaulted_fields": [
+          "mastered_p",
+          "weak_p",
+          "sigma2_max",
+          "min_obs",
+          "kappa0"
+        ],
+        "kappa0": 2,
+        "mastered_p": 0.85,
+        "min_obs": 3,
+        "p_G": 0.25,
+        "p_S": 0.1,
+        "p_T": 0.1,
+        "quorum": 3,
+        "sigma2_max": 0.05,
+        "weak_p": 0.4,
+        "window_size": 4
+      }
+    },
+    "C": {
+      "A": 1.4353321968989399,
+      "B": 0.5646678031010601,
+      "history": [],
+      "kappa": 2,
+      "n": 0,
+      "p": 0.7176660984494699,
+      "policy": null
+    },
+    "D": {
+      "A": 1,
+      "B": 1,
+      "history": [],
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5,
+      "policy": null
+    }
+  },
+  "policy": {
+    "defaulted_fields": [
+      "mastered_p",
+      "weak_p",
+      "sigma2_max",
+      "min_obs",
+      "kappa0"
+    ],
+    "kappa0": 2,
+    "mastered_p": 0.85,
+    "min_obs": 3,
+    "p_G": 0.25,
+    "p_S": 0.1,
+    "p_T": 0.1,
+    "quorum": 3,
+    "sigma2_max": 0.05,
+    "weak_p": 0.4,
+    "window_size": 4
+  },
+  "review_log": {
+    "records": {
+      "A": [
+        [
+          5,
+          true
+        ]
+      ]
+    }
+  },
+  "status": "FEASIBLE",
+  "target_node": "D",
+  "trace": [
+    {
+      "concept_state": {
+        "class": "Mastered",
+        "kappa": 6,
+        "n": 4,
+        "p": 0.9984875348374458,
+        "sigma2": 0.00021573965881232436
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {},
+        "remaining_budget": 0
+      },
+      "day": 1,
+      "decision": "FILTERED",
+      "node_id": "A",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_MASTERED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 3,
+        "n": 1,
+        "p": 0.9113375599401344,
+        "sigma2": 0.020200352945624077
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {
+          "A": true
+        },
+        "remaining_budget": 0
+      },
+      "day": 1,
+      "decision": "FILTERED",
+      "node_id": "B",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "BUDGET_EXCEEDED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.7176660984494699,
+        "sigma2": 0.06754048986192855
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {
+          "A": true
+        },
+        "remaining_budget": 0
+      },
+      "day": 1,
+      "decision": "FILTERED",
+      "node_id": "C",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "BUDGET_EXCEEDED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5,
+        "sigma2": 0.08333333333333333
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {
+          "B": false,
+          "C": false
+        },
+        "remaining_budget": 0
+      },
+      "day": 1,
+      "decision": "FILTERED",
+      "node_id": "D",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "PREREQUISITE_UNMET",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Mastered",
+        "kappa": 6,
+        "n": 4,
+        "p": 0.9984875348374458,
+        "sigma2": 0.00021573965881232436
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {},
+        "remaining_budget": 5
+      },
+      "day": 2,
+      "decision": "FILTERED",
+      "node_id": "A",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_MASTERED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 3,
+        "n": 1,
+        "p": 0.9113375599401344,
+        "sigma2": 0.020200352945624077
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "A": true
+        },
+        "remaining_budget": 10,
+        "revalidate_before_execution": false
+      },
+      "day": 2,
+      "decision": "SELECTED",
+      "node_id": "B",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "SELECTED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.7176660984494699,
+        "sigma2": 0.06754048986192855
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "A": true
+        },
+        "remaining_budget": 5,
+        "revalidate_before_execution": false
+      },
+      "day": 2,
+      "decision": "FILTERED",
+      "node_id": "C",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "BUDGET_EXCEEDED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5,
+        "sigma2": 0.08333333333333333
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "B": true,
+          "C": false
+        },
+        "remaining_budget": 5,
+        "revalidate_before_execution": false
+      },
+      "day": 2,
+      "decision": "FILTERED",
+      "node_id": "D",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Mastered",
+        "kappa": 6,
+        "n": 4,
+        "p": 0.9984875348374458,
+        "sigma2": 0.00021573965881232436
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {},
+        "remaining_budget": 0
+      },
+      "day": 3,
+      "decision": "FILTERED",
+      "node_id": "A",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_MASTERED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 3,
+        "n": 1,
+        "p": 0.9113375599401344,
+        "sigma2": 0.020200352945624077
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {
+          "A": true
+        },
+        "remaining_budget": 0
+      },
+      "day": 3,
+      "decision": "FILTERED",
+      "node_id": "B",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_SCHEDULED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.7176660984494699,
+        "sigma2": 0.06754048986192855
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "A": true
+        },
+        "remaining_budget": 10,
+        "revalidate_before_execution": false
+      },
+      "day": 3,
+      "decision": "SELECTED",
+      "node_id": "C",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "SELECTED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5,
+        "sigma2": 0.08333333333333333
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "B": true,
+          "C": true
+        },
+        "remaining_budget": 0,
+        "revalidate_before_execution": false
+      },
+      "day": 3,
+      "decision": "FILTERED",
+      "node_id": "D",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "BUDGET_EXCEEDED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Mastered",
+        "kappa": 6,
+        "n": 4,
+        "p": 0.9984875348374458,
+        "sigma2": 0.00021573965881232436
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {},
+        "remaining_budget": 0
+      },
+      "day": 4,
+      "decision": "FILTERED",
+      "node_id": "A",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "BUDGET_EXCEEDED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 3,
+        "n": 1,
+        "p": 0.9113375599401344,
+        "sigma2": 0.020200352945624077
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {
+          "A": true
+        },
+        "remaining_budget": 0
+      },
+      "day": 4,
+      "decision": "FILTERED",
+      "node_id": "B",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_SCHEDULED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.7176660984494699,
+        "sigma2": 0.06754048986192855
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {
+          "A": true
+        },
+        "remaining_budget": 0
+      },
+      "day": 4,
+      "decision": "FILTERED",
+      "node_id": "C",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_SCHEDULED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5,
+        "sigma2": 0.08333333333333333
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": true,
+        "prerequisites": {
+          "B": true,
+          "C": true
+        },
+        "remaining_budget": 10,
+        "revalidate_before_execution": true
+      },
+      "day": 4,
+      "decision": "SELECTED",
+      "node_id": "D",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "SELECTED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Mastered",
+        "kappa": 6,
+        "n": 4,
+        "p": 0.9984875348374458,
+        "sigma2": 0.00021573965881232436
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {},
+        "remaining_budget": 10
+      },
+      "day": 5,
+      "decision": "SELECTED",
+      "node_id": "A",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "REVIEW_DUE",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 3,
+        "n": 1,
+        "p": 0.9113375599401344,
+        "sigma2": 0.020200352945624077
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {
+          "A": true
+        },
+        "remaining_budget": 5
+      },
+      "day": 5,
+      "decision": "FILTERED",
+      "node_id": "B",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_SCHEDULED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.7176660984494699,
+        "sigma2": 0.06754048986192855
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {
+          "A": true
+        },
+        "remaining_budget": 5
+      },
+      "day": 5,
+      "decision": "FILTERED",
+      "node_id": "C",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_SCHEDULED",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5,
+        "sigma2": 0.08333333333333333
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {
+          "B": true,
+          "C": true
+        },
+        "remaining_budget": 5
+      },
+      "day": 5,
+      "decision": "FILTERED",
+      "node_id": "D",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_SCHEDULED",
+      "score_terms": {}
+    }
+  ]
+}

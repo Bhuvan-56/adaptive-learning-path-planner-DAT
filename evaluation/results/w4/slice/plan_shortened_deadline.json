@@ -1,0 +1,139 @@
+{
+  "completed_nodes": [
+    "A"
+  ],
+  "days": [
+    {
+      "activities": [],
+      "conditional_activities": [],
+      "day": 1,
+      "minutes_remaining": 10,
+      "minutes_used": 0,
+      "missed": true
+    }
+  ],
+  "difficulty_states": {},
+  "feasibility_explanation": {
+    "minimum_fix": "raise daily budget to at least 10 minutes",
+    "notes": "Adding extra days will not resolve an indivisible activity duration constraint.",
+    "offending_nodes": [
+      "C",
+      "D"
+    ],
+    "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
+    "status": "INFEASIBLE_PROVED"
+  },
+  "learner_states": {
+    "A": {
+      "A": 5.990925209024675,
+      "B": 0.009074790975325264,
+      "history": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "kappa": 6,
+      "n": 4,
+      "p": 0.9984875348374458,
+      "policy": {
+        "defaulted_fields": [
+          "mastered_p",
+          "weak_p",
+          "sigma2_max",
+          "min_obs",
+          "kappa0"
+        ],
+        "kappa0": 2,
+        "mastered_p": 0.85,
+        "min_obs": 3,
+        "p_G": 0.25,
+        "p_S": 0.1,
+        "p_T": 0.1,
+        "quorum": 3,
+        "sigma2_max": 0.05,
+        "weak_p": 0.4,
+        "window_size": 4
+      }
+    },
+    "B": {
+      "A": 2.7340126798204034,
+      "B": 0.2659873201795967,
+      "history": [
+        1
+      ],
+      "kappa": 3,
+      "n": 1,
+      "p": 0.9113375599401344,
+      "policy": {
+        "defaulted_fields": [
+          "mastered_p",
+          "weak_p",
+          "sigma2_max",
+          "min_obs",
+          "kappa0"
+        ],
+        "kappa0": 2,
+        "mastered_p": 0.85,
+        "min_obs": 3,
+        "p_G": 0.25,
+        "p_S": 0.1,
+        "p_T": 0.1,
+        "quorum": 3,
+        "sigma2_max": 0.05,
+        "weak_p": 0.4,
+        "window_size": 4
+      }
+    },
+    "C": {
+      "A": 1.4353321968989399,
+      "B": 0.5646678031010601,
+      "history": [],
+      "kappa": 2,
+      "n": 0,
+      "p": 0.7176660984494699,
+      "policy": null
+    },
+    "D": {
+      "A": 1,
+      "B": 1,
+      "history": [],
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5,
+      "policy": null
+    }
+  },
+  "policy": {
+    "defaulted_fields": [
+      "mastered_p",
+      "weak_p",
+      "sigma2_max",
+      "min_obs",
+      "kappa0"
+    ],
+    "kappa0": 2,
+    "mastered_p": 0.85,
+    "min_obs": 3,
+    "p_G": 0.25,
+    "p_S": 0.1,
+    "p_T": 0.1,
+    "quorum": 3,
+    "sigma2_max": 0.05,
+    "weak_p": 0.4,
+    "window_size": 4
+  },
+  "review_log": {
+    "records": {}
+  },
+  "status": "INFEASIBLE_PROVED",
+  "target_node": "D",
+  "trace": {
+    "constraints": {
+      "budget": 5,
+      "deadline_days": 2
+    },
+    "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
+    "status": "INFEASIBLE_PROVED"
+  }
+}

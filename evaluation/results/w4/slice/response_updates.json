@@ -1,0 +1,52 @@
+{
+  "assessment_failed": {
+    "after": {
+      "kappa": 6,
+      "n": 4,
+      "p": 0.13452634030871988,
+      "sigma2": 0.01663271486740891,
+      "state": "Weak"
+    },
+    "before": {
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794,
+      "state": "Uncertain"
+    },
+    "concept": "A",
+    "difficulty_after": 0.05,
+    "difficulty_before": 0.2,
+    "responses": [
+      0,
+      1,
+      0,
+      0
+    ]
+  },
+  "assessment_passed": {
+    "after": {
+      "kappa": 6,
+      "n": 4,
+      "p": 0.9984875348374458,
+      "sigma2": 0.00021573965881232436,
+      "state": "Mastered"
+    },
+    "before": {
+      "kappa": 2,
+      "n": 0,
+      "p": 0.7176660984494699,
+      "sigma2": 0.06754048986192855,
+      "state": "Uncertain"
+    },
+    "concept": "A",
+    "difficulty_after": 0.4,
+    "difficulty_before": 0.2,
+    "responses": [
+      1,
+      1,
+      1,
+      1
+    ]
+  }
+}

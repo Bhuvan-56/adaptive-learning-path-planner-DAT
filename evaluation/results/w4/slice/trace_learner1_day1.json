@@ -1,0 +1,277 @@
+[
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {},
+      "remaining_budget": 10,
+      "revalidate_before_execution": false
+    },
+    "day": 1,
+    "decision": "SELECTED",
+    "node_id": "A",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "SELECTED",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": true,
+      "prerequisites": {
+        "A": true
+      },
+      "remaining_budget": 5,
+      "revalidate_before_execution": true
+    },
+    "day": 1,
+    "decision": "SELECTED",
+    "node_id": "B",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "SELECTED",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "A": true
+      },
+      "remaining_budget": 0,
+      "revalidate_before_execution": false
+    },
+    "day": 1,
+    "decision": "FILTERED",
+    "node_id": "C",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "BUDGET_EXCEEDED",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5,
+      "sigma2": 0.08333333333333333
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "B": true,
+        "C": false
+      },
+      "remaining_budget": 0,
+      "revalidate_before_execution": false
+    },
+    "day": 1,
+    "decision": "FILTERED",
+    "node_id": "D",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "prerequisites": {},
+      "remaining_budget": 10
+    },
+    "day": 2,
+    "decision": "FILTERED",
+    "node_id": "A",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "ALREADY_SCHEDULED",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "prerequisites": {
+        "A": true
+      },
+      "remaining_budget": 10
+    },
+    "day": 2,
+    "decision": "FILTERED",
+    "node_id": "B",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "ALREADY_SCHEDULED",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": true,
+      "prerequisites": {
+        "A": true
+      },
+      "remaining_budget": 10,
+      "revalidate_before_execution": true
+    },
+    "day": 2,
+    "decision": "SELECTED",
+    "node_id": "C",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "SELECTED",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5,
+      "sigma2": 0.08333333333333333
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": false,
+      "prerequisites": {
+        "B": true,
+        "C": true
+      },
+      "remaining_budget": 0,
+      "revalidate_before_execution": false
+    },
+    "day": 2,
+    "decision": "FILTERED",
+    "node_id": "D",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "BUDGET_EXCEEDED",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "prerequisites": {},
+      "remaining_budget": 10
+    },
+    "day": 3,
+    "decision": "FILTERED",
+    "node_id": "A",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "ALREADY_SCHEDULED",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "prerequisites": {
+        "A": true
+      },
+      "remaining_budget": 10
+    },
+    "day": 3,
+    "decision": "FILTERED",
+    "node_id": "B",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "ALREADY_SCHEDULED",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "sigma2": 0.0826135405614794
+    },
+    "constraints": {
+      "budget": 10,
+      "prerequisites": {
+        "A": true
+      },
+      "remaining_budget": 10
+    },
+    "day": 3,
+    "decision": "FILTERED",
+    "node_id": "C",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "ALREADY_SCHEDULED",
+    "score_terms": {}
+  },
+  {
+    "concept_state": {
+      "class": "Uncertain",
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5,
+      "sigma2": 0.08333333333333333
+    },
+    "constraints": {
+      "budget": 10,
+      "conditional": true,
+      "prerequisites": {
+        "B": true,
+        "C": true
+      },
+      "remaining_budget": 10,
+      "revalidate_before_execution": true
+    },
+    "day": 3,
+    "decision": "SELECTED",
+    "node_id": "D",
+    "policy_version": "static_baseline_v0",
+    "reason_code": "SELECTED",
+    "score_terms": {}
+  }
+]

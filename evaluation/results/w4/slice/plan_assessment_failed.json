@@ -1,0 +1,440 @@
+{
+  "assessment_candidates": [
+    "B",
+    "C"
+  ],
+  "budget": 10,
+  "completed_nodes": [],
+  "current_day": 1,
+  "days": [
+    {
+      "activities": [
+        "A"
+      ],
+      "conditional_activities": [],
+      "day": 1,
+      "minutes_remaining": 5,
+      "minutes_used": 5
+    },
+    {
+      "activities": [],
+      "conditional_activities": [],
+      "day": 2,
+      "minutes_remaining": 10,
+      "minutes_used": 0
+    },
+    {
+      "activities": [],
+      "conditional_activities": [],
+      "day": 3,
+      "minutes_remaining": 10,
+      "minutes_used": 0
+    }
+  ],
+  "deadline_days": 3,
+  "difficulty_states": {
+    "A": {
+      "consecutive_successes": 0,
+      "difficulty": 0.05
+    }
+  },
+  "feasibility_explanation": {
+    "reason_code": "SCHEDULING_CONSTRAINTS_UNMET",
+    "status": "HEURISTIC_NO_PLAN",
+    "total_capacity": 30,
+    "w_req": 30
+  },
+  "learner_states": {
+    "A": {
+      "A": 0.8071580418523192,
+      "B": 5.192841958147681,
+      "history": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "kappa": 6,
+      "n": 4,
+      "p": 0.13452634030871988,
+      "policy": {
+        "defaulted_fields": [
+          "mastered_p",
+          "weak_p",
+          "sigma2_max",
+          "min_obs",
+          "kappa0"
+        ],
+        "kappa0": 2,
+        "mastered_p": 0.85,
+        "min_obs": 3,
+        "p_G": 0.25,
+        "p_S": 0.1,
+        "p_T": 0.1,
+        "quorum": 3,
+        "sigma2_max": 0.05,
+        "weak_p": 0.4,
+        "window_size": 4
+      }
+    },
+    "B": {
+      "A": 1.0929382228270328,
+      "B": 0.9070617771729672,
+      "history": [],
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "policy": null
+    },
+    "C": {
+      "A": 1.0929382228270328,
+      "B": 0.9070617771729672,
+      "history": [],
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5464691114135164,
+      "policy": null
+    },
+    "D": {
+      "A": 1,
+      "B": 1,
+      "history": [],
+      "kappa": 2,
+      "n": 0,
+      "p": 0.5,
+      "policy": null
+    }
+  },
+  "policy": {
+    "defaulted_fields": [
+      "mastered_p",
+      "weak_p",
+      "sigma2_max",
+      "min_obs",
+      "kappa0"
+    ],
+    "kappa0": 2,
+    "mastered_p": 0.85,
+    "min_obs": 3,
+    "p_G": 0.25,
+    "p_S": 0.1,
+    "p_T": 0.1,
+    "quorum": 3,
+    "sigma2_max": 0.05,
+    "weak_p": 0.4,
+    "window_size": 4
+  },
+  "review_log": {
+    "records": {
+      "A": [
+        [
+          1,
+          false
+        ],
+        [
+          1,
+          true
+        ],
+        [
+          1,
+          false
+        ],
+        [
+          1,
+          false
+        ]
+      ]
+    }
+  },
+  "status": "HEURISTIC_NO_PLAN",
+  "target_node": "D",
+  "trace": [
+    {
+      "concept_state": {
+        "class": "Weak",
+        "kappa": 6,
+        "n": 4,
+        "p": 0.13452634030871988,
+        "sigma2": 0.01663271486740891
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {},
+        "remaining_budget": 10,
+        "revalidate_before_execution": false
+      },
+      "day": 1,
+      "decision": "SELECTED",
+      "node_id": "A",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "SELECTED",
+      "score_terms": {
+        "exercise_difficulty": 0.05
+      }
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5464691114135164,
+        "sigma2": 0.0826135405614794
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "A": false
+        },
+        "remaining_budget": 5,
+        "revalidate_before_execution": false
+      },
+      "day": 1,
+      "decision": "FILTERED",
+      "node_id": "B",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "PREREQUISITE_UNMET",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5464691114135164,
+        "sigma2": 0.0826135405614794
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "A": false
+        },
+        "remaining_budget": 5,
+        "revalidate_before_execution": false
+      },
+      "day": 1,
+      "decision": "FILTERED",
+      "node_id": "C",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "PREREQUISITE_UNMET",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5,
+        "sigma2": 0.08333333333333333
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "B": false,
+          "C": false
+        },
+        "remaining_budget": 5,
+        "revalidate_before_execution": false
+      },
+      "day": 1,
+      "decision": "FILTERED",
+      "node_id": "D",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Weak",
+        "kappa": 6,
+        "n": 4,
+        "p": 0.13452634030871988,
+        "sigma2": 0.01663271486740891
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {},
+        "remaining_budget": 10
+      },
+      "day": 2,
+      "decision": "FILTERED",
+      "node_id": "A",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_SCHEDULED",
+      "score_terms": {
+        "exercise_difficulty": 0.05
+      }
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5464691114135164,
+        "sigma2": 0.0826135405614794
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "A": false
+        },
+        "remaining_budget": 10,
+        "revalidate_before_execution": false
+      },
+      "day": 2,
+      "decision": "FILTERED",
+      "node_id": "B",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "PREREQUISITE_UNMET",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5464691114135164,
+        "sigma2": 0.0826135405614794
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "A": false
+        },
+        "remaining_budget": 10,
+        "revalidate_before_execution": false
+      },
+      "day": 2,
+      "decision": "FILTERED",
+      "node_id": "C",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "PREREQUISITE_UNMET",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5,
+        "sigma2": 0.08333333333333333
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "B": false,
+          "C": false
+        },
+        "remaining_budget": 10,
+        "revalidate_before_execution": false
+      },
+      "day": 2,
+      "decision": "FILTERED",
+      "node_id": "D",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Weak",
+        "kappa": 6,
+        "n": 4,
+        "p": 0.13452634030871988,
+        "sigma2": 0.01663271486740891
+      },
+      "constraints": {
+        "budget": 10,
+        "prerequisites": {},
+        "remaining_budget": 10
+      },
+      "day": 3,
+      "decision": "FILTERED",
+      "node_id": "A",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "ALREADY_SCHEDULED",
+      "score_terms": {
+        "exercise_difficulty": 0.05
+      }
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5464691114135164,
+        "sigma2": 0.0826135405614794
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "A": false
+        },
+        "remaining_budget": 10,
+        "revalidate_before_execution": false
+      },
+      "day": 3,
+      "decision": "FILTERED",
+      "node_id": "B",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "PREREQUISITE_UNMET",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5464691114135164,
+        "sigma2": 0.0826135405614794
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "A": false
+        },
+        "remaining_budget": 10,
+        "revalidate_before_execution": false
+      },
+      "day": 3,
+      "decision": "FILTERED",
+      "node_id": "C",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "PREREQUISITE_UNMET",
+      "score_terms": {}
+    },
+    {
+      "concept_state": {
+        "class": "Uncertain",
+        "kappa": 2,
+        "n": 0,
+        "p": 0.5,
+        "sigma2": 0.08333333333333333
+      },
+      "constraints": {
+        "budget": 10,
+        "conditional": false,
+        "prerequisites": {
+          "B": false,
+          "C": false
+        },
+        "remaining_budget": 10,
+        "revalidate_before_execution": false
+      },
+      "day": 3,
+      "decision": "FILTERED",
+      "node_id": "D",
+      "policy_version": "static_baseline_v0",
+      "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+      "score_terms": {}
+    }
+  ]
+}
