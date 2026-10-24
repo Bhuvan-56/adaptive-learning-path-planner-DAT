@@ -1,0 +1,90 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 11 items / 5 deselected / 6 selected
+
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_latent_keys_equal_concept_ids FAILED [ 16%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_profile_expansion_to_concept_priors FAILED [ 33%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_unknown_group_raises FAILED [ 50%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_concept_with_no_group_raises FAILED [ 66%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_unexpandable_profile_4_raises FAILED [ 83%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_evaluator_view_boundary_preserved PASSED [100%]
+
+================================== FAILURES ===================================
+__________________ test_w4_d8_latent_keys_equal_concept_ids ___________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D8: SimulatedLearner latent keys are profile group names instead of concept IDs")
+    def test_w4_d8_latent_keys_equal_concept_ids():
+        from src.simulation.simulator import SimulatedLearner
+        for pid in ["profile_1", "profile_2", "profile_3"]:
+            learner = SimulatedLearner(profile_id=pid)
+>           assert set(learner._latent_states.keys()) == {"A", "B", "C", "D"}, (
+                f"Latent keys for {pid} were {list(learner._latent_states.keys())}, expected ['A', 'B', 'C', 'D']"
+            )
+E           AssertionError: Latent keys for profile_1 were ['default'], expected ['A', 'B', 'C', 'D']
+E           assert {'default'} == {'A', 'B', 'C', 'D'}
+E             Extra items in the left set:
+E             'default'
+E             Extra items in the right set:
+E             'B'
+E             'C'
+E             'A'
+E             'D'...
+E             
+E             ...Full output truncated (3 lines hidden), use '-vv' to show
+
+tests\test_w4_b2_provenance_profiles.py:147: AssertionError
+_______________ test_w4_d8_profile_expansion_to_concept_priors ________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D8: profile expansion to concept priors not implemented")
+    def test_w4_d8_profile_expansion_to_concept_priors():
+        import src.simulation.simulator as sim
+        if not hasattr(sim, "expand_profile_to_priors"):
+>           pytest.fail("expand_profile_to_priors not found in src.simulation.simulator")
+E           Failed: expand_profile_to_priors not found in src.simulation.simulator
+
+tests\test_w4_b2_provenance_profiles.py:157: Failed
+_______________________ test_w4_d8_unknown_group_raises _______________________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-17/test_w4_d8_unknown_group_raise0')
+
+    @pytest.mark.xfail(strict=True, reason="W4 D8: unknown group in mapping does not raise ValueError")
+    def test_w4_d8_unknown_group_raises(tmp_path):
+        import src.simulation.simulator as sim
+        if not hasattr(sim, "expand_profile_to_priors"):
+>           pytest.fail("expand_profile_to_priors not found in src.simulation.simulator")
+E           Failed: expand_profile_to_priors not found in src.simulation.simulator
+
+tests\test_w4_b2_provenance_profiles.py:186: Failed
+___________________ test_w4_d8_concept_with_no_group_raises ___________________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-17/test_w4_d8_concept_with_no_gro0')
+
+    @pytest.mark.xfail(strict=True, reason="W4 D8: concept with no group does not raise ValueError")
+    def test_w4_d8_concept_with_no_group_raises(tmp_path):
+        import src.simulation.simulator as sim
+        if not hasattr(sim, "expand_profile_to_priors"):
+>           pytest.fail("expand_profile_to_priors not found in src.simulation.simulator")
+E           Failed: expand_profile_to_priors not found in src.simulation.simulator
+
+tests\test_w4_b2_provenance_profiles.py:202: Failed
+__________________ test_w4_d8_unexpandable_profile_4_raises ___________________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D8: unexpandable profile_4 does not raise ValueError")
+    def test_w4_d8_unexpandable_profile_4_raises():
+        from src.simulation.simulator import SimulatedLearner
+        # profile_4 uses groups 'advanced' and 'foundational' and references 'concept_b1', 'concept_b2'
+        # none of which exist in demo_curriculum / demo_curriculum.groups.yaml
+        with pytest.raises(ValueError, match="cannot expand|unknown group|foundational_uncertain_nodes|missing"):
+>           SimulatedLearner(profile_id="profile_4", groups_path=GROUPS_PATH)
+E           TypeError: SimulatedLearner.__init__() got an unexpected keyword argument 'groups_path'
+
+tests\test_w4_b2_provenance_profiles.py:220: TypeError
+=========================== short test summary info ===========================
+FAILED tests/test_w4_b2_provenance_profiles.py::test_w4_d8_latent_keys_equal_concept_ids
+FAILED tests/test_w4_b2_provenance_profiles.py::test_w4_d8_profile_expansion_to_concept_priors
+FAILED tests/test_w4_b2_provenance_profiles.py::test_w4_d8_unknown_group_raises
+FAILED tests/test_w4_b2_provenance_profiles.py::test_w4_d8_concept_with_no_group_raises
+FAILED tests/test_w4_b2_provenance_profiles.py::test_w4_d8_unexpandable_profile_4_raises
+================== 5 failed, 1 passed, 5 deselected in 0.81s ==================

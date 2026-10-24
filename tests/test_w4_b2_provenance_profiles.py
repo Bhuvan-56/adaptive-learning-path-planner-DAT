@@ -1,3 +1,4 @@
+import glob
 import hashlib
 import json
 import os
@@ -129,3 +130,112 @@ def test_w4_d7_dirty_tree_recorded_as_dirty(tmp_path):
         dirty=True,
     )
     assert manifest["dirty"] is True
+
+
+# =============================================================================
+# DEFECT 8 REPRODUCTION TESTS
+# =============================================================================
+
+GROUPS_PATH = os.path.abspath("data/curricula/demo_curriculum.groups.yaml")
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D8: SimulatedLearner latent keys are profile group names instead of concept IDs")
+def test_w4_d8_latent_keys_equal_concept_ids():
+    from src.simulation.simulator import SimulatedLearner
+    for pid in ["profile_1", "profile_2", "profile_3"]:
+        learner = SimulatedLearner(profile_id=pid)
+        assert set(learner._latent_states.keys()) == {"A", "B", "C", "D"}, (
+            f"Latent keys for {pid} were {list(learner._latent_states.keys())}, expected ['A', 'B', 'C', 'D']"
+        )
+        assert set(learner.evaluator_view().latent_masteries.keys()) == {"A", "B", "C", "D"}
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D8: profile expansion to concept priors not implemented")
+def test_w4_d8_profile_expansion_to_concept_priors():
+    import src.simulation.simulator as sim
+    if not hasattr(sim, "expand_profile_to_priors"):
+        pytest.fail("expand_profile_to_priors not found in src.simulation.simulator")
+    
+    expand_fn = getattr(sim, "expand_profile_to_priors")
+    
+    # Profile 1: default -> (0.01, 2.0, 0)
+    p1_priors = expand_fn("profile_1", groups_path=GROUPS_PATH)
+    assert set(p1_priors.keys()) == {"A", "B", "C", "D"}
+    for cid in ["A", "B", "C", "D"]:
+        assert p1_priors[cid] == {"p": 0.01, "kappa": 2.0, "n": 0}
+
+    # Profile 2: prerequisites -> (0.90, 10.0, 8), downstream -> (0.30, 2.0, 0)
+    p2_priors = expand_fn("profile_2", groups_path=GROUPS_PATH)
+    assert set(p2_priors.keys()) == {"A", "B", "C", "D"}
+    assert p2_priors["A"] == {"p": 0.90, "kappa": 10.0, "n": 8}
+    assert p2_priors["B"] == {"p": 0.90, "kappa": 10.0, "n": 8}
+    assert p2_priors["C"] == {"p": 0.30, "kappa": 2.0, "n": 0}
+    assert p2_priors["D"] == {"p": 0.30, "kappa": 2.0, "n": 0}
+
+    # Profile 3: default -> (0.92, 8.0, 6)
+    p3_priors = expand_fn("profile_3", groups_path=GROUPS_PATH)
+    assert set(p3_priors.keys()) == {"A", "B", "C", "D"}
+    for cid in ["A", "B", "C", "D"]:
+        assert p3_priors[cid] == {"p": 0.92, "kappa": 8.0, "n": 6}
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D8: unknown group in mapping does not raise ValueError")
+def test_w4_d8_unknown_group_raises(tmp_path):
+    import src.simulation.simulator as sim
+    if not hasattr(sim, "expand_profile_to_priors"):
+        pytest.fail("expand_profile_to_priors not found in src.simulation.simulator")
+    
+    expand_fn = getattr(sim, "expand_profile_to_priors")
+    # Mapping references a group 'quantum_math' which does not exist in profile_2
+    invalid_groups_file = tmp_path / "invalid_group.yaml"
+    with open(invalid_groups_file, "w", encoding="utf-8") as f:
+        f.write("groups:\n  A: prerequisites\n  B: quantum_math\n  C: downstream\n  D: downstream\n")
+    
+    with pytest.raises(ValueError, match="quantum_math|unknown group|invalid"):
+        expand_fn("profile_2", groups_path=str(invalid_groups_file))
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D8: concept with no group does not raise ValueError")
+def test_w4_d8_concept_with_no_group_raises(tmp_path):
+    import src.simulation.simulator as sim
+    if not hasattr(sim, "expand_profile_to_priors"):
+        pytest.fail("expand_profile_to_priors not found in src.simulation.simulator")
+    
+    expand_fn = getattr(sim, "expand_profile_to_priors")
+    # Concept B has no group or is missing from mapping
+    missing_group_file = tmp_path / "missing_group.yaml"
+    with open(missing_group_file, "w", encoding="utf-8") as f:
+        f.write("groups:\n  A: prerequisites\n  C: downstream\n  D: downstream\n")
+    
+    with pytest.raises(ValueError, match="no group|missing"):
+        expand_fn("profile_2", groups_path=str(missing_group_file), curriculum_concepts=["A", "B", "C", "D"])
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D8: unexpandable profile_4 does not raise ValueError")
+def test_w4_d8_unexpandable_profile_4_raises():
+    from src.simulation.simulator import SimulatedLearner
+    # profile_4 uses groups 'advanced' and 'foundational' and references 'concept_b1', 'concept_b2'
+    # none of which exist in demo_curriculum / demo_curriculum.groups.yaml
+    with pytest.raises(ValueError, match="cannot expand|unknown group|foundational_uncertain_nodes|missing"):
+        SimulatedLearner(profile_id="profile_4", groups_path=GROUPS_PATH)
+
+
+def test_w4_d8_evaluator_view_boundary_preserved():
+    """EvaluatorView must never be imported in src/planning or src/state."""
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    checked_dirs = [
+        os.path.join(repo_root, "src", "planning"),
+        os.path.join(repo_root, "src", "state"),
+    ]
+    forbidden_patterns = ["EvaluatorView", "evaluator_view", "from src.simulation", "import EvaluatorView"]
+    violations = []
+    for cdir in checked_dirs:
+        for py_file in glob.glob(os.path.join(cdir, "**", "*.py"), recursive=True):
+            with open(py_file, "r", encoding="utf-8") as f:
+                content = f.read()
+                for pattern in forbidden_patterns:
+                    if pattern in content:
+                        rel_path = os.path.relpath(py_file, repo_root)
+                        violations.append(f"{rel_path} references '{pattern}'")
+    assert len(violations) == 0, f"Architectural boundary violated: {violations}"
+
