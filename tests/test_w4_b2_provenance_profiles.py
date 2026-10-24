@@ -139,7 +139,6 @@ def test_w4_d7_dirty_tree_recorded_as_dirty(tmp_path):
 GROUPS_PATH = os.path.abspath("data/curricula/demo_curriculum.groups.yaml")
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D8: SimulatedLearner latent keys are profile group names instead of concept IDs")
 def test_w4_d8_latent_keys_equal_concept_ids():
     from src.simulation.simulator import SimulatedLearner
     for pid in ["profile_1", "profile_2", "profile_3"]:
@@ -150,7 +149,6 @@ def test_w4_d8_latent_keys_equal_concept_ids():
         assert set(learner.evaluator_view().latent_masteries.keys()) == {"A", "B", "C", "D"}
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D8: profile expansion to concept priors not implemented")
 def test_w4_d8_profile_expansion_to_concept_priors():
     import src.simulation.simulator as sim
     if not hasattr(sim, "expand_profile_to_priors"):
@@ -179,7 +177,6 @@ def test_w4_d8_profile_expansion_to_concept_priors():
         assert p3_priors[cid] == {"p": 0.92, "kappa": 8.0, "n": 6}
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D8: unknown group in mapping does not raise ValueError")
 def test_w4_d8_unknown_group_raises(tmp_path):
     import src.simulation.simulator as sim
     if not hasattr(sim, "expand_profile_to_priors"):
@@ -195,7 +192,6 @@ def test_w4_d8_unknown_group_raises(tmp_path):
         expand_fn("profile_2", groups_path=str(invalid_groups_file))
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D8: concept with no group does not raise ValueError")
 def test_w4_d8_concept_with_no_group_raises(tmp_path):
     import src.simulation.simulator as sim
     if not hasattr(sim, "expand_profile_to_priors"):
@@ -211,13 +207,13 @@ def test_w4_d8_concept_with_no_group_raises(tmp_path):
         expand_fn("profile_2", groups_path=str(missing_group_file), curriculum_concepts=["A", "B", "C", "D"])
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D8: unexpandable profile_4 does not raise ValueError")
 def test_w4_d8_unexpandable_profile_4_raises():
     from src.simulation.simulator import SimulatedLearner
     # profile_4 uses groups 'advanced' and 'foundational' and references 'concept_b1', 'concept_b2'
     # none of which exist in demo_curriculum / demo_curriculum.groups.yaml
     with pytest.raises(ValueError, match="cannot expand|unknown group|foundational_uncertain_nodes|missing"):
         SimulatedLearner(profile_id="profile_4", groups_path=GROUPS_PATH)
+
 
 
 def test_w4_d8_evaluator_view_boundary_preserved():

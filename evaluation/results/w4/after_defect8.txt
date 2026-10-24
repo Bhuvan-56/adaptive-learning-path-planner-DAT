@@ -1,0 +1,14 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 11 items / 5 deselected / 6 selected
+
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_latent_keys_equal_concept_ids PASSED [ 16%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_profile_expansion_to_concept_priors PASSED [ 33%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_unknown_group_raises PASSED [ 50%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_concept_with_no_group_raises PASSED [ 66%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_unexpandable_profile_4_raises PASSED [ 83%]
+tests/test_w4_b2_provenance_profiles.py::test_w4_d8_evaluator_view_boundary_preserved PASSED [100%]
+
+======================= 6 passed, 5 deselected in 0.64s =======================
