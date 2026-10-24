@@ -1,0 +1,221 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collected 5 items
+
+tests\test_w4_b2_provenance_profiles.py FFF..                            [100%]
+
+================================== FAILURES ===================================
+_______________ test_w4_d7_changing_node_duration_changes_hash ________________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-10/test_w4_d7_changing_node_durat0')
+
+    @pytest.mark.xfail(strict=True, reason="W4 D7: editing node duration leaves config_hash unchanged")
+    def test_w4_d7_changing_node_duration_changes_hash(tmp_path):
+        # Setup two curriculum files with different node durations
+        with open(DEMO_CURRICULUM_PATH, "r", encoding="utf-8") as f:
+            curr_data = json.load(f)
+    
+        curr_orig = tmp_path / "curr_orig.json"
+        curr_orig.write_text(json.dumps(curr_data, indent=2), encoding="utf-8")
+    
+        # Mutate concept C baseline_duration from 10 to 9
+        curr_mutated_data = json.loads(json.dumps(curr_data))
+        for node in curr_mutated_data["nodes"]:
+            if node["node_id"] == "C":
+                node["baseline_duration"] = 9
+    
+        curr_mutated = tmp_path / "curr_mutated.json"
+        curr_mutated.write_text(json.dumps(curr_mutated_data, indent=2), encoding="utf-8")
+    
+        # Assert curriculum bytes differ before comparing hashes
+        assert curr_orig.read_bytes() != curr_mutated.read_bytes()
+    
+        out1 = str(tmp_path / "out1")
+        out2 = str(tmp_path / "out2")
+    
+        ret1 = run_demo(out_dir=out1, seed=20261012, budget=10, curriculum_path=str(curr_orig))
+        ret2 = run_demo(out_dir=out2, seed=20261012, budget=10, curriculum_path=str(curr_mutated))
+        assert ret1 == 0
+        assert ret2 == 0
+    
+        with open(os.path.join(out1, "manifest.json"), "r", encoding="utf-8") as f:
+            m1 = json.load(f)
+        with open(os.path.join(out2, "manifest.json"), "r", encoding="utf-8") as f:
+            m2 = json.load(f)
+    
+>       assert m1["config_hash"] != m2["config_hash"], (
+            f"Editing node duration left config_hash unchanged: {m1['config_hash']}"
+        )
+E       AssertionError: Editing node duration left config_hash unchanged: 6d44dca9483a5b3956a99bd151db80cf3d12cb9a9288751779703773a7b0a916
+E       assert '6d44dca9483a5b3956a99bd151db80cf3d12cb9a9288751779703773a7b0a916' != '6d44dca9483a5b3956a99bd151db80cf3d12cb9a9288751779703773a7b0a916'
+
+tests\test_w4_b2_provenance_profiles.py:59: AssertionError
+---------------------------- Captured stdout call -----------------------------
+======================================================================
+ADAPTIVE LEARNING ENGINE: END-TO-END DEMONSTRATION SUMMARY
+======================================================================
+Curriculum: C:\Users\5520\AppData\Local\Temp\pytest-of-5520\pytest-10\test_w4_d7_changing_node_durat0\curr_orig.json (Target: D, Horizon: 3 days, Daily Budget: 10 min)
+Seed: 20261012 | Config Hash: 6d44dca9483a5b39... | Git SHA: b85f934 (dirty)
+
+[1] Learner Profiles & Day 1 Plan Divergence:
+  * Novice Learner (Budget 10m):
+    - Scheduled Activities Day 1: ['A', 'B']
+    - Conditional Activities Day 1: ['B']
+    - Gating Rationale: Foundational concept 'A' is unprobed (Uncertain).
+      Dependent concept 'D' is FILTERED with reason UNCERTAIN_NEEDS_ASSESSMENT.
+  * Intermediate Learner (Budget 10m):
+    - Scheduled Activities Day 1: ['C']
+    - Gating Rationale: Prerequisites 'A' and 'B' are ALREADY_MASTERED and filtered.
+      Unlocked downstream concept 'C' (10 min) is SELECTED for Day 1.
+
+[2] Dynamic Assessment & Replanning Scenarios (Concept 'A'):
+  * Scenario A (Assessment Passed - Unblocked):
+    - Response Sequence: [1, 1, 1, 1] -> p: 0.50 -> 0.9962 (Mastered)
+    - Outcome: Prerequisite 'A' becomes evidence-Mastered.
+      Dependent concept 'B' becomes unconditionally admissible and is SELECTED on Day 1.
+  * Scenario B (Assessment Failed - Stays Blocked):
+    - Response Sequence: [0, 0, 0, 0] -> p: 0.50 -> 0.1157 (Weak)
+    - Outcome: Concept 'A' classifies as Weak.
+      Dependent concepts 'B' and 'D' remain FILTERED with reason PREREQUISITE_UNMET.
+      Planner status resolves to HEURISTIC_NO_PLAN (target unreachable within horizon).
+
+[3] Missed Day & Budget Infeasibility Handling:
+  * Missed Day: Day 1 recorded as missed (minutes_used=0). Completed nodes {'A', 'B'} preserved.
+  * Budget Reduction: Reduced from 10m to 5m/day.
+    - Planner Status: INFEASIBLE_PROVED
+    - Reason Code: InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+    - Proved Infeasibility: Adding extra days will not resolve an indivisible activity duration constraint.
+    - Actionable Minimum Fix: raise daily budget to at least 10 minutes
+
+[4] Latent Cognitive State Invariant Verification (EvaluatorView):
+  * True Latent Mastery (Novice):       {'A': False, 'B': False, 'C': False, 'D': False}
+  * True Latent Mastery (Intermediate): {'A': True, 'B': True, 'C': False, 'D': False}
+  * Invariant: Latent states remained strictly inaccessible to planning & state code.
+======================================================================
+SUCCESS: All 12 plan and trace artifacts successfully written to 'C:\Users\5520\AppData\Local\Temp\pytest-of-5520\pytest-10\test_w4_d7_changing_node_durat0\out1'.
+======================================================================
+ADAPTIVE LEARNING ENGINE: END-TO-END DEMONSTRATION SUMMARY
+======================================================================
+Curriculum: C:\Users\5520\AppData\Local\Temp\pytest-of-5520\pytest-10\test_w4_d7_changing_node_durat0\curr_mutated.json (Target: D, Horizon: 3 days, Daily Budget: 10 min)
+Seed: 20261012 | Config Hash: 6d44dca9483a5b39... | Git SHA: b85f934 (dirty)
+
+[1] Learner Profiles & Day 1 Plan Divergence:
+  * Novice Learner (Budget 10m):
+    - Scheduled Activities Day 1: ['A', 'B']
+    - Conditional Activities Day 1: ['B']
+    - Gating Rationale: Foundational concept 'A' is unprobed (Uncertain).
+      Dependent concept 'D' is FILTERED with reason UNCERTAIN_NEEDS_ASSESSMENT.
+  * Intermediate Learner (Budget 10m):
+    - Scheduled Activities Day 1: ['C']
+    - Gating Rationale: Prerequisites 'A' and 'B' are ALREADY_MASTERED and filtered.
+      Unlocked downstream concept 'C' (10 min) is SELECTED for Day 1.
+
+[2] Dynamic Assessment & Replanning Scenarios (Concept 'A'):
+  * Scenario A (Assessment Passed - Unblocked):
+    - Response Sequence: [1, 1, 1, 1] -> p: 0.50 -> 0.9962 (Mastered)
+    - Outcome: Prerequisite 'A' becomes evidence-Mastered.
+      Dependent concept 'B' becomes unconditionally admissible and is SELECTED on Day 1.
+  * Scenario B (Assessment Failed - Stays Blocked):
+    - Response Sequence: [0, 0, 0, 0] -> p: 0.50 -> 0.1157 (Weak)
+    - Outcome: Concept 'A' classifies as Weak.
+      Dependent concepts 'B' and 'D' remain FILTERED with reason PREREQUISITE_UNMET.
+      Planner status resolves to HEURISTIC_NO_PLAN (target unreachable within horizon).
+
+[3] Missed Day & Budget Infeasibility Handling:
+  * Missed Day: Day 1 recorded as missed (minutes_used=0). Completed nodes {'A', 'B'} preserved.
+  * Budget Reduction: Reduced from 10m to 5m/day.
+    - Planner Status: INFEASIBLE_PROVED
+    - Reason Code: InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+    - Proved Infeasibility: Adding extra days will not resolve an indivisible activity duration constraint.
+    - Actionable Minimum Fix: raise daily budget to at least 10 minutes
+
+[4] Latent Cognitive State Invariant Verification (EvaluatorView):
+  * True Latent Mastery (Novice):       {'A': False, 'B': False, 'C': False, 'D': False}
+  * True Latent Mastery (Intermediate): {'A': True, 'B': True, 'C': False, 'D': False}
+  * Invariant: Latent states remained strictly inaccessible to planning & state code.
+======================================================================
+SUCCESS: All 12 plan and trace artifacts successfully written to 'C:\Users\5520\AppData\Local\Temp\pytest-of-5520\pytest-10\test_w4_d7_changing_node_durat0\out2'.
+___________ test_w4_d7_manifest_records_curriculum_path_and_hashes ____________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-10/test_w4_d7_manifest_records_cu0')
+
+    @pytest.mark.xfail(strict=True, reason="W4 D7: manifest lacks actual curriculum_path, input hashes, and output checksums")
+    def test_w4_d7_manifest_records_curriculum_path_and_hashes(tmp_path):
+        custom_curr = tmp_path / "custom_demo.json"
+        shutil.copyfile(DEMO_CURRICULUM_PATH, str(custom_curr))
+    
+        out_dir = str(tmp_path / "manifest_run")
+        ret = run_demo(out_dir=out_dir, seed=20261012, budget=10, curriculum_path=str(custom_curr))
+        assert ret == 0
+    
+        manifest_path = os.path.join(out_dir, "manifest.json")
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+    
+        # 1. Manifest records actual curriculum path passed in
+>       assert "curriculum_path" in manifest
+E       AssertionError: assert 'curriculum_path' in {'config_hash': '6d44dca9483a5b3956a99bd151db80cf3d12cb9a9288751779703773a7b0a916', 'data_route': 'synthetic_demo_curriculum', 'dirty': True, 'experiment_name': 'cli_demo', ...}
+
+tests\test_w4_b2_provenance_profiles.py:78: AssertionError
+---------------------------- Captured stdout call -----------------------------
+======================================================================
+ADAPTIVE LEARNING ENGINE: END-TO-END DEMONSTRATION SUMMARY
+======================================================================
+Curriculum: C:\Users\5520\AppData\Local\Temp\pytest-of-5520\pytest-10\test_w4_d7_manifest_records_cu0\custom_demo.json (Target: D, Horizon: 3 days, Daily Budget: 10 min)
+Seed: 20261012 | Config Hash: 6d44dca9483a5b39... | Git SHA: b85f934 (dirty)
+
+[1] Learner Profiles & Day 1 Plan Divergence:
+  * Novice Learner (Budget 10m):
+    - Scheduled Activities Day 1: ['A', 'B']
+    - Conditional Activities Day 1: ['B']
+    - Gating Rationale: Foundational concept 'A' is unprobed (Uncertain).
+      Dependent concept 'D' is FILTERED with reason UNCERTAIN_NEEDS_ASSESSMENT.
+  * Intermediate Learner (Budget 10m):
+    - Scheduled Activities Day 1: ['C']
+    - Gating Rationale: Prerequisites 'A' and 'B' are ALREADY_MASTERED and filtered.
+      Unlocked downstream concept 'C' (10 min) is SELECTED for Day 1.
+
+[2] Dynamic Assessment & Replanning Scenarios (Concept 'A'):
+  * Scenario A (Assessment Passed - Unblocked):
+    - Response Sequence: [1, 1, 1, 1] -> p: 0.50 -> 0.9962 (Mastered)
+    - Outcome: Prerequisite 'A' becomes evidence-Mastered.
+      Dependent concept 'B' becomes unconditionally admissible and is SELECTED on Day 1.
+  * Scenario B (Assessment Failed - Stays Blocked):
+    - Response Sequence: [0, 0, 0, 0] -> p: 0.50 -> 0.1157 (Weak)
+    - Outcome: Concept 'A' classifies as Weak.
+      Dependent concepts 'B' and 'D' remain FILTERED with reason PREREQUISITE_UNMET.
+      Planner status resolves to HEURISTIC_NO_PLAN (target unreachable within horizon).
+
+[3] Missed Day & Budget Infeasibility Handling:
+  * Missed Day: Day 1 recorded as missed (minutes_used=0). Completed nodes {'A', 'B'} preserved.
+  * Budget Reduction: Reduced from 10m to 5m/day.
+    - Planner Status: INFEASIBLE_PROVED
+    - Reason Code: InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+    - Proved Infeasibility: Adding extra days will not resolve an indivisible activity duration constraint.
+    - Actionable Minimum Fix: raise daily budget to at least 10 minutes
+
+[4] Latent Cognitive State Invariant Verification (EvaluatorView):
+  * True Latent Mastery (Novice):       {'A': False, 'B': False, 'C': False, 'D': False}
+  * True Latent Mastery (Intermediate): {'A': True, 'B': True, 'C': False, 'D': False}
+  * Invariant: Latent states remained strictly inaccessible to planning & state code.
+======================================================================
+SUCCESS: All 12 plan and trace artifacts successfully written to 'C:\Users\5520\AppData\Local\Temp\pytest-of-5520\pytest-10\test_w4_d7_manifest_records_cu0\manifest_run'.
+___________ test_w4_d7_ninth_decimal_difference_hashes_differently ____________
+
+    @pytest.mark.xfail(strict=True, reason="W4 D7: canonical hash rounds floats to 8 decimals so 9th decimal differences collide")
+    def test_w4_d7_ninth_decimal_difference_hashes_differently():
+        val1 = {"learning_rate": 0.100000001}
+        val2 = {"learning_rate": 0.100000002}
+        h1 = resolved_config_hash(val1)
+        h2 = resolved_config_hash(val2)
+>       assert h1 != h2, f"Values differing at 9th decimal produced identical hash: {h1}"
+E       AssertionError: Values differing at 9th decimal produced identical hash: 4cd86ac2712f3b68306c78b13b45364f9b61726bdd2b0be447f7d2950198da3c
+E       assert '4cd86ac2712f3b68306c78b13b45364f9b61726bdd2b0be447f7d2950198da3c' != '4cd86ac2712f3b68306c78b13b45364f9b61726bdd2b0be447f7d2950198da3c'
+
+tests\test_w4_b2_provenance_profiles.py:110: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_w4_b2_provenance_profiles.py::test_w4_d7_changing_node_duration_changes_hash
+FAILED tests/test_w4_b2_provenance_profiles.py::test_w4_d7_manifest_records_curriculum_path_and_hashes
+FAILED tests/test_w4_b2_provenance_profiles.py::test_w4_d7_ninth_decimal_difference_hashes_differently
+========================= 3 failed, 2 passed in 1.41s =========================
