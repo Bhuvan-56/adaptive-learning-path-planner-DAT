@@ -137,3 +137,37 @@ def test_w4_d3_bad_file_fails_consistently_across_three_loaders(tmp_path):
     assert "unexpected_field" in err3
     assert err1 == err2 == err3
 
+
+import networkx as nx
+from src.curriculum.graph import load_graph, validate_graph
+from src.curriculum.errors import GraphErrorCode
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D5: validate_graph returns [] for NaN edge importance in fixture")
+def test_w4_d5_nan_edge_importance_fixture_returns_non_finite_value():
+    fixture_path = os.path.join(REPO_ROOT, "tests", "fixtures", "graphs", "non_finite_edge_importance.json")
+    g = load_graph(fixture_path)
+    errors = validate_graph(g)
+    assert errors == [GraphErrorCode.NON_FINITE_VALUE]
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D5: validate_graph returns [] for infinite edge importance")
+def test_w4_d5_inf_edge_importance_returns_non_finite_value():
+    g = nx.DiGraph()
+    g.add_node("A", baseline_duration=10.0, base_difficulty=0.20)
+    g.add_node("B", baseline_duration=15.0, base_difficulty=0.35)
+    g.add_edge("A", "B", importance=float("inf"))
+    g.graph["raw_edges"] = [("A", "B", float("inf"))]
+    errors = validate_graph(g)
+    assert errors == [GraphErrorCode.NON_FINITE_VALUE]
+
+    # Also check negative infinity
+    g2 = nx.DiGraph()
+    g2.add_node("A", baseline_duration=10.0, base_difficulty=0.20)
+    g2.add_node("B", baseline_duration=15.0, base_difficulty=0.35)
+    g2.add_edge("A", "B", importance=float("-inf"))
+    g2.graph["raw_edges"] = [("A", "B", float("-inf"))]
+    errors2 = validate_graph(g2)
+    assert errors2 == [GraphErrorCode.NON_FINITE_VALUE]
+
+
