@@ -22,7 +22,6 @@ def _file_sha256(path: str) -> str:
         return hashlib.sha256(f.read()).hexdigest()
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D7: editing node duration leaves config_hash unchanged")
 def test_w4_d7_changing_node_duration_changes_hash(tmp_path):
     # Setup two curriculum files with different node durations
     with open(DEMO_CURRICULUM_PATH, "r", encoding="utf-8") as f:
@@ -61,7 +60,6 @@ def test_w4_d7_changing_node_duration_changes_hash(tmp_path):
     )
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D7: manifest lacks actual curriculum_path, input hashes, and output checksums")
 def test_w4_d7_manifest_records_curriculum_path_and_hashes(tmp_path):
     custom_curr = tmp_path / "custom_demo.json"
     shutil.copyfile(DEMO_CURRICULUM_PATH, str(custom_curr))
@@ -101,13 +99,13 @@ def test_w4_d7_manifest_records_curriculum_path_and_hashes(tmp_path):
         assert output_checksums[fname] == expected_hash
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D7: canonical hash rounds floats to 8 decimals so 9th decimal differences collide")
 def test_w4_d7_ninth_decimal_difference_hashes_differently():
     val1 = {"learning_rate": 0.100000001}
     val2 = {"learning_rate": 0.100000002}
     h1 = resolved_config_hash(val1)
     h2 = resolved_config_hash(val2)
     assert h1 != h2, f"Values differing at 9th decimal produced identical hash: {h1}"
+
 
 
 def test_w4_d7_timestamp_does_not_affect_config_hash():
