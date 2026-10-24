@@ -90,12 +90,29 @@ def validate_graph(g: nx.DiGraph) -> List[GraphErrorCode]:
             has_bad_difficulty = True
             break
 
-    if has_non_finite_dur or has_non_finite_diff:
+    # Edge importance check: non-finite
+    has_non_finite_edge_imp = False
+    for edge in raw_edges:
+        if len(edge) >= 3:
+            imp = edge[2]
+            if imp is not None and (not isinstance(imp, (int, float)) or not math.isfinite(imp)):
+                has_non_finite_edge_imp = True
+                break
+
+    if not has_non_finite_edge_imp:
+        for _, _, attrs in g.edges(data=True):
+            imp = attrs.get("importance")
+            if imp is not None and (not isinstance(imp, (int, float)) or not math.isfinite(imp)):
+                has_non_finite_edge_imp = True
+                break
+
+    if has_non_finite_dur or has_non_finite_diff or has_non_finite_edge_imp:
         errors.append(GraphErrorCode.NON_FINITE_VALUE)
     if has_bad_duration:
         errors.append(GraphErrorCode.NONPOSITIVE_DURATION)
     if has_bad_difficulty:
         errors.append(GraphErrorCode.DIFFICULTY_OUT_OF_RANGE)
+
 
     # 4. Self loop check
     has_self_loop = len(list(nx.nodes_with_selfloops(g))) > 0
