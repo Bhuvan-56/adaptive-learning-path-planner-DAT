@@ -1,3 +1,7 @@
 # Adaptive Exercise Difficulty Stepping Configuration
 # 2-Up / 1-Down staircase adaptation step size
 step: 0.10
+
+# Prerequisite remediation trigger (PROPOSED: 2 consecutive failures)
+remediation:
+  consecutive_failures: 2
