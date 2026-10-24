@@ -1,0 +1,18 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\bhuva\Downloads\DAT11\.venv_w2\Scripts\python.exe
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collecting ... collected 11 items
+
+tests/test_w4_a2_trace_request.py::test_w4_d4_concept_state_none PASSED  [  9%]
+tests/test_w4_a2_trace_request.py::test_w4_d4_constraints_none PASSED    [ 18%]
+tests/test_w4_a2_trace_request.py::test_w4_d4_score_terms_none PASSED    [ 27%]
+tests/test_w4_a2_trace_request.py::test_w4_d4_negative_remaining_budget PASSED [ 36%]
+tests/test_w4_a2_trace_request.py::test_w4_d4_day_zero PASSED            [ 45%]
+tests/test_w4_a2_trace_request.py::test_w4_d4_day_d_plus_one PASSED      [ 54%]
+tests/test_w4_a2_trace_request.py::test_w4_d4_non_dict_entry PASSED      [ 63%]
+tests/test_w4_a2_trace_request.py::test_w4_d4_non_finite_number PASSED   [ 72%]
+tests/test_w4_a2_trace_request.py::test_w4_d4_concept_state_p_outside_unit_interval PASSED [ 81%]
+tests/test_w4_a2_trace_request.py::test_w4_d4_concept_state_n_negative PASSED [ 90%]
+tests/test_w4_a2_trace_request.py::test_w4_d4_remaining_budget_exceeds_budget_param PASSED [100%]
+
+============================= 11 passed in 0.09s ==============================

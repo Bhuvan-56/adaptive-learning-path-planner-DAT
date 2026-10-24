@@ -26,7 +26,6 @@ def make_valid_entry(node_id="A", day=1, decision="SELECTED", reason_code="SELEC
     }
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts concept_state=None")
 def test_w4_d4_concept_state_none():
     universe = {"A"}
     entry = make_valid_entry(node_id="A", day=1)
@@ -35,7 +34,6 @@ def test_w4_d4_concept_state_none():
         check_trace(universe, [entry], num_days=1)
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts constraints=None")
 def test_w4_d4_constraints_none():
     universe = {"A"}
     entry = make_valid_entry(node_id="A", day=1)
@@ -44,7 +42,6 @@ def test_w4_d4_constraints_none():
         check_trace(universe, [entry], num_days=1)
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts score_terms=None")
 def test_w4_d4_score_terms_none():
     universe = {"A"}
     entry = make_valid_entry(node_id="A", day=1)
@@ -53,7 +50,6 @@ def test_w4_d4_score_terms_none():
         check_trace(universe, [entry], num_days=1)
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts negative remaining_budget")
 def test_w4_d4_negative_remaining_budget():
     universe = {"A"}
     entry = make_valid_entry(node_id="A", day=1)
@@ -62,7 +58,6 @@ def test_w4_d4_negative_remaining_budget():
         check_trace(universe, [entry], num_days=1)
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts day 0 entry")
 def test_w4_d4_day_zero():
     universe = {"A"}
     trace = [
@@ -73,7 +68,6 @@ def test_w4_d4_day_zero():
         check_trace(universe, trace, num_days=1)
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts day D+1 entry")
 def test_w4_d4_day_d_plus_one():
     universe = {"A"}
     trace = [
@@ -84,14 +78,12 @@ def test_w4_d4_day_d_plus_one():
         check_trace(universe, trace, num_days=1)
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D4: check_trace raises AttributeError on non-dict entry")
 def test_w4_d4_non_dict_entry():
     universe = {"A"}
     with pytest.raises(ValueError, match="dictionary"):
         check_trace(universe, ["not_a_dict"], num_days=1)
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts non-finite numbers in concept_state or score_terms")
 def test_w4_d4_non_finite_number():
     universe = {"A"}
     entry1 = make_valid_entry(node_id="A", day=1)
@@ -105,7 +97,6 @@ def test_w4_d4_non_finite_number():
         check_trace(universe, [entry2], num_days=1)
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts concept_state p outside [0,1]")
 def test_w4_d4_concept_state_p_outside_unit_interval():
     universe = {"A"}
     entry_high = make_valid_entry(node_id="A", day=1)
@@ -119,10 +110,17 @@ def test_w4_d4_concept_state_p_outside_unit_interval():
         check_trace(universe, [entry_low], num_days=1)
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D4: check_trace accepts negative n in concept_state")
 def test_w4_d4_concept_state_n_negative():
     universe = {"A"}
     entry = make_valid_entry(node_id="A", day=1)
     entry["concept_state"]["n"] = -1
     with pytest.raises(ValueError, match=r"n.*negative|n.*>= 0"):
         check_trace(universe, [entry], num_days=1)
+
+
+def test_w4_d4_remaining_budget_exceeds_budget_param():
+    universe = {"A"}
+    entry = make_valid_entry(node_id="A", day=1)
+    entry["constraints"]["remaining_budget"] = 20
+    with pytest.raises(ValueError, match="exceeding daily budget"):
+        check_trace(universe, [entry], num_days=1, budget=15)

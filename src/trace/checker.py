@@ -1,4 +1,5 @@
-from typing import Set, List, Dict, Any
+import math
+from typing import Set, List, Dict, Any, Optional
 from src.trace.schema import ReasonCode
 
 VALID_REASON_CODES = {code.value for code in ReasonCode}
@@ -15,20 +16,28 @@ REQUIRED_SCHEMA_FIELDS = (
 )
 
 
-def check_trace(candidate_universe: Set[str], trace: List[Dict[str, Any]], num_days: int = 1) -> bool:
+def check_trace(
+    candidate_universe: Set[str],
+    trace: List[Dict[str, Any]],
+    num_days: int = 1,
+    budget: Optional[float] = None,
+) -> bool:
     """
     Validates automated trace completeness (TC-7.3).
 
     Trace check FAILS if:
     1. Trace is empty while candidate_universe is non-empty.
-    2. Any day in 1..num_days has no entries.
-    3. Any duplicate node appears on a given day.
-    4. Any candidate in candidate_universe is missing or extra on a given day.
-    5. Any decision is not in {"SELECTED", "FILTERED"}.
-    6. Any reason code is not in ReasonCode.
-    7. Decision and reason code mismatch (SELECTED must have SELECTED, FILTERED must have filtering reason).
-    8. Any of the 8 schema fields is missing from an entry.
-    9. Reason ALREADY_MASTERED contradicts concept_state (concept_state must be Mastered).
+    2. Trace is not a list or contains non-dict entries.
+    3. Any day is outside 1..num_days or any day in 1..num_days has no entries.
+    4. Any duplicate node appears on a given day.
+    5. Any candidate in candidate_universe is missing or extra on a given day.
+    6. Any decision is not in {"SELECTED", "FILTERED"}.
+    7. Any reason code is not in ReasonCode.
+    8. Decision and reason code mismatch (SELECTED must have SELECTED, FILTERED must have filtering reason).
+    9. Any of the 8 schema fields is missing from an entry.
+    10. Container types are invalid (concept_state, constraints, score_terms must be dicts).
+    11. Values in containers are non-finite, out of bounds (p in [0,1], n >= 0, remaining_budget in [0, budget]).
+    12. Reason ALREADY_MASTERED contradicts concept_state (concept_state must be Mastered).
 
     Returns True if valid; raises ValueError if invalid.
     """
@@ -38,12 +47,20 @@ def check_trace(candidate_universe: Set[str], trace: List[Dict[str, Any]], num_d
     if not isinstance(trace, list):
         raise ValueError("Trace must be a list of trace entry dictionaries.")
 
+    for idx, entry in enumerate(trace):
+        if not isinstance(entry, dict):
+            raise ValueError(f"Trace entry at index {idx} must be a dictionary.")
+
     # Group entries by day
     entries_by_day: Dict[int, List[Dict[str, Any]]] = {}
     for entry in trace:
         day = entry.get("day")
         if day is None:
             raise ValueError("Trace entry missing schema field: 'day'.")
+        if not isinstance(day, int) or isinstance(day, bool):
+            raise ValueError(f"Trace entry day must be an integer, got {day!r}.")
+        if day < 1 or day > num_days:
+            raise ValueError(f"Trace entry day {day} is outside valid range 1..{num_days}.")
         entries_by_day.setdefault(day, []).append(entry)
 
     # 1. Any day in 1..num_days with no entries
@@ -105,6 +122,60 @@ def check_trace(candidate_universe: Set[str], trace: List[Dict[str, Any]], num_d
                     raise ValueError(f"Trace entry for node '{node_id}' on day {day} missing schema field: '{field}'.")
 
             concept_state = entry["concept_state"]
+            if not isinstance(concept_state, dict):
+                raise ValueError(f"Trace entry for node '{node_id}' on day {day} has invalid concept_state (must be a dictionary).")
+
+            for k, v in concept_state.items():
+                if isinstance(v, (int, float)) and not isinstance(v, bool):
+                    if not math.isfinite(v):
+                        raise ValueError(f"Entry for node '{node_id}' on day {day} concept_state['{k}'] has non-finite value: {v}.")
+
+            if "p" in concept_state:
+                p = concept_state["p"]
+                if not isinstance(p, (int, float)) or isinstance(p, bool) or not math.isfinite(p) or not (0.0 <= p <= 1.0):
+                    raise ValueError(f"Entry for node '{node_id}' on day {day} has concept_state p outside [0, 1]: {p}.")
+
+            if "n" in concept_state:
+                n = concept_state["n"]
+                if not isinstance(n, int) or isinstance(n, bool) or n < 0:
+                    raise ValueError(f"Entry for node '{node_id}' on day {day} has negative concept_state n: {n}.")
+
+            if "kappa" in concept_state:
+                k = concept_state["kappa"]
+                if not isinstance(k, (int, float)) or isinstance(k, bool) or not math.isfinite(k) or k <= 0:
+                    raise ValueError(f"Entry for node '{node_id}' on day {day} has invalid concept_state kappa: {k}.")
+
+            if "sigma2" in concept_state:
+                s = concept_state["sigma2"]
+                if not isinstance(s, (int, float)) or isinstance(s, bool) or not math.isfinite(s) or s < 0:
+                    raise ValueError(f"Entry for node '{node_id}' on day {day} has invalid concept_state sigma2: {s}.")
+
+            constraints = entry["constraints"]
+            if not isinstance(constraints, dict):
+                raise ValueError(f"Trace entry for node '{node_id}' on day {day} has invalid constraints (must be a dictionary).")
+
+            for k, v in constraints.items():
+                if isinstance(v, (int, float)) and not isinstance(v, bool):
+                    if not math.isfinite(v):
+                        raise ValueError(f"Entry for node '{node_id}' on day {day} constraints['{k}'] has non-finite value: {v}.")
+
+            if "remaining_budget" in constraints:
+                rem_budget = constraints["remaining_budget"]
+                if not isinstance(rem_budget, (int, float)) or isinstance(rem_budget, bool) or not math.isfinite(rem_budget):
+                    raise ValueError(f"Entry for node '{node_id}' on day {day} has non-finite remaining_budget: {rem_budget}.")
+                if rem_budget < 0:
+                    raise ValueError(f"Entry for node '{node_id}' on day {day} has negative remaining_budget: {rem_budget}.")
+                if budget is not None and rem_budget > budget:
+                    raise ValueError(f"Entry for node '{node_id}' on day {day} has remaining_budget {rem_budget} exceeding daily budget {budget}.")
+
+            score_terms = entry["score_terms"]
+            if not isinstance(score_terms, dict):
+                raise ValueError(f"Trace entry for node '{node_id}' on day {day} has invalid score_terms (must be a dictionary).")
+
+            for k, v in score_terms.items():
+                if not isinstance(v, (int, float)) or isinstance(v, bool) or not math.isfinite(v):
+                    raise ValueError(f"Entry for node '{node_id}' on day {day} score_terms['{k}'] has non-finite value: {v}.")
+
             if reason_code == ReasonCode.ALREADY_MASTERED.value:
                 concept_class = (
                     concept_state.get("class")
