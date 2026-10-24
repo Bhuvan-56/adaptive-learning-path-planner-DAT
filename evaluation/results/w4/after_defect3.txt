@@ -1,0 +1,15 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 7 items
+
+tests/test_w4_b1_policy_graph.py::test_w4_d3_only_typo_raises_and_names_missing_keys PASSED [ 14%]
+tests/test_w4_b1_policy_graph.py::test_w4_d3_complete_file_plus_unknown_key_raises_and_names_key PASSED [ 28%]
+tests/test_w4_b1_policy_graph.py::test_w4_d3_misspelled_key_raises PASSED [ 42%]
+tests/test_w4_b1_policy_graph.py::test_w4_d3_shipped_bkt_params_loads PASSED [ 57%]
+tests/test_w4_b1_policy_graph.py::test_w4_d3_shipped_bkt_fitted_loads_through_fitted_path PASSED [ 71%]
+tests/test_w4_b1_policy_graph.py::test_w4_d3_defaulted_fields_reported_to_caller PASSED [ 85%]
+tests/test_w4_b1_policy_graph.py::test_w4_d3_bad_file_fails_consistently_across_three_loaders PASSED [100%]
+
+============================== 7 passed in 0.28s ==============================

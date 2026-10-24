@@ -1,0 +1,96 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collected 7 items
+
+tests\test_w4_b1_policy_graph.py FFF..FF                                 [100%]
+
+================================== FAILURES ===================================
+_____________ test_w4_d3_only_typo_raises_and_names_missing_keys ______________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-2/test_w4_d3_only_typo_raises_an0')
+
+    @pytest.mark.xfail(strict=True, reason="W4 D3: only-typo file silently loads default policy instead of raising missing required keys")
+    def test_w4_d3_only_typo_raises_and_names_missing_keys(tmp_path):
+        typo_file = tmp_path / "only_typo.yaml"
+        typo_file.write_text("p_GG: 0.9\n", encoding="utf-8")
+>       with pytest.raises(ValueError) as excinfo:
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_b1_policy_graph.py:18: Failed
+_______ test_w4_d3_complete_file_plus_unknown_key_raises_and_names_key ________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-2/test_w4_d3_complete_file_plus_0')
+
+    @pytest.mark.xfail(strict=True, reason="W4 D3: complete file plus unknown key drops unknown key instead of raising")
+    def test_w4_d3_complete_file_plus_unknown_key_raises_and_names_key(tmp_path):
+        extra_file = tmp_path / "extra_key.yaml"
+        extra_file.write_text(
+            "p_S: 0.10\n"
+            "p_G: 0.25\n"
+            "p_T: 0.10\n"
+            "window_size: 4\n"
+            "unknown_extra_key: 123\n",
+            encoding="utf-8",
+        )
+>       with pytest.raises(ValueError) as excinfo:
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_b1_policy_graph.py:36: Failed
+______________________ test_w4_d3_misspelled_key_raises _______________________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-2/test_w4_d3_misspelled_key_rais0')
+
+    @pytest.mark.xfail(strict=True, reason="W4 D3: misspelled key p_s silently falls back instead of raising")
+    def test_w4_d3_misspelled_key_raises(tmp_path):
+        misspelled_file = tmp_path / "misspelled.yaml"
+        misspelled_file.write_text(
+            "p_s: 0.10\n"
+            "p_G: 0.25\n"
+            "p_T: 0.10\n"
+            "window_size: 4\n",
+            encoding="utf-8",
+        )
+>       with pytest.raises(ValueError) as excinfo:
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_b1_policy_graph.py:51: Failed
+_______________ test_w4_d3_defaulted_fields_reported_to_caller ________________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-2/test_w4_d3_defaulted_fields_re0')
+
+    @pytest.mark.xfail(strict=True, reason="W4 D3: loaders do not report defaulted fields to caller")
+    def test_w4_d3_defaulted_fields_reported_to_caller(tmp_path):
+        policy = load_policy(BKT_PARAMS_PATH)
+>       assert hasattr(policy, "defaulted_fields")
+E       AssertionError: assert False
+E        +  where False = hasattr(PolicyConfig(p_S=0.1, p_G=0.25, p_T=0.1, window_size=4, mastered_p=0.85, weak_p=0.4, sigma2_max=0.05, min_obs=3, kappa0=2.0, quorum=3), 'defaulted_fields')
+
+tests\test_w4_b1_policy_graph.py:90: AssertionError
+_________ test_w4_d3_bad_file_fails_consistently_across_three_loaders _________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-2/test_w4_d3_bad_file_fails_cons0')
+
+    @pytest.mark.xfail(strict=True, reason="W4 D3: bad file fails inconsistently or silently across the three loaders")
+    def test_w4_d3_bad_file_fails_consistently_across_three_loaders(tmp_path):
+        bad_file = tmp_path / "bad_policy.yaml"
+        bad_file.write_text(
+            "p_S: 0.10\n"
+            "p_G: 0.25\n"
+            "p_T: 0.10\n"
+            "window_size: 4\n"
+            "unexpected_field: 999\n",
+            encoding="utf-8",
+        )
+        err1, err2, err3 = None, None, None
+>       with pytest.raises(ValueError) as exc1:
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_w4_b1_policy_graph.py:128: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_w4_b1_policy_graph.py::test_w4_d3_only_typo_raises_and_names_missing_keys
+FAILED tests/test_w4_b1_policy_graph.py::test_w4_d3_complete_file_plus_unknown_key_raises_and_names_key
+FAILED tests/test_w4_b1_policy_graph.py::test_w4_d3_misspelled_key_raises - F...
+FAILED tests/test_w4_b1_policy_graph.py::test_w4_d3_defaulted_fields_reported_to_caller
+FAILED tests/test_w4_b1_policy_graph.py::test_w4_d3_bad_file_fails_consistently_across_three_loaders
+========================= 5 failed, 2 passed in 0.43s =========================
