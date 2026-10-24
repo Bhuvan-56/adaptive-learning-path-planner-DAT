@@ -77,9 +77,9 @@ def test_tc_3_2_counterexample():
     assert ratio == pytest.approx(2.0 / 3.0)
 
 
-def test_tc_3_2_benchmark_runs_and_reports():
+def test_tc_3_2_benchmark_runs_and_reports(tmp_path):
     """TC-3.2: Optimality benchmark runner executes 250 instances and writes CSV/MD reports."""
-    summary_info = run_benchmark(output_dir="evaluation/results")
+    summary_info = run_benchmark(output_dir=str(tmp_path))
 
     assert os.path.exists(summary_info["csv_path"])
     assert os.path.exists(summary_info["summary_path"])

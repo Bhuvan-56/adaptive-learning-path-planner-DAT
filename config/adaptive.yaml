@@ -1,0 +1,3 @@
+# Adaptive Exercise Difficulty Stepping Configuration
+# 2-Up / 1-Down staircase adaptation step size
+step: 0.10

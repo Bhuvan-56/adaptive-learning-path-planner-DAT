@@ -4,6 +4,9 @@ import networkx as nx
 
 from src.curriculum.errors import GraphErrorCode
 
+MIN_DIFFICULTY: float = 0.05
+MAX_DIFFICULTY: float = 0.95
+
 
 def load_graph(path: str) -> nx.DiGraph:
     """Loads a JSON curriculum graph definition into a networkx DiGraph."""
@@ -45,7 +48,7 @@ def validate_graph(g: nx.DiGraph) -> List[GraphErrorCode]:
     Validates a curriculum graph against six strict graph integrity checks:
     1. MISSING_NODE: Edge references non-existent node.
     2. NONPOSITIVE_DURATION: Baseline duration <= 0 or null.
-    3. DIFFICULTY_OUT_OF_RANGE: Base difficulty outside [0.05, 0.95].
+    3. DIFFICULTY_OUT_OF_RANGE: Base difficulty outside [MIN_DIFFICULTY, MAX_DIFFICULTY].
     4. SELF_LOOP: Node has edge pointing to itself.
     5. CYCLE_DETECTED: Graph contains cyclic components (SCC size > 1).
     6. NON_FINITE_VALUE: Baseline duration or base difficulty is NaN or infinite.
@@ -78,7 +81,7 @@ def validate_graph(g: nx.DiGraph) -> List[GraphErrorCode]:
             has_bad_duration = True
             break
 
-    # 3. Difficulty check: non-finite or out of range [0.05, 0.95]
+    # 3. Difficulty check: non-finite or out of range [MIN_DIFFICULTY, MAX_DIFFICULTY]
     has_non_finite_diff = False
     has_bad_difficulty = False
     for _, attrs in g.nodes(data=True):
@@ -86,7 +89,7 @@ def validate_graph(g: nx.DiGraph) -> List[GraphErrorCode]:
         if diff is not None and (not isinstance(diff, (int, float)) or not math.isfinite(diff)):
             has_non_finite_diff = True
             break
-        elif diff is None or diff < 0.05 or diff > 0.95:
+        elif diff is None or diff < MIN_DIFFICULTY or diff > MAX_DIFFICULTY:
             has_bad_difficulty = True
             break
 
