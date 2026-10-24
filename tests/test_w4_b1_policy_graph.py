@@ -1,0 +1,143 @@
+import os
+import pytest
+import yaml
+
+from src.state.policy import load_policy, PolicyConfig
+from src.state.learner_state import load_bkt_params
+from src.state.bkt_adapter import load_fitted_bkt_params
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+BKT_PARAMS_PATH = os.path.join(REPO_ROOT, "config", "bkt_params.yaml")
+BKT_FITTED_PATH = os.path.join(REPO_ROOT, "config", "bkt_fitted.yaml")
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D3: only-typo file silently loads default policy instead of raising missing required keys")
+def test_w4_d3_only_typo_raises_and_names_missing_keys(tmp_path):
+    typo_file = tmp_path / "only_typo.yaml"
+    typo_file.write_text("p_GG: 0.9\n", encoding="utf-8")
+    with pytest.raises(ValueError) as excinfo:
+        load_policy(str(typo_file))
+    msg = str(excinfo.value)
+    for req in ["p_S", "p_G", "p_T", "window_size"]:
+        assert req in msg
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D3: complete file plus unknown key drops unknown key instead of raising")
+def test_w4_d3_complete_file_plus_unknown_key_raises_and_names_key(tmp_path):
+    extra_file = tmp_path / "extra_key.yaml"
+    extra_file.write_text(
+        "p_S: 0.10\n"
+        "p_G: 0.25\n"
+        "p_T: 0.10\n"
+        "window_size: 4\n"
+        "unknown_extra_key: 123\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError) as excinfo:
+        load_policy(str(extra_file))
+    assert "unknown_extra_key" in str(excinfo.value)
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D3: misspelled key p_s silently falls back instead of raising")
+def test_w4_d3_misspelled_key_raises(tmp_path):
+    misspelled_file = tmp_path / "misspelled.yaml"
+    misspelled_file.write_text(
+        "p_s: 0.10\n"
+        "p_G: 0.25\n"
+        "p_T: 0.10\n"
+        "window_size: 4\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError) as excinfo:
+        load_policy(str(misspelled_file))
+    msg = str(excinfo.value)
+    assert "p_s" in msg or "p_S" in msg
+
+
+def test_w4_d3_shipped_bkt_params_loads():
+    policy = load_policy(BKT_PARAMS_PATH)
+    assert isinstance(policy, PolicyConfig)
+    assert policy.p_S == 0.10
+    assert policy.p_G == 0.25
+    assert policy.p_T == 0.10
+    assert policy.window_size == 4
+
+    params = load_bkt_params(BKT_PARAMS_PATH)
+    assert params["p_S"] == 0.10
+    assert params["p_G"] == 0.25
+    assert params["p_T"] == 0.10
+    assert params["window_size"] == 4
+
+
+def test_w4_d3_shipped_bkt_fitted_loads_through_fitted_path():
+    fitted = load_fitted_bkt_params(BKT_FITTED_PATH)
+    assert fitted["p_S"] == pytest.approx(0.09389350193119235)
+    assert fitted["p_G"] == pytest.approx(0.3251211164969382)
+    assert fitted["p_T"] == pytest.approx(0.22159130231353227)
+    assert fitted["prior"] == pytest.approx(0.04792007810298316)
+    assert fitted["forget"] == 0.0
+    assert fitted["window_size"] == 4
+    assert fitted["mastered_p"] == 0.85
+    assert fitted["weak_p"] == 0.40
+    assert fitted["sigma2_max"] == 0.05
+    assert fitted["min_obs"] == 3
+    assert fitted["kappa0"] == 2.0
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D3: loaders do not report defaulted fields to caller")
+def test_w4_d3_defaulted_fields_reported_to_caller(tmp_path):
+    policy = load_policy(BKT_PARAMS_PATH)
+    assert hasattr(policy, "defaulted_fields")
+    expected_defaulted = {"mastered_p", "weak_p", "sigma2_max", "min_obs", "kappa0"}
+    assert set(policy.defaulted_fields) == expected_defaulted
+
+    params = load_bkt_params(BKT_PARAMS_PATH)
+    assert "defaulted_fields" in params
+    assert set(params["defaulted_fields"]) == expected_defaulted
+
+    # When all fields are provided, defaulted_fields should be empty
+    full_file = tmp_path / "full_policy.yaml"
+    full_file.write_text(
+        "p_S: 0.10\n"
+        "p_G: 0.25\n"
+        "p_T: 0.10\n"
+        "window_size: 4\n"
+        "mastered_p: 0.85\n"
+        "weak_p: 0.40\n"
+        "sigma2_max: 0.05\n"
+        "min_obs: 3\n"
+        "kappa0: 2.0\n",
+        encoding="utf-8",
+    )
+    full_policy = load_policy(str(full_file))
+    assert list(full_policy.defaulted_fields) == []
+
+
+@pytest.mark.xfail(strict=True, reason="W4 D3: bad file fails inconsistently or silently across the three loaders")
+def test_w4_d3_bad_file_fails_consistently_across_three_loaders(tmp_path):
+    bad_file = tmp_path / "bad_policy.yaml"
+    bad_file.write_text(
+        "p_S: 0.10\n"
+        "p_G: 0.25\n"
+        "p_T: 0.10\n"
+        "window_size: 4\n"
+        "unexpected_field: 999\n",
+        encoding="utf-8",
+    )
+    err1, err2, err3 = None, None, None
+    with pytest.raises(ValueError) as exc1:
+        load_policy(str(bad_file))
+    err1 = str(exc1.value)
+
+    with pytest.raises(ValueError) as exc2:
+        load_bkt_params(str(bad_file))
+    err2 = str(exc2.value)
+
+    with pytest.raises(ValueError) as exc3:
+        load_fitted_bkt_params(str(bad_file))
+    err3 = str(exc3.value)
+
+    assert "unexpected_field" in err1
+    assert "unexpected_field" in err2
+    assert "unexpected_field" in err3
+    assert err1 == err2 == err3
