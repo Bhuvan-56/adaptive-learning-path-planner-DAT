@@ -2,6 +2,7 @@ from typing import Dict, List, Any, Set, Optional
 import networkx as nx
 
 from src.state.learner_state import ConceptState
+from src.state.policy import PolicyConfig, default_policy
 from src.planning.feasibility import check_feasibility, FeasibilityStatus, InfeasibilityReason
 from src.trace.schema import TraceEntry, ReasonCode
 from src.trace.universe import get_candidate_universe
@@ -14,7 +15,8 @@ def generate_static_plan(
     deadline_days: int,
     target_node: str,
     policy_version: str = "static_baseline_v0",
-    completed_nodes: Optional[Set[str]] = None
+    completed_nodes: Optional[Set[str]] = None,
+    policy: Optional[PolicyConfig] = None
 ) -> Dict[str, Any]:
     """
     Generates a daily study schedule using a deterministic static baseline topological sort planner.
@@ -25,6 +27,14 @@ def generate_static_plan(
     - completed: the learner actually did it; supplied as input
     - evidence_mastered: learner-state classifier returns Mastered
     """
+    active_policy: PolicyConfig
+    if policy is None:
+        active_policy, _ = default_policy()
+    elif isinstance(policy, tuple) and hasattr(policy, "policy"):
+        active_policy = policy.policy
+    else:
+        active_policy = policy
+
     candidate_universe = get_candidate_universe(g, target_node)
 
     completed_set = set(completed_nodes or set())
@@ -33,7 +43,7 @@ def generate_static_plan(
 
     for node_id in candidate_universe:
         state = learner_states.get(node_id, ConceptState.cold_start())
-        if state.classify() == "Mastered":
+        if state.classify(active_policy) == "Mastered":
             evidence_mastered.add(node_id)
         elif node_id not in completed_set:
             required_nodes.add(node_id)
@@ -98,7 +108,7 @@ def generate_static_plan(
                         "kappa": state.kappa,
                         "sigma2": state.sigma2,
                         "n": state.n,
-                        "class": state.classify()
+                        "class": state.classify(active_policy)
                     },
                     constraints={
                         "budget": budget,
@@ -120,7 +130,7 @@ def generate_static_plan(
                         "kappa": state.kappa,
                         "sigma2": state.sigma2,
                         "n": state.n,
-                        "class": state.classify()
+                        "class": state.classify(active_policy)
                     },
                     constraints={
                         "budget": budget,
@@ -142,7 +152,7 @@ def generate_static_plan(
                         "kappa": state.kappa,
                         "sigma2": state.sigma2,
                         "n": state.n,
-                        "class": state.classify()
+                        "class": state.classify(active_policy)
                     },
                     constraints={
                         "budget": budget,
@@ -170,7 +180,7 @@ def generate_static_plan(
 
             for p in prereqs:
                 p_state = learner_states.get(p, ConceptState.cold_start())
-                p_class = p_state.classify()
+                p_class = p_state.classify(active_policy)
 
                 if p in evidence_mastered:
                     prereq_status[p] = True
@@ -229,7 +239,7 @@ def generate_static_plan(
                     "kappa": state.kappa,
                     "sigma2": state.sigma2,
                     "n": state.n,
-                    "class": state.classify()
+                    "class": state.classify(active_policy)
                 },
                 constraints={
                     "budget": budget,

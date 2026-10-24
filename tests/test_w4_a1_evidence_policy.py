@@ -107,7 +107,6 @@ def test_w4_d1_replay_rule_event_applied_once_per_call_and_twice_if_passed_twice
     assert res2["learner_states"]["A"].n == 4
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D2: plan_request ignores policy when calling generate_static_plan")
 def test_w4_d2_a_mastered_p_different_decisions_in_plan_request():
     """
     (a) mastered_p 0.99 against default 0.85 gives different decisions for the same learner through plan_request.
@@ -137,7 +136,6 @@ def test_w4_d2_a_mastered_p_different_decisions_in_plan_request():
     )
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D2: replan does not pass policy window_size into state classification")
 def test_w4_d2_b_window_size_changes_quorum_and_classification():
     """
     (b) window_size 6 against 4 changes the quorum and the classification after the same response sequence.
@@ -170,7 +168,6 @@ def test_w4_d2_b_window_size_changes_quorum_and_classification():
     assert trace6_class == "Developing"
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D2: replan does not use policy BKT parameters p_T, p_S, p_G for update")
 def test_w4_d2_c_bkt_params_different_p_inside_replan():
     """
     (c) different p_T, p_S or p_G give different p after the same responses inside replan.
@@ -191,7 +188,6 @@ def test_w4_d2_c_bkt_params_different_p_inside_replan():
     assert p1 != p2, f"Expected different p under different BKT params, but both got {p1}"
 
 
-@pytest.mark.xfail(strict=True, reason="W4 D2: replan trace concept_state class does not use supplied policy")
 def test_w4_d2_d_replan_trace_class_equals_state_classify_for_every_node():
     """
     (d) after a replan event the trace's concept_state class equals state.classify(policy) for every node.
