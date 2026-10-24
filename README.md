@@ -36,15 +36,19 @@ The architecture consists of eight distinct modular components (M1 through M8):
 
 ```
 src/
-  curriculum/  - graph loader, topological validator, error types
-  planning/    - static baseline, greedy scheduler, exact DP oracle, feasibility, replanning
-  state/       - learner state model (BKT update, Beta variance proxy, classification)
-  trace/       - decision audit trace schema, candidate universe, trace checker
-  simulation/  - synthetic learner simulator with Matched BKT generator and EvaluatorView
-config/        - BKT default parameters and learner profiles configuration
-data/          - dataset documentation, processed logs, curriculum DAG definitions
+  curriculum/  - graph loader, topological validator, error types (Module M1)
+  diagnostic/  - computerized adaptive testing (CAT / IRT) diagnostic engine (Module M2)
+  planning/    - static baseline, greedy scheduler, exact DP oracle, feasibility, difficulty stepping, replanning (Modules M3, M4, M5, M6)
+  state/       - learner state model (BKT update, Beta variance proxy, policy classification) (Module M1)
+  trace/       - decision audit trace schema, candidate universe, trace contract checker (Module M7)
+  simulation/  - synthetic learner simulator with Matched BKT generator and EvaluatorView (Module M8)
+  evaluation/  - comparative evaluation pipeline across diagnostic and planner arms (Module M8)
+  cli.py       - unified CLI entry point supporting demo, plan, and slice subcommands (Module M8)
+  provenance.py- deterministic configuration hashing and execution manifest generation
+config/        - BKT default parameters, profiles, and adaptive stepping configuration
+data/          - dataset documentation, synthetic item bank, Q-matrix, curriculum DAGs
 decisions/     - architecture and methodology decision records (ADR-001 to ADR-009)
-evaluation/    - baselines, benchmark results, metrics, configuration
+evaluation/    - baselines, benchmark results, metrics, comparative evaluation outputs
 experiments/   - benchmark configurations and evaluation definitions
 tests/         - unit and acceptance test suites for M1-M8
 weekly/        - dated weekly progress records and inputs
@@ -84,6 +88,9 @@ pytest tests/test_m3_path_planning.py
 
 # Explainability & trace checker tests (TC-7.1, TC-7.2, TC-7.3)
 pytest tests/test_m7_explainability.py
+
+# Horizontal slice & adversarial matrix tests (Week 4 T2)
+pytest tests/test_w4_t2_slice.py
 ```
 
 ## Running the Benchmark
@@ -98,24 +105,28 @@ This generates:
 - `evaluation/results/w2_greedy_vs_oracle.csv` (per-instance benchmark results)
 - `evaluation/results/w2_summary.md` (summary statistics: mean, 5th percentile, worst-case, runtimes)
 
-## End-to-End CLI Demo
+## Command-Line Interface (CLI)
 
-Run the end-to-end multi-scenario CLI demonstration:
+The application provides a unified CLI entry point via `python -m src.cli` supporting three primary subcommands: `demo`, `plan`, and `slice`.
+
+### 1. End-to-End Demo (`demo`)
+
+Run the multi-scenario end-to-end demonstration:
 
 ```bash
 python -m src.cli demo --out evaluation/results/w3/demo --seed 20261012 --budget 10
 ```
 
-This runs the complete workflow:
-- Validates the curriculum DAG (`data/curricula/demo_curriculum.json`).
+This executes:
+- Validates curriculum DAG (`data/curricula/demo_curriculum.json`).
 - Generates Day 1 plans for Novice and Intermediate learners.
-- Simulates adaptive assessment responses and replanning (Passed vs. Failed scenarios).
+- Simulates dynamic assessment responses and replanning (Passed vs. Failed scenarios).
 - Simulates a missed day and subsequent budget reduction proving block infeasibility.
-- Writes all plan and trace JSON files, state transitions (`response_updates.json`), and provenance manifest (`manifest.json`) to `--out`.
+- Writes 14 artifacts (plans, traces, `response_updates.json`, and `manifest.json`) to `--out`.
 
-## Plan Subcommand
+### 2. Single Plan Request (`plan`)
 
-Generate and trace a single plan request from data:
+Generate and trace a single plan request from input data:
 
 ```bash
 python -m src.cli plan --curriculum data/curricula/demo_curriculum.json --target D --budget 10 --deadline-days 3 --out evaluation/results/plan_run
@@ -129,6 +140,34 @@ Options:
 - `--policy <yaml>`: Optional path to BKT/classification policy YAML file.
 - `--states <json>`: Optional path to initial learner states JSON file.
 - `--out <dir>`: Output directory for `plan.json` and `trace.json` (required).
+
+### 3. Horizontal Slice Demonstration (`slice`)
+
+Run the complete Week 4 horizontal slice pipeline demonstrating all 8 integrated subsystems:
+
+```bash
+python -m src.cli slice --out evaluation/results/w4/slice --seed 20261024 --budget 10
+```
+
+Options:
+- `--out <dir>`: Output directory for all 21 slice artifacts (required).
+- `--seed <int>`: Deterministic random seed (default: `20261024`).
+- `--budget <int>`: Daily study time budget in minutes (default: `10`).
+- `--target <id>`: Target concept node ID (default: `D`).
+- `--curriculum <file>`: Curriculum DAG JSON path (default: `data/curricula/demo_curriculum.json`).
+- `--item-bank <csv>`: Synthetic item bank CSV path (default: `data/processed/item_bank_synthetic.csv`).
+- `--q-matrix <csv>`: Synthetic Q-matrix CSV path (default: `data/processed/q_matrix_synthetic.csv`).
+- `--policy <yaml>`: Policy configuration YAML (default: declared default policy).
+
+This executes:
+1. Loads and validates curriculum, item bank, and Q-matrix via `plan_request`.
+2. Creates two simulated learners expanded through groups; latent state strictly hidden.
+3. Runs adaptive CAT diagnostics via injected responses, computes initial priors, writes `diagnostic_record.json`.
+4. Plans Day 1, applies assessment with simulated responses, steps difficulty, gates dependent concepts on evidence Mastered.
+5. Advances days, schedules timestamped spaced review in leftover budget (`REVIEW_DUE`), triggers prerequisite remediation on repeated failures (`REMEDIATION_TRIGGERED`).
+6. Executes missed day, reduced budget, and shortened deadline while preserving completed progress.
+7. Validates and writes all 21 artifacts (plans, traces, `response_updates.json`, `diagnostic_record.json`, and SHA-256 `manifest.json`).
+8. Prints an evidence-backed summary derived from emitted traces.
 
 
 
