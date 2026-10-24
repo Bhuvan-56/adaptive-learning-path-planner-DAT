@@ -188,15 +188,6 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         "sigma2": c_state_pass.sigma2,
         "state": c_state_pass.classify()
     }
-    for resp in responses_pass:
-        c_state_pass.update(resp, policy=policy)
-    after_pass = {
-        "p": c_state_pass.p,
-        "kappa": c_state_pass.kappa,
-        "n": c_state_pass.n,
-        "sigma2": c_state_pass.sigma2,
-        "state": c_state_pass.classify()
-    }
 
     replan_state_pass = ReplanState(
         graph=g,
@@ -204,9 +195,18 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         budget=budget,
         deadline_days=deadline_days,
         target_node=target_node,
-        current_day=1
+        current_day=1,
+        policy=policy
     )
     plan_passed = replan(replan_state_pass, assessment_result("A", responses_pass))
+    c_state_pass_after = plan_passed["learner_states"]["A"]
+    after_pass = {
+        "p": c_state_pass_after.p,
+        "kappa": c_state_pass_after.kappa,
+        "n": c_state_pass_after.n,
+        "sigma2": c_state_pass_after.sigma2,
+        "state": c_state_pass_after.classify(policy)
+    }
     try:
         check_trace(candidate_universe, plan_passed["trace"], num_days=deadline_days)
     except ValueError as e:
@@ -232,16 +232,7 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         "kappa": c_state_fail.kappa,
         "n": c_state_fail.n,
         "sigma2": c_state_fail.sigma2,
-        "state": c_state_fail.classify()
-    }
-    for resp in responses_fail:
-        c_state_fail.update(resp, policy=policy)
-    after_fail = {
-        "p": c_state_fail.p,
-        "kappa": c_state_fail.kappa,
-        "n": c_state_fail.n,
-        "sigma2": c_state_fail.sigma2,
-        "state": c_state_fail.classify()
+        "state": c_state_fail.classify(policy)
     }
 
     replan_state_fail = ReplanState(
@@ -250,9 +241,18 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         budget=budget,
         deadline_days=deadline_days,
         target_node=target_node,
-        current_day=1
+        current_day=1,
+        policy=policy
     )
     plan_failed = replan(replan_state_fail, assessment_result("A", responses_fail))
+    c_state_fail_after = plan_failed["learner_states"]["A"]
+    after_fail = {
+        "p": c_state_fail_after.p,
+        "kappa": c_state_fail_after.kappa,
+        "n": c_state_fail_after.n,
+        "sigma2": c_state_fail_after.sigma2,
+        "state": c_state_fail_after.classify(policy)
+    }
     try:
         check_trace(candidate_universe, plan_failed["trace"], num_days=deadline_days)
     except ValueError as e:
@@ -270,7 +270,8 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         deadline_days=deadline_days,
         target_node=target_node,
         current_day=1,
-        completed_nodes={"A", "B"}
+        completed_nodes={"A", "B"},
+        policy=policy
     )
     plan_missed = replan(replan_state_inter, missed_day())
     try:
@@ -291,7 +292,8 @@ def run_demo(out_dir: str, seed: int = 20261012, budget: int = 10, curriculum_pa
         current_day=plan_missed["current_day"],
         completed_nodes=set(plan_missed["completed_nodes"]),
         past_days=plan_missed["days"][:1],
-        past_trace=plan_missed["trace"][:len(candidate_universe)]
+        past_trace=plan_missed["trace"][:len(candidate_universe)],
+        policy=policy
     )
     plan_reduced = replan(replan_state_reduced, changed_budget(reduced_budget))
     try:

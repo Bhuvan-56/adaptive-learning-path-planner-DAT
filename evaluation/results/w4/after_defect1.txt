@@ -1,0 +1,9 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\bhuva\Downloads\DAT11\.venv_w2\Scripts\python.exe
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collecting ... collected 2 items
+
+tests/test_w4_a1_evidence_policy.py::test_w4_d1_assessment_applied_once_in_cli_and_artifacts PASSED [ 50%]
+tests/test_w4_a1_evidence_policy.py::test_w4_d1_replay_rule_event_applied_once_per_call_and_twice_if_passed_twice PASSED [100%]
+
+============================== 2 passed in 2.78s ==============================

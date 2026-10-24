@@ -123,7 +123,8 @@ def plan_request(
         learner_states=learner_states,
         budget=budget,
         deadline_days=deadline_days,
-        target_node=primary_target
+        target_node=primary_target,
+        policy=active_policy
     )
 
     plan_status = plan.get("status")

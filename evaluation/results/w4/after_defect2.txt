@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.3, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\bhuva\Downloads\DAT11\.venv_w2\Scripts\python.exe
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collecting ... collected 6 items / 2 deselected / 4 selected
+
+tests/test_w4_a1_evidence_policy.py::test_w4_d2_a_mastered_p_different_decisions_in_plan_request PASSED [ 25%]
+tests/test_w4_a1_evidence_policy.py::test_w4_d2_b_window_size_changes_quorum_and_classification PASSED [ 50%]
+tests/test_w4_a1_evidence_policy.py::test_w4_d2_c_bkt_params_different_p_inside_replan PASSED [ 75%]
+tests/test_w4_a1_evidence_policy.py::test_w4_d2_d_replan_trace_class_equals_state_classify_for_every_node PASSED [100%]
+
+======================= 4 passed, 2 deselected in 1.70s =======================
