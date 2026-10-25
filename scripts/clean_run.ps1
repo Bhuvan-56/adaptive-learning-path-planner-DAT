@@ -55,6 +55,8 @@ try {
     $pythonBase = ""
     if ($env:PYTHON_EXE -and (Test-Path $env:PYTHON_EXE)) {
         $pythonBase = $env:PYTHON_EXE
+    } elseif (Test-Path "C:\Users\5520\AppData\Local\Programs\Python\Python311\python.exe") {
+        $pythonBase = "C:\Users\5520\AppData\Local\Programs\Python\Python311\python.exe"
     } elseif (Test-Path "C:\Users\bhuva\anaconda3\python.exe") {
         $pythonBase = "C:\Users\bhuva\anaconda3\python.exe"
     } else {
@@ -165,6 +167,7 @@ try {
 
     # 8. Run evaluate CLI command
     Write-Host "[8/8] Running evaluate command..."
+    & git checkout -- evaluation/results 2>$null
     $evalOut = Join-Path $cloneDir "evaluation\results\w5\eval_clean"
     & $venvPython -m src.cli evaluate --config experiments/w5_integrated.yaml --out $evalOut --learners 2
 
