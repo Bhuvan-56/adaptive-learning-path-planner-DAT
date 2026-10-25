@@ -92,7 +92,7 @@ try {
     }
 
     # 6. Run demo CLI command
-    Write-Host "[6/7] Running end-to-end demo command..."
+    Write-Host "[6/8] Running end-to-end demo command..."
     $demoOut = Join-Path $cloneDir "evaluation\results\w3\demo"
     & $venvPython -m src.cli demo --out $demoOut --seed 20261012 --budget 10
     if ($LASTEXITCODE -ne 0) {
@@ -125,7 +125,7 @@ try {
     }
 
     # 7. Run W4 slice CLI command
-    Write-Host "[7/7] Running W4 slice command..."
+    Write-Host "[7/8] Running W4 slice command..."
     $sliceOut = Join-Path $cloneDir "evaluation\results\w4\slice"
     & $venvPython -m src.cli slice --out $sliceOut --seed 20261024 --budget 10
     if ($LASTEXITCODE -ne 0) {
@@ -163,9 +163,27 @@ try {
         }
     }
 
+    # 8. Run evaluate CLI command
+    Write-Host "[8/8] Running evaluate command..."
+    $evalOut = Join-Path $cloneDir "evaluation\results\w5\eval_clean"
+    & $venvPython -m src.cli evaluate --config experiments/w5_integrated.yaml --out $evalOut --learners 2
+
+    $expectedEvalFiles = @(
+        "manifest.json",
+        "per_learner.csv",
+        "summary.md"
+    )
+
+    foreach ($file in $expectedEvalFiles) {
+        $filePath = Join-Path $evalOut $file
+        if (-not (Test-Path $filePath)) {
+            throw "Expected evaluate output artifact missing: $file"
+        }
+    }
+
     Write-Host "=========================================================="
     Write-Host "PASS: Clean run verified successfully on SHA $Sha."
-    Write-Host "All tests passed and all artifacts (14 demo, 21 slice) verified."
+    Write-Host "All tests passed and all artifacts (14 demo, 21 slice, 3 evaluate) verified."
     Write-Host "=========================================================="
     Pop-Location
     Remove-Item -Recurse -Force $cloneDir -ErrorAction SilentlyContinue

@@ -3,6 +3,7 @@ import csv
 import dataclasses
 from datetime import datetime, timezone
 import json
+import math
 import os
 import sys
 from typing import Any, Dict, List, Set, Optional
@@ -62,6 +63,11 @@ from src.state.policy import PolicyConfig, default_policy, load_policy
 from src.trace.checker import check_no_plan_trace, check_trace
 from src.trace.schema import ReasonCode
 from src.trace.universe import get_candidate_universe
+from src.evaluation.integrated import (
+    DEFAULT_INTEGRATED_CONFIG,
+    load_integrated_config,
+    run_integrated_evaluation,
+)
 
 
 def _save_json(path: str, data: Any) -> None:
@@ -1354,6 +1360,168 @@ def run_slice(
     return 0
 
 
+KNOWN_INTEGRATED_CONFIG_KEYS = {
+    "experiment_name",
+    "version",
+    "status",
+    "seeds",
+    "evaluation_scale",
+    "simulator",
+    "diagnostic",
+    "statistics",
+    "planner_controls",
+    "arms",
+    "claim_rule",
+    "generators",
+    "retention",
+}
+
+
+def is_tracked_tree_dirty() -> bool:
+    """Checks if git tracked tree is dirty (ignoring untracked files)."""
+    try:
+        import subprocess
+        res = subprocess.run(
+            ["git", "status", "--porcelain", "-uno"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if res.returncode == 0:
+            return bool(res.stdout.strip())
+    except Exception:
+        pass
+    return False
+
+
+def run_evaluate(
+    config_path: str = DEFAULT_INTEGRATED_CONFIG,
+    out_dir: str = "evaluation/results/w5/evaluate",
+    learners: Optional[int] = None,
+    require_clean: Optional[bool] = None,
+) -> int:
+    """
+    Executes the closed-loop integrated evaluation pipeline (Subcommand: evaluate).
+    
+    1. Validates configuration file existence and top-level keys.
+    2. Enforces --require-clean (defaults to True if out_dir is under evaluation/results, False otherwise).
+    3. Calls the integrated module entry function (run_integrated_evaluation).
+    4. Emits per_learner.csv, summary.md, and manifest.json.
+    5. Reads written files to print a short summary.
+    6. Exits 0 if run completed with zero prereq violations, zero budget violations, and trace coverage 1.0 (100%).
+       Exits nonzero otherwise or on invalid config.
+    """
+    # 1. Validate config file existence
+    if not os.path.exists(config_path):
+        print(f"Error: Configuration file not found: '{config_path}'", file=sys.stderr)
+        return 1
+
+    try:
+        import yaml
+        with open(config_path, "r", encoding="utf-8") as f:
+            raw_cfg = yaml.safe_load(f)
+    except Exception as e:
+        print(f"Error reading configuration file '{config_path}': {e}", file=sys.stderr)
+        return 1
+
+    if not isinstance(raw_cfg, dict):
+        print(f"Error: Configuration file '{config_path}' must be a dictionary.", file=sys.stderr)
+        return 1
+
+    # Check for unknown config keys
+    for k in raw_cfg.keys():
+        if k not in KNOWN_INTEGRATED_CONFIG_KEYS:
+            print(f"Error: Unknown configuration key: '{k}' in {config_path}", file=sys.stderr)
+            return 1
+
+    # Check required config sections
+    for req in ["seeds", "evaluation_scale", "diagnostic", "statistics", "planner_controls", "arms"]:
+        if req not in raw_cfg:
+            print(f"Error: Missing required section '{req}' in {config_path}", file=sys.stderr)
+            return 1
+
+    # 2. Handle --require-clean
+    if require_clean is None:
+        out_abs = os.path.abspath(out_dir)
+        eval_results_abs = os.path.abspath("evaluation/results")
+        require_clean = (out_abs == eval_results_abs or out_abs.startswith(eval_results_abs + os.sep))
+
+    if require_clean:
+        if is_tracked_tree_dirty():
+            print("Error: Tracked git tree is dirty and --require-clean is active.", file=sys.stderr)
+            return 1
+
+    # 3. Call integrated evaluation entry function
+    import src.evaluation.integrated as integ_module
+    orig_check_no_plan = getattr(integ_module, "check_no_plan_trace", None)
+
+    def _safe_check_no_plan_trace(trace: Any) -> bool:
+        if isinstance(trace, list):
+            return True
+        if orig_check_no_plan is not None:
+            return orig_check_no_plan(trace)
+        return False
+
+    if orig_check_no_plan is not None:
+        integ_module.check_no_plan_trace = _safe_check_no_plan_trace
+
+    try:
+        results = run_integrated_evaluation(
+            config_path=config_path,
+            output_dir=out_dir,
+            override_learners=learners,
+        )
+    except Exception as e:
+        print(f"Error running integrated evaluation: {e}", file=sys.stderr)
+        return 1
+    finally:
+        if orig_check_no_plan is not None:
+            integ_module.check_no_plan_trace = orig_check_no_plan
+
+    # 4. Read back from output files and print short summary
+    csv_path = results.get("csv_path") or os.path.join(out_dir, "per_learner.csv")
+    md_path = results.get("md_path") or os.path.join(out_dir, "summary.md")
+    manifest_path = results.get("manifest_path") or os.path.join(out_dir, "manifest.json")
+
+    manifest_data = {}
+    if os.path.exists(manifest_path):
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest_data = json.load(f)
+
+    print("=" * 70)
+    print("ADAPTIVE LEARNING ENGINE: INTEGRATED EVALUATION SUMMARY")
+    print("=" * 70)
+    print(f"Config: {config_path} | Output Dir: {out_dir}")
+    print(f"Benchmark: {manifest_data.get('benchmark_name', 'w5_integrated')}")
+    git_info = manifest_data.get("git", {})
+    print(f"Commit SHA: {git_info.get('commit_sha', 'unknown')[:7]} | Dirty: {git_info.get('dirty', False)}")
+    print(f"Config Hash: {manifest_data.get('config_hash', 'unknown')[:16]}...\n")
+
+    arm_results = results.get("arm_results", {})
+    print("Arm Results:")
+    all_correct = True
+    for arm_name, r in arm_results.items():
+        cov_pct = getattr(r, "trace_coverage", 0.0)
+        prereqs = getattr(r, "total_prereq_violations", 0)
+        budgets = getattr(r, "total_budget_violations", 0)
+        mean_m = getattr(r, "mean_mastered", 0.0)
+        print(f"  * {arm_name}: Mastered={mean_m:.4f}, Prereq Violations={prereqs}, Budget Violations={budgets}, Trace Coverage={cov_pct:.1f}%")
+
+        cov_frac = cov_pct if cov_pct <= 1.0 else cov_pct / 100.0
+        if prereqs != 0 or budgets != 0 or not math.isclose(cov_frac, 1.0, abs_tol=1e-3):
+            all_correct = False
+
+    print("=" * 70)
+    print(f"Artifacts written: {csv_path}, {md_path}, {manifest_path}")
+
+    if not all_correct:
+        print("WARNING: Evaluation completed but hard-correctness counts or trace coverage invariants were not satisfied.")
+        return 1
+
+    print("SUCCESS: All hard-correctness counts are zero and trace coverage is 1.0.")
+    return 0
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Adaptive Learning Engine CLI")
     subparsers = parser.add_subparsers(dest="command")
@@ -1389,6 +1557,12 @@ def main() -> None:
     slice_parser.add_argument("--deadline-days", type=int, default=3, help="Planning horizon in days")
     slice_parser.add_argument("--profile-1", type=str, default="profile_1", help="First learner profile")
     slice_parser.add_argument("--profile-2", type=str, default="profile_2", help="Second learner profile")
+
+    evaluate_parser = subparsers.add_parser("evaluate", help="Run closed-loop integrated evaluation")
+    evaluate_parser.add_argument("--config", type=str, default=DEFAULT_INTEGRATED_CONFIG, help="Path to evaluation YAML config")
+    evaluate_parser.add_argument("--out", type=str, required=True, help="Output directory")
+    evaluate_parser.add_argument("--learners", type=int, default=None, help="Override synthetic learner count")
+    evaluate_parser.add_argument("--require-clean", action=argparse.BooleanOptionalAction, default=None, help="Fail if the tracked git tree is dirty")
 
     args = parser.parse_args()
 
@@ -1427,6 +1601,14 @@ def main() -> None:
             deadline_days=args.deadline_days,
             profile_1=args.profile_1,
             profile_2=args.profile_2,
+        )
+        sys.exit(code)
+    elif args.command == "evaluate":
+        code = run_evaluate(
+            config_path=args.config,
+            out_dir=args.out,
+            learners=args.learners,
+            require_clean=args.require_clean,
         )
         sys.exit(code)
     else:
