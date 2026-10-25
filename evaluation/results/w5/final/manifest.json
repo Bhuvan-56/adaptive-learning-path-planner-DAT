@@ -1,0 +1,41 @@
+{
+  "benchmark_name": "w5_integrated",
+  "config_hash": "8a4ace116675cd2e24c5252e9c26dd6aea2d2facaf861c7b4682510c4aeefdf7",
+  "git": {
+    "commit_sha": "a20a6df02b67b98fbd843d0599b1db38a23fbafe",
+    "dirty": false
+  },
+  "input_files": {
+    "config": {
+      "path": "experiments/w5_final.yaml",
+      "sha256": "f15969f758d004540dacee2b111e639063a592bf67dbf32a79c41dc78cd942d5"
+    },
+    "curriculum": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\data\\curricula\\demo_curriculum.json",
+      "sha256": "36c8fcca4c0adfe00aa53a3664b7a501c179b6eeb6c502811699bd9765e817d4"
+    },
+    "item_bank": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\data\\processed\\item_bank_synthetic.csv",
+      "sha256": "e40ffdebe931d155cc5d9b6c9451f3aaf270231f2c50a81f6cdd54851af2f9e5"
+    },
+    "profiles": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\config\\profiles.yaml",
+      "sha256": "5e001c16c68f105b30fde6cf7eb7e3116c5ce0496773d341aa55e2b35a9d312f"
+    },
+    "q_matrix": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\data\\processed\\q_matrix_synthetic.csv",
+      "sha256": "1ed05f59ac73f8c4ecd3f937c8ed5ed414f12324b8760ede234266cf0decc39e"
+    }
+  },
+  "output_files": {
+    "per_learner.csv": "89f59d19938ff3876618ff30aa992d692aadcd46b326603d2a78678c826e7639",
+    "summary.md": "f3fd7f82d491f72f46b877d112b4c469b1a425aad5ba94867fd6193e23f28e41"
+  },
+  "package_versions": {
+    "networkx": "3.1",
+    "numpy": "1.26.4",
+    "pytest": "7.3.1",
+    "yaml": "6.0.1"
+  },
+  "timestamp": "2026-10-25T16:55:04Z"
+}
