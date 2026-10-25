@@ -1,0 +1,238 @@
+# Acceptance Groups Test Mapping (Week 5)
+# Maps each acceptance group (M1-a to M8-d) from docs/ACCEPTANCE_GROUPS.md
+# to the concrete pytest node IDs collected from the repository test suite.
+# Note: Any cited test name from docs/ACCEPTANCE_GROUPS.md not found in the
+# collected test suite is recorded under missing_citations.
+
+M1-a:
+  name: "Graph Topology & Schema Validation"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m1_curriculum_graph.py::test_tc_1_2_valid_branching_graph_passes"
+    - "tests/test_m1_curriculum_graph.py::test_tc_1_2_rejects_malformed_graph_files[missing_node.json-MISSING_NODE]"
+    - "tests/test_m1_curriculum_graph.py::test_tc_1_2_rejects_malformed_graph_files[nonpositive_duration.json-NONPOSITIVE_DURATION]"
+    - "tests/test_m1_curriculum_graph.py::test_tc_1_2_rejects_malformed_graph_files[difficulty_out_of_range.json-DIFFICULTY_OUT_OF_RANGE]"
+    - "tests/test_m1_curriculum_graph.py::test_tc_1_2_rejects_malformed_graph_files[self_loop.json-SELF_LOOP]"
+    - "tests/test_m1_curriculum_graph.py::test_tc_1_2_rejects_malformed_graph_files[cycle_detected.json-CYCLE_DETECTED]"
+    - "tests/test_m1_curriculum_graph.py::test_tc_1_2_rejects_malformed_graph_files[non_finite_value.json-NON_FINITE_VALUE]"
+  missing_citations: []
+  asserts_criterion: "tests/test_m1_curriculum_graph.py:33"
+
+M1-b:
+  name: "BKT Numerical Parity with pyBKT"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m1_bkt_parity.py::test_bkt_parity_on_heldout_student"
+    - "tests/test_m1_bkt_parity.py::test_bkt_adapter_validation_and_forget_zero"
+    - "tests/test_m1_bkt_parity.py::test_bkt_adapter_to_concept_state"
+  missing_citations:
+    - "test_bkt_pybkt_numeric_parity_across_sequences"
+  asserts_criterion: "tests/test_m1_bkt_parity.py:125"
+
+M1-c:
+  name: "State Classification Precedence & Window Gating"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m1_learner_state.py::test_boundary_variance_0_05"
+    - "tests/test_m1_learner_state.py::test_boundary_p_0_85"
+    - "tests/test_m1_learner_state.py::test_boundary_p_0_40"
+    - "tests/test_m1_learner_state.py::test_boundary_n_3"
+    - "tests/test_m1_learner_state.py::test_window_gate_boundaries"
+    - "tests/test_m1_learner_state.py::test_consistent_correct_reaches_mastered"
+    - "tests/test_m1_learner_state.py::test_consistent_incorrect_reaches_weak"
+    - "tests/test_m1_learner_state.py::test_conflicting_evidence_no_unsupported_confidence"
+    - "tests/test_m1_learner_state.py::test_cold_start_uncertain"
+  missing_citations: []
+  asserts_criterion: "tests/test_m1_learner_state.py:108"
+
+M1-d:
+  name: "Zero Prerequisite Violations (Hard Correctness)"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m3_states_feasibility.py::test_scheduled_only_prerequisite_does_not_unlock_dependent_unconditionally"
+    - "tests/test_m3_states_feasibility.py::test_failed_prerequisite_keeps_dependents_blocked"
+    - "tests/test_w4_a3_difficulty_gate.py::test_gate_case_1_scheduled_only_prerequisite_keeps_dependent_blocked"
+    - "tests/test_w4_a3_difficulty_gate.py::test_gate_case_2_failed_assessment_keeps_dependent_blocked"
+    - "tests/test_w4_a3_difficulty_gate.py::test_gate_case_3_missed_day_keeps_dependent_blocked_and_preserves_work"
+    - "tests/test_w4_a3_difficulty_gate.py::test_gate_case_4_passed_assessment_releases_dependent"
+  missing_citations: []
+  asserts_criterion: "tests/test_m3_states_feasibility.py:67"
+
+M2-a:
+  name: "CAT Item Selection & Stopping Rule"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m2_adaptive_diagnostic.py::test_tc_2_1_incorrect_response_lowers_mastery_and_selects_max_fisher_item"
+    - "tests/test_m2_adaptive_diagnostic.py::test_tc_2_2_diagnostic_terminates_on_variance_or_question_limit"
+    - "tests/test_w4_b3_diagnostic.py::test_diagnostic_stops_at_item_cap"
+    - "tests/test_w4_b3_diagnostic.py::test_diagnostic_stops_at_variance_rule_constructed_case"
+    - "tests/test_w4_b3_diagnostic.py::test_diagnostic_selects_max_fisher_information_hand_computed"
+    - "tests/test_w4_b3_diagnostic.py::test_diagnostic_same_responses_give_same_item_sequence"
+  missing_citations: []
+  asserts_criterion: "tests/test_m2_adaptive_diagnostic.py:125"
+
+M2-b:
+  name: "CAT Ability-to-Skill Mapping"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_w4_b3_diagnostic.py::test_diagnostic_concept_states_unprobed_uncertain"
+  missing_citations:
+    - "test_cat_theta_to_bkt_mapping"
+  asserts_criterion: "tests/test_w4_b3_diagnostic.py:263"
+
+M3-a:
+  name: "Zero Daily Budget Violations (Hard Correctness)"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m3_path_planning.py::test_tc_3_1_budget_never_exceeds_configured_budget[5]"
+    - "tests/test_m3_path_planning.py::test_tc_3_1_budget_never_exceeds_configured_budget[10]"
+    - "tests/test_m3_path_planning.py::test_tc_3_1_budget_never_exceeds_configured_budget[15]"
+    - "tests/test_m3_path_planning.py::test_tc_3_1_budget_never_exceeds_configured_budget[30]"
+  missing_citations: []
+  asserts_criterion: "tests/test_m3_path_planning.py:36"
+
+M3-b:
+  name: "Greedy Benchmark Approximation Distribution"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m3_path_planning.py::test_tc_3_2_counterexample"
+    - "tests/test_m3_path_planning.py::test_tc_3_2_benchmark_runs_and_reports"
+    - "tests/test_benchmark_invariance.py::test_repaired_oracle_order_invariance_across_250_instances"
+    - "tests/test_benchmark_invariance.py::test_counterexample_12_18"
+  missing_citations: []
+  asserts_criterion: "tests/test_m3_path_planning.py:77"
+
+M3-c:
+  name: "Oracle Precedence & Order Invariance"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m3_oracle_order.py::test_oracle_order_independence"
+    - "tests/test_m3_oracle_bruteforce.py::test_oracle_hard_cap_raises_value_error"
+    - "tests/test_m3_oracle_bruteforce.py::test_oracle_timeout_raises_timeout_error"
+  missing_citations: []
+  asserts_criterion: "tests/test_m3_oracle_bruteforce.py:136"
+
+M4-a:
+  name: "Infeasibility Detection & Repair Guidance"
+  doc_status: "partial"
+  node_ids:
+    - "tests/test_m3_path_planning.py::test_infeasible_block_10min_under_5min_cap"
+    - "tests/test_m3_states_feasibility.py::test_defect_4_three_six_minute_tasks_heuristic_no_plan_consistent_nested_status"
+  missing_citations: []
+  asserts_criterion: "tests/test_m3_path_planning.py:53"
+
+M4-b:
+  name: "2-Up / 1-Down Dynamic Exercise Adaptation"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m4_difficulty_adaptation.py::test_tc_4_1_single_failure_decreases_difficulty_floored_at_0_05"
+    - "tests/test_m4_difficulty_adaptation.py::test_tc_4_2_two_consecutive_successes_increase_difficulty_capped_at_0_95"
+    - "tests/test_m4_difficulty_adaptation.py::test_difficulty_floor"
+    - "tests/test_m4_difficulty_adaptation.py::test_difficulty_cap"
+  missing_citations: []
+  asserts_criterion: "tests/test_m4_difficulty_adaptation.py:20"
+
+M5-a:
+  name: "Remediation Trigger on Repeated Assessment Failure"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m5_spaced_review_remediation.py::test_tc_5_1_failed_assessments_trigger_prerequisite_remediation"
+    - "tests/test_w4_a4_review_remediation.py::test_k_failures_trigger_remediation_and_k_minus_1_do_not"
+    - "tests/test_w4_a4_review_remediation.py::test_remediation_inside_same_daily_budget"
+  missing_citations: []
+  asserts_criterion: "tests/test_m5_spaced_review_remediation.py:66"
+
+M5-b:
+  name: "HLR Spaced Review Scheduling"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m5_spaced_review_remediation.py::test_tc_5_2_decayed_hlr_recall_schedules_spaced_review"
+    - "tests/test_w4_a4_review_remediation.py::test_review_eligibility_boundary_above_and_below"
+    - "tests/test_w4_a4_review_remediation.py::test_review_never_displaces_required_work"
+    - "tests/test_w4_a4_review_remediation.py::test_review_deferred_when_budget_is_short"
+  missing_citations: []
+  asserts_criterion: "tests/test_w4_a4_review_remediation.py:83"
+
+M6-a:
+  name: "Dynamic Event Replanning"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m6_replanning_events.py::test_event_missed_day_keeps_completed_work"
+    - "tests/test_m6_replanning_events.py::test_event_budget_reduced_gives_valid_plan_or_structured_infeasibility"
+    - "tests/test_m6_replanning_events.py::test_event_uncertain_prereq_assessment_passes_dependent_admissible"
+    - "tests/test_m6_replanning_events.py::test_event_failed_assessment_prereq_dependent_stays_blocked"
+  missing_citations: []
+  asserts_criterion: "tests/test_m6_replanning_events.py:163"
+
+M6-b:
+  name: "Plan Compression on Resource Reductions"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m6_dynamic_replanning.py::test_tc_6_2_reduced_budget_outputs_valid_plan_or_infeasibility_trace_with_alternatives"
+  missing_citations: []
+  asserts_criterion: "tests/test_m6_dynamic_replanning.py:131"
+
+M7-a:
+  name: "Trace Coverage 1.0 & Schema Contract (Hard Correctness)"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m7_explainability.py::test_trace_has_one_entry_per_candidate"
+    - "tests/test_m7_trace_contract.py::test_check_trace_missing_whole_day_2_of_2"
+    - "tests/test_m7_trace_contract.py::test_check_trace_bogus_decision"
+    - "tests/test_m7_trace_contract.py::test_check_trace_missing_constraints_field"
+  missing_citations: []
+  asserts_criterion: "tests/test_m7_explainability.py:25"
+
+M7-b:
+  name: "Prerequisite & Skip Explainability Justification"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_m7_explainability.py::test_blocked_and_skipped_nodes_visible"
+    - "tests/test_m3_states_feasibility.py::test_uncertain_prerequisite_routes_to_uncertain_needs_assessment"
+    - "tests/test_m3_states_feasibility.py::test_completed_input_node_traced_as_completed"
+  missing_citations: []
+  asserts_criterion: "tests/test_m7_explainability.py:40"
+
+M8-a:
+  name: "Learner Profile Plan Differentiation"
+  doc_status: "partial"
+  node_ids:
+    - "tests/test_m8_evaluation.py::test_tc_8_1_different_mastery_profiles_produce_distinct_plans"
+    - "tests/test_w4_b2_provenance_profiles.py::test_w4_d8_profile_expansion_to_concept_priors"
+    - "tests/test_w4_t2_slice.py::test_slice_two_learners_differ"
+  missing_citations: []
+  asserts_criterion: "NONE FOUND"
+
+M8-b:
+  name: "Single Runnable End-to-End Command (Hard Correctness)"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_cli_demo.py::test_cli_demo_byte_identical_rerun"
+    - "tests/test_cli_demo.py::test_cli_demo_all_traces_pass_contracts"
+    - "tests/test_w4_a2_trace_request.py::test_w4_d6_cli_plan_subprocess"
+    - "tests/test_w4_t2_slice.py::test_slice_runs_and_produces_all_artifacts"
+  missing_citations: []
+  asserts_criterion: "tests/test_cli_demo.py:32"
+
+M8-c:
+  name: "Latent Mastery Simulator Invisibility Invariant"
+  doc_status: "passing"
+  node_ids:
+    - "tests/test_simulation.py::test_planner_and_state_modules_contain_no_import_of_evaluator_view"
+    - "tests/test_cli_demo.py::test_cli_demo_no_evaluator_view_imports_in_planning_or_state"
+    - "tests/test_w4_b4_comparison.py::test_latent_state_invisibility_and_zero_evaluation_imports_under_planning_and_state"
+  missing_citations: []
+  asserts_criterion: "tests/test_simulation.py:69"
+
+M8-d:
+  name: "Independent Retained-Recall Outcome Evaluation"
+  doc_status: "partial"
+  node_ids:
+    - "tests/test_w4_b4_comparison.py::test_w4_comparison_yaml_schema_and_protocol_citations"
+    - "tests/test_w4_b4_comparison.py::test_diagnostic_comparison_runs_and_emits_valid_artifacts"
+    - "tests/test_w4_b4_comparison.py::test_paired_bootstrap_ci_computation"
+    - "tests/test_w4_b4_comparison.py::test_planner_controls_comparison"
+    - "tests/test_simulation.py::test_mismatched_generator_interface_raises_not_implemented"
+  missing_citations:
+    - "test_independent_retention_outcome"
+  asserts_criterion: "NONE FOUND"
