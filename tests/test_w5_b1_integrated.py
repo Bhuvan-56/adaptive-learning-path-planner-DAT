@@ -3,7 +3,6 @@ from src.evaluation.compare import run_planner_comparison
 from src.simulation.simulator import SimulatedLearner
 
 
-@pytest.mark.xfail(strict=True, reason="W5 F1: compare_planner_controls queries lessons instead of activities")
 def test_w5_f1_planner_controls_executes_activities(tmp_path):
     """
     Verifies that run_planner_comparison executes scheduled activities for static and adaptive arms.

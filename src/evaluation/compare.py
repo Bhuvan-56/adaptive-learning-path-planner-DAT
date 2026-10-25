@@ -724,7 +724,7 @@ def run_planner_comparison(
                 completed_so_far: Set[str] = set()
 
                 for d_info in days:
-                    lessons = d_info.get("lessons", [])
+                    lessons = d_info.get("activities", d_info.get("lessons", []))
                     # Check daily budget constraint
                     day_cost = sum(int(g.nodes[nid].get("baseline_duration", 0)) for nid in lessons)
                     if day_cost > daily_budget:
@@ -826,7 +826,7 @@ def run_planner_comparison(
                     day_lessons = []
                     for d_entry in days:
                         if d_entry.get("day") == day_idx:
-                            day_lessons = d_entry.get("lessons", [])
+                            day_lessons = d_entry.get("activities", d_entry.get("lessons", []))
                             break
 
                     day_cost = sum(int(g.nodes[nid].get("baseline_duration", 0)) for nid in day_lessons)
