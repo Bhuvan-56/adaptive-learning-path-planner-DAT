@@ -1374,6 +1374,10 @@ KNOWN_INTEGRATED_CONFIG_KEYS = {
     "claim_rule",
     "generators",
     "retention",
+    "scenarios",
+    "outcomes",
+    "primary_outcome",
+    "secondary_outcomes",
 }
 
 

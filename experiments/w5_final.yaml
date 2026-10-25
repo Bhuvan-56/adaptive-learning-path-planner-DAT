@@ -1,0 +1,134 @@
+# Week 5 Final Evaluation Configuration (w5/t2-final-run)
+# Master benchmark specification for final integrated evaluation run.
+
+experiment_name: "w5_final"
+version: "1.0"
+status: "BENCHMARK_SPECIFICATION"
+
+# Evaluated Generator Scenarios (Module M8 / Task B2 & T2)
+scenarios:
+  S0:
+    name: "default_matched_bkt"
+    description: "Primary matched BKT response dynamics (SimulatedLearner default generator)"
+    generator: "bkt_default"
+  S1:
+    name: "forgetting_variant"
+    description: "Daily latent mastery decay with parameter p_F = 0.05"
+    generator: "forgetting"
+    secondary_evaluation: "delayed_retention_quiz"
+  S2:
+    name: "difficulty_sensitive_variant"
+    description: "Monotone logit scaling response sensitivity with parameter k = 0.50"
+    generator: "difficulty_sensitive"
+  S3:
+    name: "mismatched_pfa_generator"
+    description: "Mismatched PFA/logistic generator (non-BKT practice-count dynamics)"
+    generator: "mismatched_pfa"
+
+# Outcomes Specification
+primary_outcome: "concepts truly mastered at the end of the horizon, read by the evaluator"
+
+secondary_outcomes:
+  retained_recall: "retained recall in S1 only via delayed retention quiz"
+  prerequisite_violations: "zero prerequisite violations (hard correctness invariant)"
+  budget_violations: "zero daily budget violations (hard correctness invariant)"
+  trace_coverage: "audit trace coverage 1.0 (hard correctness invariant)"
+  no_plan_counts: "infeasibility and no-plan reason codes"
+  runtime: "planning runtime p50 and p95 distributions"
+
+# Evaluated Planner Arms & Ablations
+arms:
+  primary:
+    - "adaptive_full"
+    - "static_prerequisite_order"
+    - "non_adaptive_greedy"
+  ablations:
+    enabled: true
+    flags:
+      no_diagnostic: true        # Cold-start priors instead of CAT diagnostic
+      no_replan: true            # Static schedule without dynamic replanning
+      no_difficulty_step: true   # Static base difficulty without 2-Up/1-Down staircase
+      no_review: true            # Review scheduling disabled
+      no_remediation: true       # Prerequisite remediation disabled
+
+# Evaluation Cohort Scale
+evaluation_scale:
+  num_synthetic_learners: 200
+  num_seed_runs: 5
+
+# Matched Cohort Seeds
+seeds:
+  - 42
+  - 101
+  - 2024
+  - 777
+  - 999
+
+# Statistical Bootstrap Parameters
+statistics:
+  bootstrap_resamples: 1000
+  confidence_level: 0.95
+
+# Strict Claim Rule
+claim_rule: "An arm is called better than another only if the paired 95% interval for the difference excludes zero (strictly positive lower bound). Otherwise the summary reports 'no difference shown'."
+
+# Planner Operational Constraints
+planner_controls:
+  horizon_days: 5
+  daily_budget: 10
+  retention_delay_days: 7
+  target_node: "D"
+
+# Diagnostic Testing Constraints
+diagnostic:
+  item_cap: 10
+  stopping_variance: 0.15
+  latent_mastery_rule: "theta >= b_concept"
+  concept_difficulties:
+    A: -0.20
+    B: -0.20
+    C: 0.15
+    D: 0.50
+  held_out_items_per_concept: 5
+
+# Generative Simulator Specifications & Variants (Task B2)
+generators:
+  bkt_default:
+    generator_name: "MatchedBKTGenerator"
+    p_S: 0.10
+    p_G: 0.25
+    p_T: 0.10
+    p_F: 0.00
+    k: 0.00
+  forgetting:
+    generator_name: "MatchedBKTGenerator"
+    p_S: 0.10
+    p_G: 0.25
+    p_T: 0.10
+    p_F: 0.05
+    k: 0.00
+  difficulty_sensitive:
+    generator_name: "MatchedBKTGenerator"
+    p_S: 0.10
+    p_G: 0.25
+    p_T: 0.10
+    p_F: 0.00
+    k: 0.50
+  mismatched_pfa:
+    generator_name: "MismatchedPFAOrLogisticGenerator"
+    concept_intercepts:
+      A: 0.0
+      B: -0.2
+      C: -0.5
+      D: -1.0
+    gamma: 0.40
+    rho: 0.10
+    difficulty_weight: 1.0
+    mastered_p: 0.75
+    p_F: 0.00
+
+# Delayed Retention Quiz Parameters (src.evaluation.retention)
+retention:
+  items_per_concept_N: 5
+  delay_days_D: 7
+  reference_difficulty: 0.50

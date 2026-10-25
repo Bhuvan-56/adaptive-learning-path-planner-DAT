@@ -438,6 +438,12 @@ def main() -> int:
         help="Output directory for matrix reports (default: evaluation/results/w5)",
     )
     parser.add_argument(
+        "--prefix",
+        type=str,
+        default="acceptance_matrix_r1",
+        help="Base filename prefix for output reports (default: acceptance_matrix_r1)",
+    )
+    parser.add_argument(
         "--allow-dirty",
         action="store_true",
         help="Allow generation when tracked tree is dirty (refuses otherwise)",
@@ -479,8 +485,8 @@ def main() -> int:
         )
 
     os.makedirs(args.out, exist_ok=True)
-    md_path = os.path.join(args.out, "acceptance_matrix_r1.md")
-    csv_path = os.path.join(args.out, "acceptance_matrix_r1.csv")
+    md_path = os.path.join(args.out, f"{args.prefix}.md")
+    csv_path = os.path.join(args.out, f"{args.prefix}.csv")
 
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(md_content)
