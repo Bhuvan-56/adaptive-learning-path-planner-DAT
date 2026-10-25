@@ -107,7 +107,7 @@ This generates:
 
 ## Command-Line Interface (CLI)
 
-The application provides a unified CLI entry point via `python -m src.cli` supporting three primary subcommands: `demo`, `plan`, and `slice`.
+The application provides a unified CLI entry point via `python -m src.cli` supporting four primary subcommands: `demo`, `plan`, `slice`, and `evaluate`.
 
 ### 1. End-to-End Demo (`demo`)
 
@@ -168,6 +168,28 @@ This executes:
 6. Executes missed day, reduced budget, and shortened deadline while preserving completed progress.
 7. Validates and writes all 21 artifacts (plans, traces, `response_updates.json`, `diagnostic_record.json`, and SHA-256 `manifest.json`).
 8. Prints an evidence-backed summary derived from emitted traces.
+
+### 4. Integrated Evaluation (`evaluate`)
+
+Run the closed-loop integrated evaluation pipeline:
+
+```bash
+python -m src.cli evaluate --config experiments/w5_integrated.yaml --out evaluation/results/w5/eval_run --learners 10
+```
+
+Options:
+- `--config <yaml>`: Path to evaluation YAML configuration (default: `experiments/w5_integrated.yaml`).
+- `--out <dir>`: Output directory for `per_learner.csv`, `summary.md`, and `manifest.json` (required).
+- `--learners <int>`: Optional override for synthetic learner cohort size.
+- `--require-clean`: Optional flag enforcing clean git status on tracked tree (default: enabled when `--out` is under `evaluation/results`, disabled otherwise).
+
+This executes:
+1. Validates configuration schema and required benchmark sections.
+2. Runs closed-loop integrated evaluation across all primary and ablation planner arms.
+3. Records simulated learner histories, prerequisite checks, and budget compliance.
+4. Computes paired bootstrap confidence intervals and statistical claim comparisons.
+5. Emits `per_learner.csv`, `summary.md`, and SHA-256 `manifest.json`.
+6. Prints a concise execution summary reading back from generated output files.
 
 
 
