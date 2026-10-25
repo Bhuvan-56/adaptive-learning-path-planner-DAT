@@ -1,0 +1,897 @@
+{
+  "seeds": [
+    42,
+    101,
+    2024
+  ],
+  "requests": [
+    {
+      "concept": "A",
+      "difficulty": 0.1
+    },
+    {
+      "concept": "A",
+      "difficulty": 0.5
+    },
+    {
+      "concept": "A",
+      "difficulty": 0.9
+    },
+    {
+      "concept": "B",
+      "difficulty": 0.2
+    },
+    {
+      "concept": "B",
+      "difficulty": 0.5
+    },
+    {
+      "concept": "B",
+      "difficulty": 0.8
+    },
+    {
+      "concept": "C",
+      "difficulty": 0.3
+    },
+    {
+      "concept": "C",
+      "difficulty": 0.5
+    },
+    {
+      "concept": "C",
+      "difficulty": 0.7
+    },
+    {
+      "concept": "D",
+      "difficulty": 0.4
+    },
+    {
+      "concept": "D",
+      "difficulty": 0.5
+    },
+    {
+      "concept": "D",
+      "difficulty": 0.6
+    },
+    {
+      "concept": "A",
+      "difficulty": 0.5
+    },
+    {
+      "concept": "B",
+      "difficulty": 0.5
+    },
+    {
+      "concept": "C",
+      "difficulty": 0.5
+    },
+    {
+      "concept": "D",
+      "difficulty": 0.5
+    }
+  ],
+  "runs": {
+    "42": [
+      {
+        "concept": "A",
+        "difficulty": 0.1,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "A",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "A",
+        "difficulty": 0.9,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.2,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.8,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.3,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.7,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.4,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.6,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "A",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      }
+    ],
+    "101": [
+      {
+        "concept": "A",
+        "difficulty": 0.1,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "A",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "A",
+        "difficulty": 0.9,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.2,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.8,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.3,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.7,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.4,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.6,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "A",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      }
+    ],
+    "2024": [
+      {
+        "concept": "A",
+        "difficulty": 0.1,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "A",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "A",
+        "difficulty": 0.9,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.2,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": false,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.8,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.3,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.7,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.4,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.6,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "A",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "B",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "C",
+        "difficulty": 0.5,
+        "score": 0,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      },
+      {
+        "concept": "D",
+        "difficulty": 0.5,
+        "score": 1,
+        "latent_before": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        },
+        "latent_after": {
+          "A": true,
+          "B": true,
+          "C": false,
+          "D": false
+        }
+      }
+    ]
+  }
+}
