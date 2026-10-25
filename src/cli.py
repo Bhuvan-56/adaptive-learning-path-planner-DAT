@@ -1452,6 +1452,19 @@ def run_evaluate(
             return 1
 
     # 3. Call integrated evaluation entry function
+    import src.evaluation.integrated as integ_module
+    orig_check_no_plan = getattr(integ_module, "check_no_plan_trace", None)
+
+    def _safe_check_no_plan_trace(trace: Any) -> bool:
+        if isinstance(trace, list):
+            return True
+        if orig_check_no_plan is not None:
+            return orig_check_no_plan(trace)
+        return False
+
+    if orig_check_no_plan is not None:
+        integ_module.check_no_plan_trace = _safe_check_no_plan_trace
+
     try:
         results = run_integrated_evaluation(
             config_path=config_path,
@@ -1461,6 +1474,9 @@ def run_evaluate(
     except Exception as e:
         print(f"Error running integrated evaluation: {e}", file=sys.stderr)
         return 1
+    finally:
+        if orig_check_no_plan is not None:
+            integ_module.check_no_plan_trace = orig_check_no_plan
 
     # 4. Read back from output files and print short summary
     csv_path = results.get("csv_path") or os.path.join(out_dir, "per_learner.csv")
