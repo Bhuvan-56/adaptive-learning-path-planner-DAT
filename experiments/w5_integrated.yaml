@@ -1,0 +1,89 @@
+# Week 5 Integrated Evaluation Configuration (w5/b1-integrated-harness)
+# Master specification for closed-loop integrated evaluation harness.
+
+experiment_name: "w5_integrated"
+version: "1.0"
+status: "BENCHMARK_SPECIFICATION"
+
+# Random seeds for reproducibility across matched learner cohorts
+# Copied from experiments/w4_comparison.yaml lines 9-14
+seeds:
+  - 42
+  - 101
+  - 2024
+  - 777
+  - 999
+
+evaluation_scale:
+  # Evaluation cohort size (number of synthetic learners)
+  # Copied from experiments/w4_comparison.yaml line 19
+  num_synthetic_learners: 200
+  # Number of seed runs
+  # Copied from experiments/w4_comparison.yaml line 21
+  num_seed_runs: 5
+
+simulator:
+  # Generative response simulator family
+  generator_name: "MatchedBKTGenerator"
+  p_S: 0.10
+  p_G: 0.25
+  p_T: 0.10
+
+diagnostic:
+  # Item cap for CAT diagnostic assessment
+  # Copied from experiments/w4_comparison.yaml line 25
+  item_cap: 10
+  # CAT early stopping variance threshold
+  # Copied from experiments/w4_comparison.yaml line 27
+  stopping_variance: 0.15
+  # Synthetic relation for latent concept mastery from latent ability theta:
+  # Copied from experiments/w4_comparison.yaml line 30
+  latent_mastery_rule: "theta >= b_concept"  # [PROPOSED]
+  # Concept difficulties threshold per concept in demo curriculum for latent mastery
+  # Copied from experiments/w4_comparison.yaml lines 31-36
+  concept_difficulties:
+    A: -0.20
+    B: -0.20
+    C: 0.15
+    D: 0.50
+  # Number of held-out items per concept/learner for log-loss prediction
+  # Copied from experiments/w4_comparison.yaml line 39
+  held_out_items_per_concept: 5  # [PROPOSED] docs/EVALUATION_PROTOCOL.md line 63
+
+statistics:
+  # Bootstrap resamples for paired confidence intervals
+  # Copied from experiments/w4_comparison.yaml line 43
+  bootstrap_resamples: 1000  # [PROPOSED] docs/EVALUATION_PROTOCOL.md line 87
+  # Confidence level
+  # Copied from experiments/w4_comparison.yaml line 44
+  confidence_level: 0.95
+
+planner_controls:
+  # Planning horizon in days for planner comparison
+  # Copied from experiments/w4_comparison.yaml line 48
+  horizon_days: 5
+  # Daily study budget in minutes
+  # Copied from experiments/w4_comparison.yaml line 50
+  daily_budget: 10
+  # Retention delay in days
+  # Copied from experiments/w4_comparison.yaml line 53
+  retention_delay_days: 7  # [PROPOSED] docs/EVALUATION_PROTOCOL.md line 65
+  # Target node in curriculum DAG
+  # Copied from experiments/w4_comparison.yaml line 54
+  target_node: "D"
+
+arms:
+  primary:
+    - "adaptive_full"
+    - "static_prerequisite_order"
+    - "non_adaptive_greedy"
+  ablations:
+    enabled: true
+    flags:
+      no_diagnostic: true        # Cold-start priors instead of CAT diagnostic
+      no_replan: true            # Static schedule without dynamic replanning
+      no_difficulty_step: true   # Static base difficulty without 2-Up/1-Down staircase
+      no_review: true            # Review scheduling disabled
+      no_remediation: true       # Prerequisite remediation disabled
+
+claim_rule: "An arm is called better than another only if the paired 95% interval for the difference excludes zero (strictly positive lower bound). Otherwise the summary reports 'no difference shown'."

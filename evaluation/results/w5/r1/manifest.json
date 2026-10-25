@@ -1,0 +1,41 @@
+{
+  "benchmark_name": "w5_integrated",
+  "config_hash": "48e094d0e54f3fc868158903c044d547a8ee6e2a903e4c85e958c0c9bfbc0e7c",
+  "git": {
+    "commit_sha": "c898d4495eebf666a2eea5a0faaa86a5fd778ea5",
+    "dirty": false
+  },
+  "input_files": {
+    "config": {
+      "path": "experiments/w5_integrated.yaml",
+      "sha256": "1a54f565a87a780276dc56c5515a1542e61270d2f19ff92b6e1c4fe76f69a1d8"
+    },
+    "curriculum": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\data\\curricula\\demo_curriculum.json",
+      "sha256": "828ce77d69051334ce94affdbc221b11d3bed3d127067a282472eb34238542b0"
+    },
+    "item_bank": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\data\\processed\\item_bank_synthetic.csv",
+      "sha256": "4ecb9c2679d7d7557e6062ed6e002940633a5eb5bdfd63ad796d3a55c6e8e6c3"
+    },
+    "profiles": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\config\\profiles.yaml",
+      "sha256": "7f8a67a8941c15cea8671e03fa20931ea6a845bc604aecda884edb04728beea4"
+    },
+    "q_matrix": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\data\\processed\\q_matrix_synthetic.csv",
+      "sha256": "ee534e6c1312cec3be8baa8d8c5ce09cf9b53b25292a8eb6826bd0dc588c5320"
+    }
+  },
+  "output_files": {
+    "per_learner.csv": "e4d789895754b1177301e046f97f0f38d3fd2e15fdc9c01e4be19b40ef4404aa",
+    "summary.md": "9c4947fb0e5c42375ec1eed289bf4738745dd5529e33813e00ac1f01f46e1434"
+  },
+  "package_versions": {
+    "networkx": "3.1",
+    "numpy": "1.24.3",
+    "pytest": "7.3.1",
+    "yaml": "6.0.1"
+  },
+  "timestamp": "2026-10-25T11:11:35Z"
+}

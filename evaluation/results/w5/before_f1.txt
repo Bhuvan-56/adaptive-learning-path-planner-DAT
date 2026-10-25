@@ -1,0 +1,50 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collected 1 item
+
+tests\test_w5_b1_integrated.py F                                         [100%]
+
+================================== FAILURES ===================================
+_______________ test_w5_f1_planner_controls_executes_activities _______________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-34/test_w5_f1_planner_controls_ex0')
+
+    @pytest.mark.xfail(strict=True, reason="W5 F1: compare_planner_controls queries lessons instead of activities")
+    def test_w5_f1_planner_controls_executes_activities(tmp_path):
+        """
+        Verifies that run_planner_comparison executes scheduled activities for static and adaptive arms.
+        In the unfixed code, lines 727 and 829 query .get('lessons', []) which evaluates to [] because
+        generate_static_plan and replan emit 'activities', causing 0 activities to be executed.
+        """
+        out_dir = str(tmp_path / "f1_test")
+        call_counts = []
+        orig_respond = SimulatedLearner.respond
+    
+        def wrapped_respond(self, concept, difficulty=0.5):
+            call_counts.append(concept)
+            return orig_respond(self, concept=concept, difficulty=difficulty)
+    
+        SimulatedLearner.respond = wrapped_respond
+        try:
+            run_planner_comparison(
+                output_dir=out_dir,
+                override_learners=2,
+                override_resamples=10,
+            )
+        finally:
+            SimulatedLearner.respond = orig_respond
+    
+        # Unfixed code only executes non_adaptive_greedy (8 calls for 2 learners: A, B, C, D each)
+        # Fixed code executes static_prerequisite_order and adaptive_replan activities as well.
+>       assert len(call_counts) > 8, (
+            f"Only greedy executed activities ({len(call_counts)} calls); static and adaptive executed 0."
+        )
+E       AssertionError: Only greedy executed activities (8 calls); static and adaptive executed 0.
+E       assert 8 > 8
+E        +  where 8 = len(['A', 'B', 'C', 'D', 'A', 'B', ...])
+
+tests\test_w5_b1_integrated.py:33: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_w5_b1_integrated.py::test_w5_f1_planner_controls_executes_activities
+============================== 1 failed in 2.36s ==============================
