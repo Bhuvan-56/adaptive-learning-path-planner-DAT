@@ -87,3 +87,37 @@ arms:
       no_remediation: true       # Prerequisite remediation disabled
 
 claim_rule: "An arm is called better than another only if the paired 95% interval for the difference excludes zero (strictly positive lower bound). Otherwise the summary reports 'no difference shown'."
+
+generators:
+  # Generator family specifications and variant parameters
+  bkt_default:
+    generator_name: "MatchedBKTGenerator"
+    p_S: 0.10
+    p_G: 0.25
+    p_T: 0.10
+    p_F: 0.00
+    k: 0.00
+  # Forgetting variant: daily mastery decay probability
+  forgetting:
+    p_F: 0.05                 # [PROPOSED] daily mastery decay probability
+  # Difficulty-sensitive variant: monotone logit scaling parameter
+  difficulty_sensitive:
+    k: 0.50                   # [PROPOSED] logit difficulty sensitivity scaling
+  # Mismatched PFA/logistic generator: non-BKT count-based learning
+  mismatched_pfa:
+    concept_intercepts:       # Concept baseline difficulty intercepts (beta_c)
+      A: 0.0
+      B: -0.2
+      C: -0.5
+      D: -1.0
+    gamma: 0.40               # [PROPOSED] weight on prior practice successes
+    rho: 0.10                 # [PROPOSED] weight on prior practice failures
+    difficulty_weight: 1.0    # [PROPOSED] sensitivity to item difficulty deviation
+    mastered_p: 0.75          # [PROPOSED] evaluator mastery rule threshold at reference difficulty 0.5
+
+retention:
+  # Delayed retention quiz parameters from docs/EVALUATION_PROTOCOL.md lines 63-73
+  items_per_concept_N: 5      # [PROPOSED] docs/EVALUATION_PROTOCOL.md line 63
+  delay_days_D: 7             # [PROPOSED] docs/EVALUATION_PROTOCOL.md line 65
+  reference_difficulty: 0.50
+

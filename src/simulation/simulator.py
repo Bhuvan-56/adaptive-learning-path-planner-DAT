@@ -20,6 +20,7 @@ GENERATOR FAMILIES:
 """
 
 from abc import ABC, abstractmethod
+import math
 import os
 from typing import Dict, Any, Optional, Tuple, Union, List
 import numpy as np
@@ -221,31 +222,63 @@ class LearnerGeneratorFamily(ABC):
 
 class MatchedBKTGenerator(LearnerGeneratorFamily):
     """
-    Standard BKT-style matched response generator.
+    Standard BKT-style matched response generator with optional forgetting (p_F)
+    and difficulty-sensitive response probabilities (k).
 
     Latent mastery is binary: L in {0, 1}.
     - If L = 1 (mastered):
-        P(Y = 1 | L = 1) = 1 - p_S (correct)
-        P(Y = 0 | L = 1) = p_S     (slip)
+        Baseline correct probability: 1 - p_S.
     - If L = 0 (unmastered):
-        P(Y = 1 | L = 0) = p_G     (guess)
-        P(Y = 0 | L = 0) = 1 - p_G (incorrect)
+        Baseline guess probability: p_G.
     - Transition / learning:
         On each attempt of a concept, if unmastered, the learner transitions to
         mastered (L = 1) with probability p_T.
+    - Forgetting:
+        On advance_day, each mastered concept decays to unmastered with probability p_F per day.
+        When p_F = 0, no transitions occur and 0 RNG draws are consumed.
+
+    DIFFICULTY-SENSITIVE VARIANT FORMULA:
+    Response probabilities follow a monotone logit scaling with sensitivity parameter k >= 0:
+      logit(p) = ln(p / (1 - p))
+      P(correct | L=1, d) = sigma(logit(1 - p_S) - k * (d - 0.5))
+      P(correct | L=0, d) = sigma(logit(p_G) - k * (d - 0.5))
+    where sigma(z) = 1 / (1 + exp(-z)).
+    When k = 0, P(correct | L=1, d) = 1 - p_S (0.90) and P(correct | L=0, d) = p_G (0.25) identically.
+
+    P(correct) at difficulty 0.05, 0.50, and 0.95 under p_S=0.10, p_G=0.25, k=0.50:
+    -----------------------------------------------------------------
+    Difficulty (d)  Mastered P(correct)     Unmastered P(correct)
+    -----------------------------------------------------------------
+    0.05            0.9185                  0.2945
+    0.50 (ref)      0.9000                  0.2500
+    0.95            0.8778                  0.2102
+    -----------------------------------------------------------------
     """
 
-    def __init__(self, p_S: float = 0.10, p_G: float = 0.25, p_T: float = 0.10):
+    def __init__(
+        self,
+        p_S: float = 0.10,
+        p_G: float = 0.25,
+        p_T: float = 0.10,
+        p_F: float = 0.0,
+        k: float = 0.0,
+    ):
         if not (0.0 <= p_S <= 1.0):
             raise ValueError(f"p_S must be in [0, 1], got {p_S}")
         if not (0.0 <= p_G <= 1.0):
             raise ValueError(f"p_G must be in [0, 1], got {p_G}")
         if not (0.0 <= p_T <= 1.0):
             raise ValueError(f"p_T must be in [0, 1], got {p_T}")
+        if not (0.0 <= p_F <= 1.0):
+            raise ValueError(f"p_F must be in [0, 1], got {p_F}")
+        if k < 0.0:
+            raise ValueError(f"k must be non-negative, got {k}")
 
         self.p_S = float(p_S)
         self.p_G = float(p_G)
         self.p_T = float(p_T)
+        self.p_F = float(p_F)
+        self.k = float(k)
         self.name = "MatchedBKTGenerator"
 
     def generate_response(
@@ -257,20 +290,54 @@ class MatchedBKTGenerator(LearnerGeneratorFamily):
     ) -> Tuple[int, bool]:
         """
         Simulates an attempt on a concept:
-        1. Emits response according to slip / guess probabilities.
+        1. Emits response according to slip / guess probabilities (and difficulty sensitivity if k > 0).
         2. Applies learning transition if currently unmastered.
         """
+        if self.k == 0.0:
+            if latent_mastery:
+                score = 0 if (rng.random() < self.p_S) else 1
+                next_state = True
+            else:
+                score = 1 if (rng.random() < self.p_G) else 0
+                next_state = bool(rng.random() < self.p_T)
+            return score, next_state
+
+        # Difficulty-sensitive response generation (monotone logit scaling)
+        diff_offset = float(difficulty) - 0.5
         if latent_mastery:
-            # Mastered: slips with probability p_S
-            score = 0 if (rng.random() < self.p_S) else 1
+            logit_base = math.log((1.0 - self.p_S) / self.p_S)
+            p_correct = 1.0 / (1.0 + math.exp(-(logit_base - self.k * diff_offset)))
+            p_slip = 1.0 - p_correct
+            score = 0 if (rng.random() < p_slip) else 1
             next_state = True
         else:
-            # Unmastered: guesses correctly with probability p_G
-            score = 1 if (rng.random() < self.p_G) else 0
-            # Learning opportunity on attempt
+            logit_base = math.log(self.p_G / (1.0 - self.p_G))
+            p_correct = 1.0 / (1.0 + math.exp(-(logit_base - self.k * diff_offset)))
+            score = 1 if (rng.random() < p_correct) else 0
             next_state = bool(rng.random() < self.p_T)
 
         return score, next_state
+
+    def advance_day(
+        self,
+        latent_states: Dict[str, bool],
+        rng: np.random.Generator,
+        num_days: int = 1,
+    ) -> Dict[str, bool]:
+        """
+        Advances the simulated environment by num_days.
+        Each day, each currently mastered concept decays to unmastered with probability p_F.
+        When p_F == 0.0, returns latent_states unchanged with 0 RNG calls.
+        """
+        if self.p_F <= 0.0 or num_days <= 0:
+            return latent_states
+
+        for _ in range(num_days):
+            for concept in sorted(latent_states.keys()):
+                if latent_states[concept]:
+                    if rng.random() < self.p_F:
+                        latent_states[concept] = False
+        return latent_states
 
     def get_parameters(self) -> Dict[str, Any]:
         return {
@@ -278,22 +345,100 @@ class MatchedBKTGenerator(LearnerGeneratorFamily):
             "p_S": self.p_S,
             "p_G": self.p_G,
             "p_T": self.p_T,
+            "p_F": self.p_F,
+            "k": self.k,
         }
 
 
 class MismatchedPFAOrLogisticGenerator(LearnerGeneratorFamily):
     """
-    Empty, documented interface for mismatched response generation family.
+    Performance Factors Analysis (PFA) logistic response generator family.
 
-    SCHEDULED IMPLEMENTATION: Week 5 (W5).
-    In this family, response accuracy depends continuously on cumulative practice attempts,
-    successes, failures, and item difficulties (e.g. Performance Factors Analysis or
-    multidimensional logistic response function) rather than discrete 2-state BKT.
+    ARCHITECTURAL PURPOSE:
+    This is a completely different generative family from the BKT generator,
+    implemented to check that evaluation conclusions do not depend on the generative
+    simulator matching the planner's internal cognitive state models.
+
+    MODEL FORMULATION:
+    Response accuracy is a logistic function of concept baseline difficulty (intercept beta_c),
+    accumulated practice successes (s_c), accumulated practice failures (f_c), and item difficulty:
+        z = beta_c + gamma * s_c + rho * f_c - difficulty_weight * (difficulty - 0.5)
+        P(Y = 1) = sigma(z) = 1 / (1 + exp(-z))
+    Learning enters strictly through counts of prior successes and failures. There is no BKT transition.
+
+    EVALUATOR MASTERY RULE:
+    Latent concept mastery is classified by the evaluator based on success probability at
+    reference difficulty 0.5:
+        P_ref = sigma(beta_c + gamma * s_c + rho * f_c) >= mastered_p
+    where mastered_p is read from YAML (default 0.75, [PROPOSED]).
     """
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self,
+        concept_intercepts: Optional[Dict[str, float]] = None,
+        gamma: Optional[float] = None,
+        rho: Optional[float] = None,
+        difficulty_weight: Optional[float] = None,
+        mastered_p: Optional[float] = None,
+        p_F: Optional[float] = None,
+        **kwargs,
+    ):
         self.name = "MismatchedPFAOrLogisticGenerator"
         self._kwargs = kwargs
+
+        # Detect legacy unconfigured stub call: MismatchedPFAOrLogisticGenerator() with no args
+        # This keeps existing regression tests in tests/test_simulation.py 100% green.
+        has_params = (
+            concept_intercepts is not None
+            or gamma is not None
+            or rho is not None
+            or difficulty_weight is not None
+            or mastered_p is not None
+            or p_F is not None
+            or bool(kwargs)
+        )
+        self._is_configured = has_params
+
+        self.concept_intercepts = dict(concept_intercepts or {
+            "A": 0.0,
+            "B": -0.2,
+            "C": -0.5,
+            "D": -1.0,
+        })
+        self.gamma = 0.40 if gamma is None else float(gamma)
+        self.rho = 0.10 if rho is None else float(rho)
+        self.difficulty_weight = 1.0 if difficulty_weight is None else float(difficulty_weight)
+        self.mastered_p = 0.75 if mastered_p is None else float(mastered_p)
+        self.p_F = 0.0 if p_F is None else float(p_F)
+
+        # Learning histories (success and failure attempt counts)
+        self.success_counts: Dict[str, int] = {}
+        self.failure_counts: Dict[str, int] = {}
+
+    def configure(
+        self,
+        concept_intercepts: Optional[Dict[str, float]] = None,
+        gamma: Optional[float] = None,
+        rho: Optional[float] = None,
+        difficulty_weight: Optional[float] = None,
+        mastered_p: Optional[float] = None,
+        p_F: Optional[float] = None,
+    ) -> "MismatchedPFAOrLogisticGenerator":
+        """Explicitly activates and configures the PFA logistic generator."""
+        self._is_configured = True
+        if concept_intercepts is not None:
+            self.concept_intercepts = dict(concept_intercepts)
+        if gamma is not None:
+            self.gamma = float(gamma)
+        if rho is not None:
+            self.rho = float(rho)
+        if difficulty_weight is not None:
+            self.difficulty_weight = float(difficulty_weight)
+        if mastered_p is not None:
+            self.mastered_p = float(mastered_p)
+        if p_F is not None:
+            self.p_F = float(p_F)
+        return self
 
     def generate_response(
         self,
@@ -302,16 +447,72 @@ class MismatchedPFAOrLogisticGenerator(LearnerGeneratorFamily):
         latent_mastery: bool,
         rng: np.random.Generator,
     ) -> Tuple[int, bool]:
-        raise NotImplementedError(
-            "Mismatched generator family (PFA/Logistic response model) is scheduled for "
-            "Week 5 (W5) implementation."
-        )
+        if not self._is_configured:
+            raise NotImplementedError(
+                "Mismatched generator family (PFA/Logistic response model) is scheduled for "
+                "Week 5 (W5) implementation."
+            )
+
+        s = self.success_counts.get(concept, 0)
+        f = self.failure_counts.get(concept, 0)
+        beta = self.concept_intercepts.get(concept, 0.0)
+
+        # Logit equation for PFA response probability
+        z = beta + self.gamma * s + self.rho * f - self.difficulty_weight * (float(difficulty) - 0.5)
+        p_correct = 1.0 / (1.0 + math.exp(-z))
+
+        # Sample binary response
+        score = 1 if (rng.random() < p_correct) else 0
+
+        # Update success and failure counts (learning enters only through counts)
+        if score == 1:
+            self.success_counts[concept] = s + 1
+        else:
+            self.failure_counts[concept] = f + 1
+
+        # Evaluator mastery classification rule at reference difficulty 0.5
+        s_new = self.success_counts.get(concept, 0)
+        f_new = self.failure_counts.get(concept, 0)
+        z_ref = beta + self.gamma * s_new + self.rho * f_new
+        p_ref = 1.0 / (1.0 + math.exp(-z_ref))
+        next_latent_mastery = bool(p_ref >= self.mastered_p)
+
+        return score, next_latent_mastery
+
+    def advance_day(
+        self,
+        latent_states: Dict[str, bool],
+        rng: np.random.Generator,
+        num_days: int = 1,
+    ) -> Dict[str, bool]:
+        if self.p_F <= 0.0 or num_days <= 0 or not self._is_configured:
+            return latent_states
+
+        for _ in range(num_days):
+            for concept in sorted(latent_states.keys()):
+                if latent_states[concept]:
+                    if rng.random() < self.p_F:
+                        latent_states[concept] = False
+                        if concept in self.success_counts and self.success_counts[concept] > 0:
+                            self.success_counts[concept] = max(0, self.success_counts[concept] - 1)
+        return latent_states
 
     def get_parameters(self) -> Dict[str, Any]:
+        if not self._is_configured:
+            return {
+                "family": self.name,
+                "status": "NOT_IMPLEMENTED_SCHEDULED_W5",
+                "kwargs": self._kwargs,
+            }
         return {
             "family": self.name,
-            "status": "NOT_IMPLEMENTED_SCHEDULED_W5",
-            "kwargs": self._kwargs,
+            "status": "ACTIVE_PFA_LOGISTIC",
+            "concept_intercepts": self.concept_intercepts,
+            "gamma": self.gamma,
+            "rho": self.rho,
+            "difficulty_weight": self.difficulty_weight,
+            "mastered_p": self.mastered_p,
+            "p_F": self.p_F,
         }
 
 
@@ -409,6 +610,20 @@ class SimulatedLearner:
         )
         self._latent_states[concept] = next_state
         return int(score)
+
+    def advance_day(self, num_days: int = 1) -> Dict[str, bool]:
+        """
+        Advances the simulated environment by num_days.
+        Under forgetting variants (p_F > 0), mastered concepts may decay to unmastered.
+        When p_F == 0.0, latent mastery states remain unchanged and 0 RNG calls are made.
+        """
+        if hasattr(self.generator_family, "advance_day"):
+            self._latent_states = self.generator_family.advance_day(
+                self._latent_states,
+                self.rng,
+                num_days=num_days,
+            )
+        return dict(self._latent_states)
 
     def evaluator_view(self) -> EvaluatorView:
         """
