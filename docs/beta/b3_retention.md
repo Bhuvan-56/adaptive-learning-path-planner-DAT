@@ -76,3 +76,4 @@ All reported figures and statistical intervals are generated from synthetic simu
 - No claims of calibration or fitting to real human learner data are made.
 - Under S0, decay is absent ($p_F = 0$), so differences reflect item score response distributions across studied concepts.
 - Under S1, decay is present ($p_F = 0.05$), and adaptive paths demonstrate higher retained recall than fixed topological or greedy paths under simulator assumptions.
+
