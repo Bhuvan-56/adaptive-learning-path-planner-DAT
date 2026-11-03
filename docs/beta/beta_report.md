@@ -91,7 +91,8 @@ Because D1 was left blank, no speculative or breaking changes were introduced to
 | Trace Coverage (All Arms) | 100.0% | 100.0% | Invariant Maintained | `evaluation/results/w5/final/summary.md` |
 
 **Decision Line D1:**  
-Decision D1: __________________________________________________________________
+Decision D1: Documented limit. The 800 no-plan days (4,000 across 5 seeds) reflect an intentional prerequisite gating invariant where unprobed concepts remain Uncertain without follow-up diagnostic probing; retained as a documented limit for Beta with frozen baseline preserved.
+
 
 ---
 
@@ -113,7 +114,8 @@ Benchmark results across 1,000 synthetic learners (5 seeds $\times$ 200 learners
 - **Trace Coverage:** 100.0% across all scenarios and arms.
 
 **Decision Line D2:**  
-Decision D2: __________________________________________________________________
+Decision D2: Retain default scenario S0 as primary benchmark baseline; scenarios S1 (forgetting) and S2 (difficulty-sensitivity) are retained as verified sensitivity variants confirming zero safety violations and 100% trace coverage.
+
 
 ---
 
@@ -194,7 +196,8 @@ $$\operatorname{Var}_{\min, 10} = \frac{1}{1.0 + I_{\text{top10},\max}} = \frac{
 Because $0.195022 > 0.15$, **the variance stopping rule $\operatorname{Var} \le 0.15$ CANNOT fire with this bank within 10 items**. All diagnostics terminate solely on the 10-item cap. The committed threshold was kept unchanged.
 
 **Decision Line D3:**  
-Decision D3: __________________________________________________________________
+Decision D3: Documented limit. Variance stopping threshold 0.15 is mathematically unreachable within 10 items for the committed 24-item bank (theoretical minimum variance 0.195022 > 0.15); retain committed 0.15 threshold and 10-item cap as documented limit.
+
 
 ---
 
@@ -234,8 +237,8 @@ To ensure independent codebase ownership without agent dependency, both members 
 
 ## 11. Review Status
 
-Review Status: __________________________________________________________________  
-*(Internal check only; all evaluations and regression suites executed locally and verified via automated clean-run harness. No external auditor evaluated this SHA from an external clone).*
+Review Status: Internal check only. Automated clean-run verification passed on SHA c6ff658666260c90d6091c46ae249a99fe4cdf19. All evaluation data is synthetic; no external auditor reviewed this SHA from an independent clone.
+
 
 ---
 
