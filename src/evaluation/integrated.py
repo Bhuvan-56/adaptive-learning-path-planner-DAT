@@ -733,6 +733,7 @@ def run_integrated_evaluation(
     all_combined_records: List[Dict[str, Any]] = []
 
     for idx, s in enumerate(seeds):
+        t_seed_start = time.perf_counter()
         # First seed writes directly to per_learner.csv for backwards compatibility
         csv_name = "per_learner.csv" if idx == 0 else f"per_learner_seed_{s}.csv"
         md_name = f"summary_seed_{s}.md"
@@ -753,6 +754,10 @@ def run_integrated_evaluation(
         if idx == 0:
             s0_copy = os.path.join(out_dir, f"per_learner_seed_{s}.csv")
             pd.DataFrame(s_res["records"]).to_csv(s0_copy, index=False)
+        t_seed_end = time.perf_counter()
+        seed_elapsed = t_seed_end - t_seed_start
+        s_res["runtime_sec"] = round(seed_elapsed, 2)
+        print(f"Seed {s} completed in {seed_elapsed:.2f}s")
         seed_results[s] = s_res
         all_combined_records.extend(s_res["records"])
 
