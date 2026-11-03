@@ -13,3 +13,4 @@
 | 2026-11-03 | Antigravity (Gemini 3.8 Flash) | beta/a3-cat-own | tests/test_beta_a3_cat.py, docs/beta/a3_cat_stopping.md, docs/beta/ownership_A.md, weekly/BETA_AI_LOG.md, weekly/W5_AI_LOG.md | pytest tests/test_beta_a3_cat.py: 2 passed; practice/a-live pytest: 1 passed; practice/a-task pytest: 1 passed; full suite: 241 passed, 1 xfailed, 0 skipped | | |
 
 
+| 2026-11-03 | Antigravity (Gemini 3.8 Flash) | beta/b3-retention-own | src/evaluation/integrated.py, tests/test_beta_b3_retention.py, docs/beta/b3_retention.md, docs/beta/ownership_B.md, evaluation/results/beta_evidence/before_B3_retention.txt, evaluation/results/beta_evidence/after_B3_retention.txt | pytest tests/test_beta_b3_retention.py: 3 passed; python -m src.cli evaluate (S0 & S1): exit 0; practice/b-live test: 1 passed; practice/b-task test: 1 passed; full suite: 246 passed, 1 xfailed, 0 skipped | | |

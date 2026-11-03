@@ -1,0 +1,206 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 1 item
+
+tests/test_beta_b3_retention.py::test_integrated_run_writes_retained_recall_per_learner FAILED [100%]
+
+================================== FAILURES ===================================
+___________ test_integrated_run_writes_retained_recall_per_learner ____________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-113/test_integrated_run_writes_ret0')
+
+    @pytest.mark.xfail(strict=True, reason="Harness does not yet write retained_recall per learner across all arms")
+    def test_integrated_run_writes_retained_recall_per_learner(tmp_path):
+        """
+        Verifies that running integrated evaluation writes a retained_recall column
+        for every learner record in per_learner.csv.
+        """
+        out_dir = str(tmp_path / "eval_retention_check")
+        res = run_integrated_evaluation(
+            config_path="experiments/w5_final.yaml",
+            output_dir=out_dir,
+            override_learners=4,
+            override_resamples=10,
+        )
+    
+        csv_path = res["csv_path"]
+        assert os.path.exists(csv_path), f"Output CSV not found at {csv_path}"
+    
+        df = pd.read_csv(csv_path)
+>       assert "retained_recall" in df.columns, f"'retained_recall' not found in columns: {df.columns.tolist()}"
+E       AssertionError: 'retained_recall' not found in columns: ['learner_id', 'seed', 'arm', 'theta_true', 'theta_hat', 'mastered_concepts', 'prereq_violations', 'budget_violations', 'no_plan_days', 'runtime_ms']
+E       assert 'retained_recall' in Index(['learner_id', 'seed', 'arm', 'theta_true', 'theta_hat',\n       'mastered_concepts', 'prereq_violations', 'budget_violations',\n       'no_plan_days', 'runtime_ms'],\n      dtype='object')
+E        +  where Index(['learner_id', 'seed', 'arm', 'theta_true', 'theta_hat',\n       'mastered_concepts', 'prereq_violations', 'budget_violations',\n       'no_plan_days', 'runtime_ms'],\n      dtype='object') =     learner_id   seed  ... no_plan_days  runtime_ms\n0            0  42000  ...            4     11.9488\n1            1  42001  ...            4     11.0463\n2            2  42002  ...            4      8.4656\n3            3  42003  ...            4     10.1845\n4            0  42000  ...            0      1.0371\n5            1  42001  ...            0      1.2496\n6            2  42002  ...            0      0.6542\n7            3  42003  ...            0      1.8141\n8            0  42000  ...            0      0.0295\n9            1  42001  ...            0      0.0194\n10           2  42002  ...            0      0.0504\n11           3  42003  ...            0      0.0198\n12           0  42000  ...            4     12.2604\n13           1  42001  ...            4     13.2125\n14           2  42002  ...            4     13.5527\n15           3  42003  ...            4     13.8134\n16           0  42000  ...            0      1.5189\n17           1  42001  ...            0      1.8083\n18           2  42002  ...            0      1.4249\n19           3  42003  ...            0      1.6905\n20           0  42000  ...            4     17.4681\n21           1  42001  ...            4     10.2878\n22           2  42002  ...            4     11.7608\n23           3  42003  ...            4     12.8929\n24           0  42000  ...            4     10.7852\n25           1  42001  ...            4     10.9505\n26           2  42002  ...            4      8.4086\n27           3  42003  ...            4     12.5764\n28           0  42000  ...            4     11.4784\n29           1  42001  ...            4      7.9272\n30           2  42002  ...            4     11.4593\n31           3  42003  ...            4     10.4090\n\n[32 rows x 10 columns].columns
+
+tests\test_beta_b3_retention.py:35: AssertionError
+---------------------------- Captured stdout call -----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 42 completed in 1.29s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 101 completed in 1.30s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 2024 completed in 1.49s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 777 completed in 1.10s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 999 completed in 1.25s
+=========================== short test summary info ===========================
+FAILED tests/test_beta_b3_retention.py::test_integrated_run_writes_retained_recall_per_learner
+============================= 1 failed in 10.10s ==============================

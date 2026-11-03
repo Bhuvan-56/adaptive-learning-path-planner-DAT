@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 3 items
+
+tests/test_beta_b3_retention.py::test_integrated_run_writes_retained_recall_per_learner PASSED [ 33%]
+tests/test_beta_b3_retention.py::test_retained_recall_range PASSED       [ 66%]
+tests/test_beta_b3_retention.py::test_existing_outputs_unchanged_apart_from_new_value PASSED [100%]
+
+============================= 3 passed in 23.64s ==============================
