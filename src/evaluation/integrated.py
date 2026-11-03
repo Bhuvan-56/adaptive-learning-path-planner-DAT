@@ -64,7 +64,8 @@ from src.diagnostic.diagnostic import (
     DEFAULT_QMATRIX_PATH,
     DEFAULT_CURRICULUM_PATH,
 )
-from src.simulation.simulator import SimulatedLearner
+from src.simulation.simulator import SimulatedLearner, MatchedBKTGenerator
+from src.evaluation.retention import administer_retention_quiz
 from src.provenance import (
     compute_file_sha256,
     get_git_info,
@@ -133,6 +134,24 @@ def recount_plan_violations(
             completed_so_far.add(nid)
 
     return prereq_violations, budget_violations
+
+
+def make_learner_generator(scenario_name: str) -> Tuple[MatchedBKTGenerator, bool]:
+    """
+    Constructs the MatchedBKTGenerator family and retention quiz flag for the given scenario.
+    S0: default matched BKT (p_F=0.0, k=0.0)
+    S1: forgetting variant (p_F=0.05, k=0.0) with delayed retention quiz
+    S2: difficulty-sensitive variant (p_F=0.0, k=0.50)
+    """
+    s = str(scenario_name).strip()
+    if s == "S0":
+        return MatchedBKTGenerator(p_S=0.10, p_G=0.25, p_T=0.10, p_F=0.00, k=0.00), False
+    elif s == "S1":
+        return MatchedBKTGenerator(p_S=0.10, p_G=0.25, p_T=0.10, p_F=0.05, k=0.00), True
+    elif s == "S2":
+        return MatchedBKTGenerator(p_S=0.10, p_G=0.25, p_T=0.10, p_F=0.00, k=0.50), False
+    else:
+        raise ValueError(f"Unknown scenario '{s}'. Expected one of: 'S0', 'S1', 'S2'.")
 
 
 @dataclass
@@ -219,12 +238,15 @@ def _evaluate_single_seed(
             learner_seed = gt.seed
 
             # Instantiate simulation learner (held strictly by evaluation harness)
+            scenario_name = str(config.get("scenario", "S0")).strip()
+            learner_gen, eval_retention = make_learner_generator(scenario_name)
             sim_learner = SimulatedLearner(
                 profile_id="profile_1",
                 initial_mastery=gt.latent_mastery,
                 seed=learner_seed,
                 budget_override=daily_budget,
                 curriculum_concepts=curriculum_nodes,
+                generator_family=learner_gen,
             )
             evaluator = sim_learner.evaluator_view()
 
@@ -483,6 +505,14 @@ def _evaluate_single_seed(
                 "no_plan_days": learner_no_plan,
                 "runtime_ms": round(arm_runtime_ms, 4),
             }
+            if eval_retention:
+                ret_res = administer_retention_quiz(
+                    learner=sim_learner,
+                    studied_concepts=sorted(list(completed_so_far)),
+                    config_source=config,
+                )
+                learner_rec["retention_share"] = round(float(ret_res["retention_share"]), 4)
+
             records.append(learner_rec)
             all_learner_records.append(learner_rec)
 
@@ -691,6 +721,8 @@ def run_integrated_evaluation(
     """
     cfg_file = config_path or DEFAULT_INTEGRATED_CONFIG
     config = load_integrated_config(cfg_file)
+    scenario_name = str(config.get("scenario", "S0")).strip()
+    make_learner_generator(scenario_name)
 
     n_learners = override_learners or int(config["evaluation_scale"]["num_synthetic_learners"])
     raw_seeds = config.get("seeds", [42])
