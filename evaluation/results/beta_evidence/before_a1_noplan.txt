@@ -66,3 +66,4 @@ tests\test_beta_a1_noplan.py:252: AssertionError
 =========================== short test summary info ===========================
 FAILED tests/test_beta_a1_noplan.py::test_candidate_pending_d1_uncertain_prereq_yields_non_empty_plan
 ============================== 1 failed in 1.76s ==============================
+

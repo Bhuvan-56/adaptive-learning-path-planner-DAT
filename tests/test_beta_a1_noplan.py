@@ -253,3 +253,4 @@ def test_candidate_pending_d1_uncertain_prereq_yields_non_empty_plan(tmp_path):
         f"Learner received empty plan on Day 2 due to Uncertain prerequisite A: {result.get('feasibility_explanation')}"
     )
     assert result["status"] != FeasibilityStatus.HEURISTIC_NO_PLAN
+
