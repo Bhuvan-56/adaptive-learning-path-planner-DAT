@@ -1,0 +1,12 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 4 items
+
+tests/test_beta_b2_scenarios.py::test_scenario_s1_produces_learners_with_forgetting_enabled PASSED [ 25%]
+tests/test_beta_b2_scenarios.py::test_scenario_selector_generator_parameters PASSED [ 50%]
+tests/test_beta_b2_scenarios.py::test_unknown_scenario_name_raises_error PASSED [ 75%]
+tests/test_beta_b2_scenarios.py::test_s0_equality_on_small_cohort PASSED [100%]
+
+============================= 4 passed in 24.20s ==============================

@@ -1,0 +1,133 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0 -- C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT\.venv_w2\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collecting ... collected 1 item
+
+tests/test_beta_b2_scenarios.py::test_scenario_s1_produces_learners_with_forgetting_enabled FAILED [100%]
+
+================================== FAILURES ===================================
+_________ test_scenario_s1_produces_learners_with_forgetting_enabled __________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-107/test_scenario_s1_produces_lear0')
+
+    @pytest.mark.xfail(strict=True, reason="Scenario selector not yet integrated into run_integrated_evaluation")
+    def test_scenario_s1_produces_learners_with_forgetting_enabled(tmp_path):
+        """
+        Verifies that running evaluation under scenario S1 passes a generator_family
+        with forgetting p_F == 0.05 to all SimulatedLearner instances.
+        """
+        captured_learners = []
+        orig_init = SimulatedLearner.__init__
+    
+        def spy_init(self, *args, **kwargs):
+            orig_init(self, *args, **kwargs)
+            captured_learners.append(self)
+    
+        with patch.object(SimulatedLearner, "__init__", spy_init):
+            res = run_integrated_evaluation(
+                config_path="experiments/beta_s1.yaml",
+                output_dir=str(tmp_path / "out_s1"),
+                override_learners=2,
+                override_resamples=10,
+            )
+    
+        assert len(captured_learners) > 0, "No SimulatedLearner instances were created"
+        for l in captured_learners:
+            gen = getattr(l, "generator_family", None)
+            assert gen is not None, "SimulatedLearner was not initialized with a generator_family"
+            p_f = getattr(gen, "p_F", 0.0)
+>           assert p_f == 0.05, f"Expected forgetting p_F == 0.05, got {p_f}"
+E           AssertionError: Expected forgetting p_F == 0.05, got 0.0
+E           assert 0.0 == 0.05
+
+tests\test_beta_b2_scenarios.py:45: AssertionError
+---------------------------- Captured stdout call -----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 42 completed in 0.83s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 101 completed in 0.94s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 2024 completed in 0.99s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 777 completed in 0.88s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 999 completed in 0.86s
+=========================== short test summary info ===========================
+FAILED tests/test_beta_b2_scenarios.py::test_scenario_s1_produces_learners_with_forgetting_enabled
+============================== 1 failed in 7.43s ==============================

@@ -1,0 +1,93 @@
+experiment_name: w5_final
+version: '1.0'
+status: BENCHMARK_SPECIFICATION
+scenarios: S1
+primary_outcome: concepts truly mastered at the end of the horizon, read by the evaluator
+secondary_outcomes:
+  retained_recall: retained recall in S1 only via delayed retention quiz
+  prerequisite_violations: zero prerequisite violations (hard correctness invariant)
+  budget_violations: zero daily budget violations (hard correctness invariant)
+  trace_coverage: audit trace coverage 1.0 (hard correctness invariant)
+  no_plan_counts: infeasibility and no-plan reason codes
+  runtime: planning runtime p50 and p95 distributions
+arms:
+  primary:
+  - adaptive_full
+  - static_prerequisite_order
+  - non_adaptive_greedy
+  ablations:
+    enabled: true
+    flags:
+      no_diagnostic: true
+      no_replan: true
+      no_difficulty_step: true
+      no_review: true
+      no_remediation: true
+evaluation_scale:
+  num_synthetic_learners: 200
+  num_seed_runs: 5
+seeds:
+- 42
+- 101
+- 2024
+- 777
+- 999
+statistics:
+  bootstrap_resamples: 1000
+  confidence_level: 0.95
+claim_rule: An arm is called better than another only if the paired 95% interval for
+  the difference excludes zero (strictly positive lower bound). Otherwise the summary
+  reports 'no difference shown'.
+planner_controls:
+  horizon_days: 5
+  daily_budget: 10
+  retention_delay_days: 7
+  target_node: D
+diagnostic:
+  item_cap: 10
+  stopping_variance: 0.15
+  latent_mastery_rule: theta >= b_concept
+  concept_difficulties:
+    A: -0.2
+    B: -0.2
+    C: 0.15
+    D: 0.5
+  held_out_items_per_concept: 5
+generators:
+  bkt_default:
+    generator_name: MatchedBKTGenerator
+    p_S: 0.1
+    p_G: 0.25
+    p_T: 0.1
+    p_F: 0.0
+    k: 0.0
+  forgetting:
+    generator_name: MatchedBKTGenerator
+    p_S: 0.1
+    p_G: 0.25
+    p_T: 0.1
+    p_F: 0.05
+    k: 0.0
+  difficulty_sensitive:
+    generator_name: MatchedBKTGenerator
+    p_S: 0.1
+    p_G: 0.25
+    p_T: 0.1
+    p_F: 0.0
+    k: 0.5
+  mismatched_pfa:
+    generator_name: MismatchedPFAOrLogisticGenerator
+    concept_intercepts:
+      A: 0.0
+      B: -0.2
+      C: -0.5
+      D: -1.0
+    gamma: 0.4
+    rho: 0.1
+    difficulty_weight: 1.0
+    mastered_p: 0.75
+    p_F: 0.0
+retention:
+  items_per_concept_N: 5
+  delay_days_D: 7
+  reference_difficulty: 0.5
