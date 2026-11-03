@@ -136,6 +136,17 @@ def recount_plan_violations(
     return prereq_violations, budget_violations
 
 
+def resolve_scenario_name(config: Dict[str, Any]) -> str:
+    if "scenario" in config:
+        return str(config["scenario"]).strip()
+    s = config.get("scenarios")
+    if isinstance(s, str):
+        return s.strip()
+    if isinstance(s, dict) and "active" in s:
+        return str(s["active"]).strip()
+    return "S0"
+
+
 def make_learner_generator(scenario_name: str) -> Tuple[MatchedBKTGenerator, bool]:
     """
     Constructs the MatchedBKTGenerator family and retention quiz flag for the given scenario.
@@ -238,7 +249,7 @@ def _evaluate_single_seed(
             learner_seed = gt.seed
 
             # Instantiate simulation learner (held strictly by evaluation harness)
-            scenario_name = str(config.get("scenario", "S0")).strip()
+            scenario_name = resolve_scenario_name(config)
             learner_gen, eval_retention = make_learner_generator(scenario_name)
             sim_learner = SimulatedLearner(
                 profile_id="profile_1",
@@ -721,7 +732,7 @@ def run_integrated_evaluation(
     """
     cfg_file = config_path or DEFAULT_INTEGRATED_CONFIG
     config = load_integrated_config(cfg_file)
-    scenario_name = str(config.get("scenario", "S0")).strip()
+    scenario_name = resolve_scenario_name(config)
     make_learner_generator(scenario_name)
 
     n_learners = override_learners or int(config["evaluation_scale"]["num_synthetic_learners"])
