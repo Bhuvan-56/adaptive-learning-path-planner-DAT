@@ -175,26 +175,27 @@ To understand or extend the evaluation and planning systems, read files in this 
 ## 6. Live Code Change & Expected Diff
 
 ### Change Description
-Add non-negative input validation for `delay_days` in `src/evaluation/retention.py::administer_retention_quiz`.
+Add range validation for reference `difficulty` ($0.0 \le \text{difficulty} \le 1.0$) in `src/evaluation/retention.py::administer_retention_quiz`.
 
 ### Expected Diff:
 ```diff
 --- a/src/evaluation/retention.py
 +++ b/src/evaluation/retention.py
 @@ -107,6 +107,8 @@ def administer_retention_quiz(
-     params = load_retention_parameters(config_source)
-     delay = delay_days if delay_days is not None else params["delay_days"]
-+    if delay < 0:
-+        raise ValueError("delay_days must be non-negative")
-     items_per_concept = n_items if n_items is not None else params["n_items"]
+     if d < 0:
+         raise ValueError(f"delay_days must be non-negative, got {d}")
++    if not (0.0 <= diff <= 1.0):
++        raise ValueError(f"difficulty must be between 0.0 and 1.0, got {diff}")
+ 
+     # 1. Advance simulation environment by D days (decaying mastered concepts if p_F > 0)
 ```
 
 ### Verification Test:
 ```python
-def test_administer_retention_quiz_negative_delay_raises():
-    learner = SimulatedLearner(learner_id="test_neg", initial_mastery={})
-    with pytest.raises(ValueError, match="delay_days must be non-negative"):
-        administer_retention_quiz(learner, studied_concepts=["A"], delay_days=-1)
+def test_administer_retention_quiz_invalid_difficulty_raises():
+    learner = SimulatedLearner(learner_id="test_diff", initial_mastery={})
+    with pytest.raises(ValueError, match="difficulty must be between 0.0 and 1.0"):
+        administer_retention_quiz(learner, studied_concepts=["A"], difficulty=1.5)
 ```
 
 ---
@@ -202,23 +203,25 @@ def test_administer_retention_quiz_negative_delay_raises():
 ## 7. Practice Change Task & Expected Diff
 
 ### Task Description
-Add positive item count validation (`n_items > 0`) in `src/evaluation/retention.py::administer_retention_quiz`.
+Add non-negative delay validation (`delay_days_D >= 0`) in `src/evaluation/retention.py::load_retention_parameters`.
 
 ### Expected Diff:
 ```diff
 --- a/src/evaluation/retention.py
 +++ b/src/evaluation/retention.py
-@@ -110,6 +110,8 @@ def administer_retention_quiz(
-     items_per_concept = n_items if n_items is not None else params["n_items"]
-+    if items_per_concept <= 0:
-+        raise ValueError("n_items must be positive")
-     ref_difficulty = difficulty if difficulty is not None else params["reference_difficulty"]
+@@ -73,6 +73,8 @@ def load_retention_parameters(
+     d = int(ret_block.get("delay_days_D", controls_block.get("retention_delay_days", DEFAULT_RETENTION_D)))
+     diff = float(ret_block.get("reference_difficulty", DEFAULT_REFERENCE_DIFFICULTY))
+ 
++    if d < 0:
++        raise ValueError(f"Config delay_days must be non-negative, got {d}")
+     return n, d, diff
 ```
 
 ### Verification Test:
 ```python
-def test_administer_retention_quiz_non_positive_items_raises():
-    learner = SimulatedLearner(learner_id="test_zero", initial_mastery={})
-    with pytest.raises(ValueError, match="n_items must be positive"):
-        administer_retention_quiz(learner, studied_concepts=["A"], n_items=0)
+def test_load_retention_parameters_negative_delay_raises():
+    cfg = {"retention": {"delay_days_D": -5}}
+    with pytest.raises(ValueError, match="Config delay_days must be non-negative"):
+        load_retention_parameters(cfg)
 ```
