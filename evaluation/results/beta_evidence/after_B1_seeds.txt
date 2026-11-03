@@ -1,0 +1,8 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collected 3 items
+
+tests\test_beta_b1_seeds.py ...                                          [100%]
+
+============================== 3 passed in 7.88s ==============================
