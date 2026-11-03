@@ -1,0 +1,69 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.4, pytest-7.3.1, pluggy-1.6.0
+rootdir: C:\Users\5520\Documents\IITH BTECH ENGINEERING\SEM 7\distributued Ai\Project\adaptive-learning-path-planner-DAT
+collected 1 item
+
+tests\test_beta_b1_seeds.py F                                            [100%]
+
+================================== FAILURES ===================================
+________ test_two_seeds_yields_two_result_sets_with_different_cohorts _________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-89/test_two_seeds_yields_two_resu0')
+
+    @pytest.mark.xfail(strict=True, reason="Harness uses only first seed; config with two seeds yields only one result set")
+    def test_two_seeds_yields_two_result_sets_with_different_cohorts(tmp_path):
+        """
+        Verifies that a configuration specifying multiple seeds yields distinct result sets
+        for each seed, each having its own cohort of synthetic learners.
+        In the unfixed code, line 172 selects config['seeds'][0], ignoring subsequent seeds.
+        """
+        cfg = load_integrated_config(DEFAULT_INTEGRATED_CONFIG)
+        cfg["seeds"] = [42, 101]
+        cfg["evaluation_scale"]["num_synthetic_learners"] = 3
+        cfg["evaluation_scale"]["num_seed_runs"] = 2
+    
+        cfg_path = tmp_path / "two_seeds.yaml"
+        with open(cfg_path, "w", encoding="utf-8") as f:
+            yaml.safe_dump(cfg, f)
+    
+        out_dir = str(tmp_path / "multi_seed_out")
+        res = run_integrated_evaluation(
+            config_path=str(cfg_path),
+            output_dir=out_dir,
+            override_learners=3,
+            override_resamples=10,
+        )
+    
+>       assert "seed_results" in res, "Multi-seed run did not return seed_results"
+E       AssertionError: Multi-seed run did not return seed_results
+E       assert 'seed_results' in {'arm_results': {'ablation_no_diagnostic': ArmEvaluationResult(arm_name='ablation_no_diagnostic', mean_mastered=2.3333...s\\5520\\AppData\\Local\\Temp\\pytest-of-5520\\pytest-89\\test_two_seeds_yields_two_resu0\\multi_seed_out\\summary.md'}
+
+tests\test_beta_b1_seeds.py:46: AssertionError
+---------------------------- Captured stdout call -----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=========================== short test summary info ===========================
+FAILED tests/test_beta_b1_seeds.py::test_two_seeds_yields_two_result_sets_with_different_cohorts
+============================= 1 failed in 13.14s ==============================
