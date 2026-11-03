@@ -180,6 +180,9 @@ class ArmEvaluationResult:
     runtime_p95_ms: float
     learner_mastered: List[float] = field(default_factory=list)
     records: List[Dict[str, Any]] = field(default_factory=list)
+    learner_retained_recall: List[float] = field(default_factory=list)
+    mean_retained_recall: float = 0.0
+    retained_recall_ci: Tuple[float, float] = (0.0, 0.0)
 
 
 def _evaluate_single_seed(
@@ -237,6 +240,7 @@ def _evaluate_single_seed(
     for arm in all_arms:
         records: List[Dict[str, Any]] = []
         mastered_list: List[float] = []
+        retention_list: List[float] = []
         runtimes_ms_list: List[float] = []
         total_prereqs = 0
         total_budgets = 0
@@ -516,19 +520,23 @@ def _evaluate_single_seed(
                 "no_plan_days": learner_no_plan,
                 "runtime_ms": round(arm_runtime_ms, 4),
             }
-            if eval_retention:
-                ret_res = administer_retention_quiz(
-                    learner=sim_learner,
-                    studied_concepts=sorted(list(completed_so_far)),
-                    config_source=config,
-                )
-                learner_rec["retention_share"] = round(float(ret_res["retention_share"]), 4)
+            # Call the existing retention quiz evaluator from harness for every arm, reusing the same learner
+            ret_res = administer_retention_quiz(
+                learner=sim_learner,
+                studied_concepts=sorted(list(completed_so_far)),
+                config_source=config,
+            )
+            ret_share = round(float(ret_res["retention_share"]), 4)
+            learner_rec["retained_recall"] = ret_share
+            learner_rec["retention_share"] = ret_share
+            retention_list.append(ret_share)
 
             records.append(learner_rec)
             all_learner_records.append(learner_rec)
 
         # Statistical aggregation
         m_mean, m_low, m_high = compute_paired_bootstrap_ci(mastered_list, bootstrap_resamples, seed=seed)
+        r_mean, r_low, r_high = compute_paired_bootstrap_ci(retention_list, bootstrap_resamples, seed=seed)
         coverage_pct = round(100.0 * total_days_valid_trace / total_days_evaluated, 2) if total_days_evaluated > 0 else 0.0
         p50_ms = float(np.percentile(runtimes_ms_list, 50)) if runtimes_ms_list else 0.0
         p95_ms = float(np.percentile(runtimes_ms_list, 95)) if runtimes_ms_list else 0.0
@@ -546,6 +554,9 @@ def _evaluate_single_seed(
             runtime_p95_ms=p95_ms,
             learner_mastered=mastered_list,
             records=records,
+            learner_retained_recall=retention_list,
+            mean_retained_recall=r_mean,
+            retained_recall_ci=(r_low, r_high),
         )
 
     # ---------------------------------------------------------
