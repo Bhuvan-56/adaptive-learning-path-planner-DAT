@@ -152,29 +152,23 @@ class ArmEvaluationResult:
     records: List[Dict[str, Any]] = field(default_factory=list)
 
 
-def run_integrated_evaluation(
-    config_path: Optional[str] = None,
-    output_dir: Optional[str] = None,
-    override_learners: Optional[int] = None,
-    override_resamples: Optional[int] = None,
+def _evaluate_single_seed(
+    config: Dict[str, Any],
+    seed: int,
+    n_learners: int,
+    horizon_days: int,
+    daily_budget: int,
+    target_node: str,
+    bootstrap_resamples: int,
+    output_dir: str,
+    cfg_file: str,
+    csv_filename: str = "per_learner.csv",
+    md_filename: str = "summary.md",
+    write_manifest: bool = True,
 ) -> Dict[str, Any]:
-    """
-    Executes the closed-loop integrated evaluation across all configured arms.
-    Generates:
-      - per_learner.csv
-      - summary.md
-      - manifest.json
-    """
-    cfg_file = config_path or DEFAULT_INTEGRATED_CONFIG
-    config = load_integrated_config(cfg_file)
-
-    n_learners = override_learners or int(config["evaluation_scale"]["num_synthetic_learners"])
-    seed = int(config["seeds"][0])
-    horizon_days = int(config["planner_controls"]["horizon_days"])
-    daily_budget = int(config["planner_controls"]["daily_budget"])
-    target_node = str(config["planner_controls"]["target_node"])
-    bootstrap_resamples = override_resamples or int(config["statistics"]["bootstrap_resamples"])
-
+    """Evaluates a single seed cohort across all configured arms."""
+    out_dir = output_dir
+    os.makedirs(out_dir, exist_ok=True)
     curriculum_path = DEFAULT_CURRICULUM_PATH
     g = load_graph(curriculum_path)
     curriculum_nodes = list(g.nodes())
@@ -521,8 +515,8 @@ def run_integrated_evaluation(
     )
     os.makedirs(out_dir, exist_ok=True)
 
-    csv_path = os.path.join(out_dir, "per_learner.csv")
-    md_path = os.path.join(out_dir, "summary.md")
+    csv_path = os.path.join(out_dir, csv_filename)
+    md_path = os.path.join(out_dir, md_filename)
     manifest_path = os.path.join(out_dir, "manifest.json")
 
     # 1. per_learner.csv
@@ -597,10 +591,247 @@ def run_integrated_evaluation(
         json.dump(manifest_data, f, indent=2, sort_keys=True)
 
     return {
+        "seed": seed,
         "csv_path": csv_path,
         "md_path": md_path,
         "manifest_path": manifest_path,
         "arm_results": arm_results,
+        "records": all_learner_records,
+        "cohort": learners_ground_truth,
+    }
+
+
+def _build_multi_seed_summary_markdown(
+    config: Dict[str, Any],
+    seeds: List[int],
+    seed_results: Dict[int, Dict[str, Any]],
+    bootstrap_resamples: int,
+) -> str:
+    """Builds comprehensive GitHub-flavored Markdown summary report across all evaluated seeds."""
+    n_learners = config["evaluation_scale"]["num_synthetic_learners"]
+    horizon = config["planner_controls"]["horizon_days"]
+    budget = config["planner_controls"]["daily_budget"]
+
+    lines = []
+    lines.append("# Week 5 Integrated Evaluation Summary: Multi-Seed Benchmark")
+    lines.append("")
+    lines.append("## 1. Multi-Seed Benchmark Setup")
+    lines.append("")
+    lines.append("- **Benchmark Name:** `w5_integrated_multiseed`")
+    lines.append(f"- **Evaluated Seeds ({len(seeds)}):** `{seeds}`")
+    lines.append(f"- **Synthetic Learners per Seed:** {n_learners}")
+    lines.append(f"- **Total Synthetic Learners Evaluated:** {n_learners * len(seeds)}")
+    lines.append(f"- **Planning Horizon:** {horizon} days")
+    lines.append(f"- **Daily Study Budget:** {budget} minutes")
+    lines.append(f"- **Bootstrap Resamples per Seed:** {bootstrap_resamples} (paired percentile bootstrap)")
+    lines.append("- **Generative Simulator:** `MatchedBKTGenerator` (BKT response dynamics)")
+    lines.append("")
+    lines.append("## 2. Per-Seed Performance Table (Primary Arms)")
+    lines.append("")
+    lines.append("| Seed | adaptive_full [95% CI] | static_prerequisite_order [95% CI] | non_adaptive_greedy [95% CI] | adaptive minus static [95% CI] | Claim Assessment | No-Plan Days (adaptive) |")
+    lines.append("|---|---|---|---|---|---|---|")
+
+    for s in seeds:
+        sr = seed_results[s]["arm_results"]
+        r_adapt = sr["adaptive_full"]
+        r_static = sr["static_prerequisite_order"]
+        r_greedy = sr["non_adaptive_greedy"]
+
+        diffs = [a - b for a, b in zip(r_adapt.learner_mastered, r_static.learner_mastered)]
+        d_mean, d_low, d_high = compute_paired_bootstrap_ci(diffs, bootstrap_resamples, seed=s)
+
+        if d_low > 0.0:
+            claim = f"adaptive_full improves on static_prerequisite_order [{d_low:.4f}, {d_high:.4f}]"
+        elif d_high < 0.0:
+            claim = f"static_prerequisite_order improves on adaptive_full [{abs(d_high):.4f}, {abs(d_low):.4f}]"
+        else:
+            claim = "no difference shown"
+
+        adapt_ci = f"{r_adapt.mean_mastered:.4f} [{r_adapt.mastered_ci[0]:.4f}, {r_adapt.mastered_ci[1]:.4f}]"
+        static_ci = f"{r_static.mean_mastered:.4f} [{r_static.mastered_ci[0]:.4f}, {r_static.mastered_ci[1]:.4f}]"
+        greedy_ci = f"{r_greedy.mean_mastered:.4f} [{r_greedy.mastered_ci[0]:.4f}, {r_greedy.mastered_ci[1]:.4f}]"
+        diff_ci = f"{d_mean:.4f} [{d_low:.4f}, {d_high:.4f}]"
+
+        lines.append(f"| **{s}** | {adapt_ci} | {static_ci} | {greedy_ci} | {diff_ci} | {claim} | {r_adapt.no_plan_count} |")
+
+    lines.append("")
+    primary_s = seeds[0]
+    primary_arms = list(config["arms"]["primary"])
+    ablation_flags = config["arms"].get("ablations", {}).get("flags", {})
+    ablation_arms = []
+    if config["arms"].get("ablations", {}).get("enabled", True):
+        for flag_name, is_enabled in ablation_flags.items():
+            if is_enabled:
+                ablation_arms.append(f"ablation_{flag_name}")
+
+    primary_summary = _build_summary_markdown(
+        config=config,
+        arm_results=seed_results[primary_s]["arm_results"],
+        primary_arms=primary_arms,
+        ablation_arms=ablation_arms,
+        bootstrap_resamples=bootstrap_resamples,
+        seed=primary_s,
+    )
+    lines.append(primary_summary)
+    return "\n".join(lines)
+
+
+def run_integrated_evaluation(
+    config_path: Optional[str] = None,
+    output_dir: Optional[str] = None,
+    override_learners: Optional[int] = None,
+    override_resamples: Optional[int] = None,
+) -> Dict[str, Any]:
+    """
+    Executes the closed-loop integrated evaluation across all configured arms.
+    For single-seed configurations, emits per_learner.csv, summary.md, manifest.json
+    directly in output_dir.
+    For multi-seed configurations, runs each seed with its own cohort and bootstrap,
+    emitting per-seed and combined artifacts directly under output_dir.
+    """
+    cfg_file = config_path or DEFAULT_INTEGRATED_CONFIG
+    config = load_integrated_config(cfg_file)
+
+    n_learners = override_learners or int(config["evaluation_scale"]["num_synthetic_learners"])
+    raw_seeds = config.get("seeds", [42])
+    seeds = [int(s) for s in raw_seeds]
+    horizon_days = int(config["planner_controls"]["horizon_days"])
+    daily_budget = int(config["planner_controls"]["daily_budget"])
+    target_node = str(config["planner_controls"]["target_node"])
+    bootstrap_resamples = override_resamples or int(config["statistics"]["bootstrap_resamples"])
+
+    out_dir = output_dir or os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "evaluation", "results", "w5", "r1")
+    )
+    os.makedirs(out_dir, exist_ok=True)
+
+    if len(seeds) == 1:
+        single_res = _evaluate_single_seed(
+            config=config,
+            seed=seeds[0],
+            n_learners=n_learners,
+            horizon_days=horizon_days,
+            daily_budget=daily_budget,
+            target_node=target_node,
+            bootstrap_resamples=bootstrap_resamples,
+            output_dir=out_dir,
+            cfg_file=cfg_file,
+            csv_filename="per_learner.csv",
+            md_filename="summary.md",
+        )
+        return {
+            "csv_path": single_res["csv_path"],
+            "md_path": single_res["md_path"],
+            "manifest_path": single_res["manifest_path"],
+            "arm_results": single_res["arm_results"],
+            "seed_results": {seeds[0]: single_res},
+            seeds[0]: single_res,
+        }
+
+    # Multi-seed execution
+    seed_results: Dict[int, Dict[str, Any]] = {}
+    all_combined_records: List[Dict[str, Any]] = []
+
+    for idx, s in enumerate(seeds):
+        t_seed_start = time.perf_counter()
+        # First seed writes directly to per_learner.csv for backwards compatibility
+        csv_name = "per_learner.csv" if idx == 0 else f"per_learner_seed_{s}.csv"
+        md_name = f"summary_seed_{s}.md"
+        s_res = _evaluate_single_seed(
+            config=config,
+            seed=s,
+            n_learners=n_learners,
+            horizon_days=horizon_days,
+            daily_budget=daily_budget,
+            target_node=target_node,
+            bootstrap_resamples=bootstrap_resamples,
+            output_dir=out_dir,
+            cfg_file=cfg_file,
+            csv_filename=csv_name,
+            md_filename=md_name,
+        )
+        # Also copy primary seed to per_learner_seed_<s0>.csv for symmetric naming
+        if idx == 0:
+            s0_copy = os.path.join(out_dir, f"per_learner_seed_{s}.csv")
+            pd.DataFrame(s_res["records"]).to_csv(s0_copy, index=False)
+        t_seed_end = time.perf_counter()
+        seed_elapsed = t_seed_end - t_seed_start
+        s_res["runtime_sec"] = round(seed_elapsed, 2)
+        print(f"Seed {s} completed in {seed_elapsed:.2f}s")
+        seed_results[s] = s_res
+        all_combined_records.extend(s_res["records"])
+
+    primary_csv_path = os.path.join(out_dir, "per_learner.csv")
+
+    # Multi-seed combined summary
+    combined_md_path = os.path.join(out_dir, "summary.md")
+    multi_summary_text = _build_multi_seed_summary_markdown(
+        config=config,
+        seeds=seeds,
+        seed_results=seed_results,
+        bootstrap_resamples=bootstrap_resamples,
+    )
+    with open(combined_md_path, "w", encoding="utf-8") as f:
+        f.write(multi_summary_text)
+
+    # Multi-seed manifest listing all output files directly in out_dir
+    combined_manifest_path = os.path.join(out_dir, "manifest.json")
+    git_sha, dirty = get_git_info()
+    curriculum_path = DEFAULT_CURRICULUM_PATH
+    item_bank_path = DEFAULT_ITEM_BANK_PATH
+    qmatrix_path = DEFAULT_QMATRIX_PATH
+    profiles_path = DEFAULT_PROFILES_PATH if os.path.exists(DEFAULT_PROFILES_PATH) else cfg_file
+
+    output_checksums = {}
+    for entry in sorted(os.listdir(out_dir)):
+        full_p = os.path.join(out_dir, entry)
+        if entry != "manifest.json" and os.path.isfile(full_p):
+            output_checksums[entry] = compute_file_sha256(full_p)
+
+    manifest_data = {
+        "benchmark_name": "w5_integrated_multiseed",
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "config_hash": resolved_config_hash(config),
+        "git": {
+            "commit_sha": git_sha,
+            "dirty": dirty,
+        },
+        "seeds": seeds,
+        "package_versions": get_package_versions(),
+        "input_files": {
+            "config": {
+                "path": cfg_file,
+                "sha256": compute_file_sha256(cfg_file),
+            },
+            "curriculum": {
+                "path": curriculum_path,
+                "sha256": compute_file_sha256(curriculum_path),
+            },
+            "item_bank": {
+                "path": item_bank_path,
+                "sha256": compute_file_sha256(item_bank_path),
+            },
+            "q_matrix": {
+                "path": qmatrix_path,
+                "sha256": compute_file_sha256(qmatrix_path),
+            },
+            "profiles": {
+                "path": profiles_path,
+                "sha256": compute_file_sha256(profiles_path),
+            },
+        },
+        "output_files": output_checksums,
+    }
+    with open(combined_manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest_data, f, indent=2, sort_keys=True)
+
+    return {
+        "csv_path": primary_csv_path,
+        "md_path": combined_md_path,
+        "manifest_path": combined_manifest_path,
+        "arm_results": seed_results[seeds[0]]["arm_results"],
+        "seed_results": seed_results,
+        **{s: seed_results[s] for s in seeds},
     }
 
 
