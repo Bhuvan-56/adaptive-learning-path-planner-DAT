@@ -1,0 +1,69 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-7.3.1, pluggy-1.7.0
+rootdir: C:\Users\bhuva\Downloads\DAT11
+collected 1 item
+
+tests\test_beta_a1_noplan.py F                                           [100%]
+
+================================== FAILURES ===================================
+______ test_candidate_pending_d1_uncertain_prereq_yields_non_empty_plan _______
+
+tmp_path = WindowsPath('C:/Users/bhuva/AppData/Local/Temp/pytest-of-bhuva/pytest-187/test_candidate_pending_d1_unce0')
+
+    @pytest.mark.xfail(strict=True, reason="Candidate pending D1: learner whose only blocker is an Uncertain prerequisite still gets a non-empty plan")
+    def test_candidate_pending_d1_uncertain_prereq_yields_non_empty_plan(tmp_path):
+        """
+        Candidate test pending D1 decision:
+        When a learner has completed prerequisite A (with n=1, Uncertain), and has 10 minutes of daily
+        budget available, downstream candidate C (duration 10, requires A) or practice on A itself
+        should be scheduled so the learner receives a non-empty daily plan rather than halting.
+        Under the unfixed codebase, this test strictly fails because replan returns 0 activities
+        and HEURISTIC_NO_PLAN.
+        """
+        policy, _ = default_policy()
+        g = load_graph("data/curricula/demo_curriculum.json")
+    
+        st_a = ConceptState.cold_start()
+        st_a.update(correct=1, policy=policy)
+        assert st_a.classify(policy) == "Uncertain"
+    
+        learner_states = {
+            "A": st_a,
+            "B": ConceptState.cold_start(),
+            "C": ConceptState.cold_start(),
+            "D": ConceptState.cold_start(),
+        }
+        diff_states = {c: DifficultyState(difficulty=0.5) for c in g.nodes()}
+    
+        replan_state = ReplanState(
+            graph=g,
+            learner_states=learner_states,
+            budget=10,
+            deadline_days=5,
+            target_node="D",
+            completed_nodes={"A"},
+            current_day=2,
+            difficulty_states=diff_states,
+            review_log=ReviewLog(),
+            policy=policy,
+            past_days=[{"day": 1, "activities": ["A"]}],
+        )
+    
+        ev = assessment_result("A", [1])
+        result = replan(replan_state, ev)
+    
+        day2_plan = next((d for d in result["days"] if d["day"] == 2), None)
+        assert day2_plan is not None
+        # A non-empty plan is expected if an Uncertain prerequisite does not completely starve the schedule
+>       assert len(day2_plan["activities"]) > 0, (
+            f"Learner received empty plan on Day 2 due to Uncertain prerequisite A: {result.get('feasibility_explanation')}"
+        )
+E       AssertionError: Learner received empty plan on Day 2 due to Uncertain prerequisite A: {'status': <FeasibilityStatus.HEURISTIC_NO_PLAN: 'HEURISTIC_NO_PLAN'>, 'w_req': 25, 'total_capacity': 40, 'reason_code': <InfeasibilityReason.SCHEDULING_CONSTRAINTS_UNMET: 'SCHEDULING_CONSTRAINTS_UNMET'>}
+E       assert 0 > 0
+E        +  where 0 = len([])
+
+tests\test_beta_a1_noplan.py:252: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_beta_a1_noplan.py::test_candidate_pending_d1_uncertain_prereq_yields_non_empty_plan
+============================== 1 failed in 1.76s ==============================
+
