@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrated S0 Results</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js"></script>
+</head>
+<body>
+<main>
+  <h1>Integrated S0 results</h1>
+  <p class="lede">The whole loop (diagnostic, learner state, planning, replanning) run for 5 days with a 10-minute daily
+    budget on 1,000 synthetic learners: 5 seeds × 200 learners, every arm on the same learners. Outcome: number of
+    concepts mastered at the end (out of 4).</p>
+  <div class="note">Results from a simulator with synthetic learners (<code>MatchedBKTGenerator</code>), scenario S0 only.</div>
+
+  <h2>Arms</h2>
+  <div class="card">
+    <div class="table-wrap" id="arms"><p class="small">Loading…</p></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h3 style="margin-top:0">Concepts mastered, mean with 95% CI</h3>
+    <div id="forest"></div>
+  </div>
+
+  <h2>Paired differences in concepts mastered</h2>
+  <p>Each learner is run under both arms, so differences are taken learner by learner and bootstrapped. An arm is
+    called better only if the 95% CI excludes zero.</p>
+  <div class="card">
+    <div class="table-wrap" id="diffs"></div>
+  </div>
+  <div class="card" style="margin-top:12px"><div id="diff-forest"></div></div>
+
+  <h2>How these numbers are computed</h2>
+  <div class="card small" id="method"></div>
+</main>
+<script>
+(async () => {
+  let r;
+  try { r = await Site.getJSON("data/s0_pooled.json"); } catch (e) { return Site.fail(document.getElementById("arms"), e); }
+  const S = r.sources;
+  const csvs = "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_*.csv";
+  const n = x => x.toLocaleString("en-US");
+
+  document.getElementById("arms").innerHTML = `<table><thead><tr><th>Arm</th><th class="num">Learners</th><th class="num">Mastered [95% CI]</th>
+    <th class="num">No-plan days</th><th class="num">Prereq viol.</th><th class="num">Budget viol.</th><th class="num">Trace coverage</th></tr></thead>
+    <tbody>${r.arms.map(a => `<tr><td><code>${a.arm}</code></td><td class="num">${n(a.n)}</td>
+      <td class="num">${Site.fmt4(a.mastered)} [${Site.fmt4(a.lo)}, ${Site.fmt4(a.hi)}]</td>
+      <td class="num">${n(a.no_plan_days)} / ${n(a.learner_days)}</td><td class="num">${a.prereq_violations}</td><td class="num">${a.budget_violations}</td>
+      <td class="num">${a.trace_coverage ?? '<span class="small">not reported</span>'}</td></tr>`).join("")}</tbody></table>
+    ${Site.src(csvs, "arms in file order")}
+    <span class="src">Trace coverage: as printed in ${S.coverage.map(p => `<a href="../${p}"><code>${p.split("/").pop()}</code></a>`).join(", ")} (the summaries print it for the four primary arms; the same value in all five seeds).</span>`;
+
+  // forest plot of arm means
+  function forest(rows, label, lo, hi, opts) {
+    const W = 700, rowH = 26, L = opts.left, R = 20, T = 10, B = 34, H = T + B + rows.length * rowH;
+    const X = v => L + (v - lo) / (hi - lo) * (W - L - R);
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.aria}">`;
+    for (let v = lo; v <= hi + 1e-9; v += opts.step) {
+      svg += `<line class="gridline" x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H - B}"/><text x="${X(v)}" y="${H - B + 14}" text-anchor="middle">${v.toFixed(opts.dp)}</text>`;
+    }
+    if (opts.zero) svg += `<line class="zero" x1="${X(0)}" x2="${X(0)}" y1="${T}" y2="${H - B}"/>`;
+    rows.forEach((d, i) => {
+      const y = T + rowH * i + rowH / 2, c = opts.color(d);
+      svg += `<g data-tip="${opts.tip(d)}"><rect x="0" y="${y - rowH / 2}" width="${W}" height="${rowH}" fill="transparent"/>
+        <text x="${L - 8}" y="${y + 4}" text-anchor="end" style="fill:var(--text)">${label(d)}</text>
+        <line x1="${X(d.lo)}" x2="${X(d.hi)}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="2"/>
+        <circle cx="${X(d.mean ?? d.mastered)}" cy="${y}" r="5" fill="${c}" stroke="var(--surface)" stroke-width="2"/></g>`;
+    });
+    svg += `<text x="${(W + L) / 2}" y="${H - 6}" text-anchor="middle">${opts.axis}</text></svg>`;
+    return svg;
+  }
+  const fEl = document.getElementById("forest");
+  const rng = (rows, st) => [Math.floor(Math.min(...rows.map(d => d.lo)) / st) * st, Math.ceil(Math.max(...rows.map(d => d.hi)) / st) * st];
+  fEl.innerHTML = forest(r.arms, a => a.arm, ...rng(r.arms, 0.1), {
+    left: 250, step: 0.1, dp: 1, aria: "Concepts mastered per arm with 95% CI", axis: "concepts mastered (mean, 95% CI)",
+    color: a => a.arm.includes("greedy") ? (a.arm.endsWith("best_singleton") ? "var(--series-2)" : "var(--series-1)") : "var(--text-2)",
+    tip: a => `<b>${a.arm}</b><br>${Site.fmt4(a.mastered)} [${Site.fmt4(a.lo)}, ${Site.fmt4(a.hi)}]`,
+  }) + Site.src(csvs);
+  Site.bindTips(fEl);
+
+  document.getElementById("diffs").innerHTML = `<table><thead><tr><th>Comparison (A − B)</th><th class="num">Mean diff.</th><th class="num">95% CI</th>
+    <th class="num">Learners changed (+ / −)</th><th>Claim</th></tr></thead>
+    <tbody>${r.diffs.map(d => `<tr><td><code>${d.a}</code> − <code>${d.b}</code></td><td class="num">${Site.signed4(d.mean)}</td>
+      <td class="num">[${Site.fmt4(d.lo)}, ${Site.fmt4(d.hi)}]</td><td class="num">${d.changed} (+${d.up} / −${d.down})</td>
+      <td><span class="pill ${d.claim === "no difference shown" ? "" : "warn"}">${Site.esc(d.claim)}</span></td></tr>`).join("")}</tbody></table>
+    ${Site.src(csvs, "comparisons are the ones each <code>summary_seed_&lt;s&gt;.md</code> reports (sections 3 and 4), pooled over 1,000 learners")}`;
+
+  const dEl = document.getElementById("diff-forest");
+  dEl.innerHTML = forest(r.diffs, d => `${d.a} − ${d.b}`.replace("non_adaptive_", "na_").replace("non_adaptive_", "na_").replace("static_prerequisite_order", "static"), ...rng(r.diffs, 0.05), {
+    left: 330, step: 0.05, dp: 2, zero: true, aria: "Paired differences with 95% CI", axis: "paired difference in concepts mastered (A − B)",
+    color: d => d.a === "non_adaptive_greedy_best_singleton" ? "var(--series-2)" : "var(--text-2)",
+    tip: d => `<b>${d.a} − ${d.b}</b><br>${Site.signed4(d.mean)} [${Site.fmt4(d.lo)}, ${Site.fmt4(d.hi)}]<br>${d.claim}`,
+  }) + `<p class="small">Labels shorten <code>non_adaptive_</code> to <code>na_</code> and <code>static_prerequisite_order</code> to <code>static</code>.</p>` + Site.src(csvs);
+  Site.bindTips(dEl);
+
+  document.getElementById("method").innerHTML = `
+    <p><code>per_learner.csv</code> and the arm table in <code>summary.md</code> hold seed 42 only, so the five per-seed files are pooled.
+    <code>site/build_data.py</code> follows <a href="../${S.method}"><code>${S.method}</code></a>: the five files are concatenated in the order 42, 101, 2024, 777, 999;
+    each arm's mean and CI use <code>compute_paired_bootstrap_ci</code> (B = 1000, seed 42); paired differences use rows sorted by the per-learner seed.</p>
+    <p>The build checks its arm means, CIs and no-plan days for the four primary arms, the best-singleton − greedy difference (+0.0130 [0.0040, 0.0230], 23 learners: 18 up, 5 down)
+    and adaptive_full − static (−0.1020 [−0.1210, −0.0830]) against <a href="../${S.checked_against}"><code>${S.checked_against}</code></a> and stops if any differs.</p>
+    <p>Sources: ${S.per_learner.map(p => `<a href="../${p}"><code>${p}</code></a>`).join(", ")}.</p>`;
+})();
+</script>
+</body>
+</html>

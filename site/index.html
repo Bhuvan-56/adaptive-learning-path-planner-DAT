@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adaptive Learning-Path Planner</title>
+<meta name="description" content="Adaptive learning-path planner: diagnostic, learner state, prerequisite-safe budgeted daily plans and replanning. Week 7 results and live demos.">
+<link rel="stylesheet" href="assets/style.css">
+<!-- Warm the browser cache for the live demos (same pinned Pyodide as assets/pyrunner.js). -->
+<link rel="prefetch" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js" crossorigin>
+<link rel="prefetch" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.asm.js" crossorigin>
+<link rel="prefetch" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.asm.wasm" crossorigin>
+<link rel="prefetch" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/python_stdlib.zip" crossorigin>
+<link rel="prefetch" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide-lock.json" crossorigin>
+<script src="assets/common.js"></script>
+</head>
+<body>
+<main>
+  <h1>Adaptive Learning-Path Planner</h1>
+  <p class="lede">Given a target concept, a daily time budget and a deadline, the engine finds out what the learner
+    already knows, keeps a per-concept learner state, and builds a day-by-day study plan that never schedules a concept
+    before its prerequisites and never goes over the daily budget. When something changes, it replans.</p>
+  <p class="made-by">Made by: Bhuvan and Abdur</p>
+
+  <h2>What the engine does</h2>
+  <div class="pipeline">
+    <div class="card step">
+      <h3>Diagnostic</h3>
+      <p>A short adaptive test (IRT computerized adaptive testing) estimates the learner's ability and gives each concept
+        a starting belief.</p>
+      <span class="src">Code: <code>src/diagnostic/diagnostic.py</code></span>
+    </div>
+    <div class="card step">
+      <h3>Learner state</h3>
+      <p>Each concept keeps a belief that it is known, updated after every answer (Bayesian Knowledge Tracing), and is
+        classed <b>Mastered</b>, <b>Developing</b>, <b>Uncertain</b> or <b>Weak</b>.</p>
+      <span class="src">Code: <code>src/state/learner_state.py</code>, <code>src/state/policy.py</code></span>
+    </div>
+    <div class="card step">
+      <h3>Daily plan</h3>
+      <p>Concepts are placed day by day in prerequisite order inside the daily budget. A request that cannot fit is
+        rejected with a reason code and a suggested fix. Each decision is written to a trace.</p>
+      <span class="src">Code: <code>src/planning/service.py</code>, <code>src/planning/static_baseline.py</code>, <code>src/planning/feasibility.py</code></span>
+    </div>
+    <div class="card step">
+      <h3>Replan</h3>
+      <p>On a new assessment result, a missed day, or a changed budget or deadline, the remaining days are planned again;
+        repeated failures trigger remediation of prerequisites.</p>
+      <span class="src">Code: <code>src/planning/replan.py</code></span>
+    </div>
+  </div>
+
+  <h2>Week 7 change: best-singleton fallback</h2>
+  <p>The daily scheduler picks items by score per minute (greedy). Week 7 added an opt-in fallback: also look at the
+    best single item that fits, and keep whichever is worth more.</p>
+  <div class="grid cols-2" id="headline"><p class="small">Loading…</p></div>
+  <div class="note">All results on this site come from a simulator with synthetic learners and synthetic scheduling
+    instances, not from real learners.</div>
+
+  <h2>Pages</h2>
+  <div class="grid cols-2">
+    <a class="card" href="curriculum.html"><b>Curriculum</b><br><span class="small">The 4-concept demo graph the planner uses.</span></a>
+    <a class="card" href="scheduling.html"><b>Scheduling benchmark</b><br><span class="small">Greedy vs greedy + best-singleton against the exact optimum on 250 instances.</span></a>
+    <a class="card" href="results.html"><b>Integrated S0</b><br><span class="small">All nine arms, 1,000 synthetic learners, pooled over five seeds.</span></a>
+    <a class="card" href="demos.html"><b>Live demos</b><br><span class="small">The real project code running in your browser.</span></a>
+  </div>
+</main>
+<script>
+(async () => {
+  const el = document.getElementById("headline");
+  try {
+    const [s, r] = await Promise.all([Site.getJSON("data/scheduling.json"), Site.getJSON("data/s0_pooled.json")]);
+    const d = s.paired_diff;
+    const bs = r.diffs.find(x => x.a === "non_adaptive_greedy_best_singleton" && x.b === "non_adaptive_greedy");
+    el.innerHTML = `
+      <div class="card stat"><div class="k">Scheduling: mean ratio to optimum, best-singleton minus greedy (250 instances)</div>
+        <div class="v">${Site.signed4(d.mean)}</div><div class="ci">95% CI [${d.lo}, ${d.hi}]</div>
+        ${Site.src(s.sources.summary)}</div>
+      <div class="card stat"><div class="k">Integrated S0: concepts mastered, best-singleton arm minus greedy arm (1,000 learners)</div>
+        <div class="v">${Site.signed4(bs.mean)}</div><div class="ci">95% CI [${Site.fmt4(bs.lo)}, ${Site.fmt4(bs.hi)}]</div>
+        ${Site.src("evaluation/results/w7/improvement/integrated_s0/per_learner_seed_*.csv", "pooled as in <code>scripts/w7_pooled_s0.py</code>")}</div>`;
+  } catch (e) { Site.fail(el, e); }
+})();
+</script>
+</body>
+</html>

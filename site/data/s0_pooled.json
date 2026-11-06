@@ -1,0 +1,231 @@
+{
+ "sources": {
+  "per_learner": [
+   "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_42.csv",
+   "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_101.csv",
+   "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_2024.csv",
+   "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_777.csv",
+   "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_999.csv"
+  ],
+  "coverage": [
+   "evaluation/results/w7/improvement/integrated_s0/summary_seed_42.md",
+   "evaluation/results/w7/improvement/integrated_s0/summary_seed_101.md",
+   "evaluation/results/w7/improvement/integrated_s0/summary_seed_2024.md",
+   "evaluation/results/w7/improvement/integrated_s0/summary_seed_777.md",
+   "evaluation/results/w7/improvement/integrated_s0/summary_seed_999.md"
+  ],
+  "method": "scripts/w7_pooled_s0.py",
+  "checked_against": "docs/w7/comparison.md"
+ },
+ "arms": [
+  {
+   "arm": "adaptive_full",
+   "n": 1000,
+   "mastered": 1.934,
+   "lo": 1.8309,
+   "hi": 2.038,
+   "no_plan_days": 4000,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0,
+   "trace_coverage": "100.0%"
+  },
+  {
+   "arm": "static_prerequisite_order",
+   "n": 1000,
+   "mastered": 2.036,
+   "lo": 1.936,
+   "hi": 2.14,
+   "no_plan_days": 0,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0,
+   "trace_coverage": "100.0%"
+  },
+  {
+   "arm": "non_adaptive_greedy",
+   "n": 1000,
+   "mastered": 2.036,
+   "lo": 1.936,
+   "hi": 2.14,
+   "no_plan_days": 0,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0,
+   "trace_coverage": "100.0%"
+  },
+  {
+   "arm": "non_adaptive_greedy_best_singleton",
+   "n": 1000,
+   "mastered": 2.049,
+   "lo": 1.951,
+   "hi": 2.151,
+   "no_plan_days": 0,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0,
+   "trace_coverage": "100.0%"
+  },
+  {
+   "arm": "ablation_no_diagnostic",
+   "n": 1000,
+   "mastered": 1.934,
+   "lo": 1.8309,
+   "hi": 2.038,
+   "no_plan_days": 4000,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0,
+   "trace_coverage": null
+  },
+  {
+   "arm": "ablation_no_replan",
+   "n": 1000,
+   "mastered": 2.036,
+   "lo": 1.936,
+   "hi": 2.14,
+   "no_plan_days": 0,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0,
+   "trace_coverage": null
+  },
+  {
+   "arm": "ablation_no_difficulty_step",
+   "n": 1000,
+   "mastered": 1.934,
+   "lo": 1.8309,
+   "hi": 2.038,
+   "no_plan_days": 4000,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0,
+   "trace_coverage": null
+  },
+  {
+   "arm": "ablation_no_review",
+   "n": 1000,
+   "mastered": 1.934,
+   "lo": 1.8309,
+   "hi": 2.038,
+   "no_plan_days": 4000,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0,
+   "trace_coverage": null
+  },
+  {
+   "arm": "ablation_no_remediation",
+   "n": 1000,
+   "mastered": 1.934,
+   "lo": 1.8309,
+   "hi": 2.038,
+   "no_plan_days": 4000,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0,
+   "trace_coverage": null
+  }
+ ],
+ "diffs": [
+  {
+   "a": "adaptive_full",
+   "b": "static_prerequisite_order",
+   "mean": -0.102,
+   "lo": -0.121,
+   "hi": -0.083,
+   "changed": 99,
+   "up": 0,
+   "down": 99,
+   "claim": "static_prerequisite_order better (higher mastery)"
+  },
+  {
+   "a": "adaptive_full",
+   "b": "non_adaptive_greedy",
+   "mean": -0.102,
+   "lo": -0.121,
+   "hi": -0.083,
+   "changed": 99,
+   "up": 0,
+   "down": 99,
+   "claim": "non_adaptive_greedy better (higher mastery)"
+  },
+  {
+   "a": "non_adaptive_greedy",
+   "b": "static_prerequisite_order",
+   "mean": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "changed": 0,
+   "up": 0,
+   "down": 0,
+   "claim": "no difference shown"
+  },
+  {
+   "a": "non_adaptive_greedy_best_singleton",
+   "b": "non_adaptive_greedy",
+   "mean": 0.013,
+   "lo": 0.004,
+   "hi": 0.023,
+   "changed": 23,
+   "up": 18,
+   "down": 5,
+   "claim": "non_adaptive_greedy_best_singleton better (higher mastery)"
+  },
+  {
+   "a": "ablation_no_diagnostic",
+   "b": "adaptive_full",
+   "mean": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "changed": 0,
+   "up": 0,
+   "down": 0,
+   "claim": "no difference shown"
+  },
+  {
+   "a": "ablation_no_replan",
+   "b": "adaptive_full",
+   "mean": 0.102,
+   "lo": 0.083,
+   "hi": 0.121,
+   "changed": 99,
+   "up": 99,
+   "down": 0,
+   "claim": "ablation_no_replan better (higher mastery)"
+  },
+  {
+   "a": "ablation_no_difficulty_step",
+   "b": "adaptive_full",
+   "mean": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "changed": 0,
+   "up": 0,
+   "down": 0,
+   "claim": "no difference shown"
+  },
+  {
+   "a": "ablation_no_review",
+   "b": "adaptive_full",
+   "mean": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "changed": 0,
+   "up": 0,
+   "down": 0,
+   "claim": "no difference shown"
+  },
+  {
+   "a": "ablation_no_remediation",
+   "b": "adaptive_full",
+   "mean": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "changed": 0,
+   "up": 0,
+   "down": 0,
+   "claim": "no difference shown"
+  }
+ ]
+}

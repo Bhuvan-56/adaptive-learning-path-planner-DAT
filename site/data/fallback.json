@@ -1,0 +1,1778 @@
+{
+ "generated_by": "site/build_data.py (same site/py/demo_api.py the live demo runs)",
+ "a": {
+  "counterexample_12_18": {
+   "input": {
+    "items": [
+     {
+      "node_id": "item_1",
+      "duration": 6,
+      "score": 12,
+      "prerequisites": []
+     },
+     {
+      "node_id": "item_2",
+      "duration": 5,
+      "score": 9,
+      "prerequisites": []
+     },
+     {
+      "node_id": "item_3",
+      "duration": 5,
+      "score": 9,
+      "prerequisites": []
+     }
+    ],
+    "budget": 10
+   },
+   "output": {
+    "ok": true,
+    "budget": 10,
+    "greedy": {
+     "score": 12,
+     "picks": [
+      "item_1"
+     ],
+     "minutes": 6
+    },
+    "best_singleton": {
+     "score": 12,
+     "picks": [
+      "item_1"
+     ],
+     "minutes": 6
+    },
+    "oracle": {
+     "score": 18,
+     "picks": [
+      "item_2",
+      "item_3"
+     ],
+     "minutes": 10
+    }
+   }
+  },
+  "benchmark_seed47_instance215": {
+   "input": {
+    "items": [
+     {
+      "node_id": "item_1",
+      "duration": 9,
+      "score": 12,
+      "prerequisites": []
+     },
+     {
+      "node_id": "item_2",
+      "duration": 1,
+      "score": 3,
+      "prerequisites": []
+     },
+     {
+      "node_id": "item_3",
+      "duration": 5,
+      "score": 20,
+      "prerequisites": [
+       "item_2",
+       "item_1"
+      ]
+     },
+     {
+      "node_id": "item_4",
+      "duration": 5,
+      "score": 2,
+      "prerequisites": []
+     },
+     {
+      "node_id": "item_5",
+      "duration": 10,
+      "score": 15,
+      "prerequisites": [
+       "item_4",
+       "item_1",
+       "item_2",
+       "item_3"
+      ]
+     },
+     {
+      "node_id": "item_6",
+      "duration": 8,
+      "score": 14,
+      "prerequisites": [
+       "item_1",
+       "item_3",
+       "item_4",
+       "item_5",
+       "item_2"
+      ]
+     },
+     {
+      "node_id": "item_7",
+      "duration": 6,
+      "score": 3,
+      "prerequisites": []
+     },
+     {
+      "node_id": "item_8",
+      "duration": 5,
+      "score": 14,
+      "prerequisites": []
+     },
+     {
+      "node_id": "item_9",
+      "duration": 6,
+      "score": 4,
+      "prerequisites": [
+       "item_7"
+      ]
+     },
+     {
+      "node_id": "item_10",
+      "duration": 7,
+      "score": 13,
+      "prerequisites": [
+       "item_6",
+       "item_1",
+       "item_8",
+       "item_7",
+       "item_3",
+       "item_9",
+       "item_5",
+       "item_4",
+       "item_2"
+      ]
+     },
+     {
+      "node_id": "item_11",
+      "duration": 3,
+      "score": 10,
+      "prerequisites": [
+       "item_10",
+       "item_1",
+       "item_7",
+       "item_8",
+       "item_4",
+       "item_2",
+       "item_9",
+       "item_5",
+       "item_3"
+      ]
+     }
+    ],
+    "budget": 5
+   },
+   "output": {
+    "ok": true,
+    "budget": 5,
+    "greedy": {
+     "score": 3,
+     "picks": [
+      "item_2"
+     ],
+     "minutes": 1
+    },
+    "best_singleton": {
+     "score": 14,
+     "picks": [
+      "item_8"
+     ],
+     "minutes": 5
+    },
+    "oracle": {
+     "score": 14,
+     "picks": [
+      "item_8"
+     ],
+     "minutes": 5
+    }
+   }
+  }
+ },
+ "b": {
+  "cold_start": {
+   "input": {
+    "target": "D",
+    "budget": 10,
+    "deadline_days": 5,
+    "answers": {}
+   },
+   "output": {
+    "is_valid": true,
+    "status": "FEASIBLE",
+    "error_codes": [],
+    "message": "Plan generated successfully",
+    "states": {
+     "A": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "B": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "C": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "D": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     }
+    },
+    "plan": {
+     "status": "FEASIBLE",
+     "feasibility": {
+      "status": "FEASIBLE",
+      "w_req": 30,
+      "total_capacity": 50
+     },
+     "days": [
+      {
+       "day": 1,
+       "activities": [
+        "A",
+        "B"
+       ],
+       "conditional_activities": [
+        "B"
+       ],
+       "minutes_used": 10,
+       "minutes_remaining": 0
+      },
+      {
+       "day": 2,
+       "activities": [
+        "C"
+       ],
+       "conditional_activities": [
+        "C"
+       ],
+       "minutes_used": 10,
+       "minutes_remaining": 0
+      },
+      {
+       "day": 3,
+       "activities": [
+        "D"
+       ],
+       "conditional_activities": [
+        "D"
+       ],
+       "minutes_used": 10,
+       "minutes_remaining": 0
+      },
+      {
+       "day": 4,
+       "activities": [],
+       "conditional_activities": [],
+       "minutes_used": 0,
+       "minutes_remaining": 10
+      },
+      {
+       "day": 5,
+       "activities": [],
+       "conditional_activities": [],
+       "minutes_used": 0,
+       "minutes_remaining": 10
+      }
+     ],
+     "assessment_candidates": [
+      "C"
+     ],
+     "trace": [
+      {
+       "day": 1,
+       "node_id": "A",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 1,
+       "node_id": "B",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 1,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "BUDGET_EXCEEDED",
+       "class": "Uncertain",
+       "remaining_budget": 0
+      },
+      {
+       "day": 1,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+       "class": "Uncertain",
+       "remaining_budget": 0
+      },
+      {
+       "day": 2,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "C",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "BUDGET_EXCEEDED",
+       "class": "Uncertain",
+       "remaining_budget": 0
+      },
+      {
+       "day": 3,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "D",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      }
+     ]
+    }
+   }
+  },
+  "a_mastered": {
+   "input": {
+    "target": "D",
+    "budget": 10,
+    "deadline_days": 5,
+    "answers": {
+     "A": "1111"
+    }
+   },
+   "output": {
+    "is_valid": true,
+    "status": "FEASIBLE",
+    "error_codes": [],
+    "message": "Plan generated successfully",
+    "states": {
+     "A": {
+      "p": 0.9962,
+      "n": 4,
+      "sigma2": 0.0005,
+      "class": "Mastered",
+      "history": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     "B": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "C": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "D": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     }
+    },
+    "plan": {
+     "status": "FEASIBLE",
+     "feasibility": {
+      "status": "FEASIBLE",
+      "w_req": 25,
+      "total_capacity": 50
+     },
+     "days": [
+      {
+       "day": 1,
+       "activities": [
+        "B"
+       ],
+       "conditional_activities": [],
+       "minutes_used": 5,
+       "minutes_remaining": 5
+      },
+      {
+       "day": 2,
+       "activities": [
+        "C"
+       ],
+       "conditional_activities": [],
+       "minutes_used": 10,
+       "minutes_remaining": 0
+      },
+      {
+       "day": 3,
+       "activities": [
+        "D"
+       ],
+       "conditional_activities": [
+        "D"
+       ],
+       "minutes_used": 10,
+       "minutes_remaining": 0
+      },
+      {
+       "day": 4,
+       "activities": [],
+       "conditional_activities": [],
+       "minutes_used": 0,
+       "minutes_remaining": 10
+      },
+      {
+       "day": 5,
+       "activities": [],
+       "conditional_activities": [],
+       "minutes_used": 0,
+       "minutes_remaining": 10
+      }
+     ],
+     "assessment_candidates": [
+      "C"
+     ],
+     "trace": [
+      {
+       "day": 1,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 1,
+       "node_id": "B",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 1,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "BUDGET_EXCEEDED",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 1,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 2,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "C",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "BUDGET_EXCEEDED",
+       "class": "Uncertain",
+       "remaining_budget": 0
+      },
+      {
+       "day": 3,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "D",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      }
+     ]
+    }
+   }
+  },
+  "weak_prereq": {
+   "input": {
+    "target": "D",
+    "budget": 10,
+    "deadline_days": 5,
+    "answers": {
+     "A": "1111",
+     "B": "0000"
+    }
+   },
+   "output": {
+    "is_valid": true,
+    "status": "HEURISTIC_NO_PLAN",
+    "error_codes": [],
+    "message": "Plan generated successfully",
+    "states": {
+     "A": {
+      "p": 0.9962,
+      "n": 4,
+      "sigma2": 0.0005,
+      "class": "Mastered",
+      "history": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     "B": {
+      "p": 0.1157,
+      "n": 4,
+      "sigma2": 0.0146,
+      "class": "Weak",
+      "history": [
+       0,
+       0,
+       0,
+       0
+      ]
+     },
+     "C": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "D": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     }
+    },
+    "plan": {
+     "status": "HEURISTIC_NO_PLAN",
+     "feasibility": {
+      "status": "HEURISTIC_NO_PLAN",
+      "w_req": 25,
+      "total_capacity": 50,
+      "reason_code": "SCHEDULING_CONSTRAINTS_UNMET"
+     },
+     "days": [
+      {
+       "day": 1,
+       "activities": [
+        "B"
+       ],
+       "conditional_activities": [],
+       "minutes_used": 5,
+       "minutes_remaining": 5
+      },
+      {
+       "day": 2,
+       "activities": [
+        "C"
+       ],
+       "conditional_activities": [],
+       "minutes_used": 10,
+       "minutes_remaining": 0
+      },
+      {
+       "day": 3,
+       "activities": [],
+       "conditional_activities": [],
+       "minutes_used": 0,
+       "minutes_remaining": 10
+      },
+      {
+       "day": 4,
+       "activities": [],
+       "conditional_activities": [],
+       "minutes_used": 0,
+       "minutes_remaining": 10
+      },
+      {
+       "day": 5,
+       "activities": [],
+       "conditional_activities": [],
+       "minutes_used": 0,
+       "minutes_remaining": 10
+      }
+     ],
+     "assessment_candidates": [
+      "C"
+     ],
+     "trace": [
+      {
+       "day": 1,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 1,
+       "node_id": "B",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Weak",
+       "remaining_budget": 10
+      },
+      {
+       "day": 1,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "BUDGET_EXCEEDED",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 1,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 2,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Weak",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "C",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "PREREQUISITE_UNMET",
+       "class": "Uncertain",
+       "remaining_budget": 0
+      },
+      {
+       "day": 3,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Weak",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "PREREQUISITE_UNMET",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Weak",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "PREREQUISITE_UNMET",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Weak",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "PREREQUISITE_UNMET",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      }
+     ]
+    }
+   }
+  },
+  "block_too_big": {
+   "input": {
+    "target": "D",
+    "budget": 8,
+    "deadline_days": 5,
+    "answers": {}
+   },
+   "output": {
+    "is_valid": true,
+    "status": "INFEASIBLE_PROVED",
+    "error_codes": [],
+    "message": "Plan generated successfully",
+    "states": {
+     "A": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "B": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "C": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "D": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     }
+    },
+    "plan": {
+     "status": "INFEASIBLE_PROVED",
+     "feasibility": {
+      "status": "INFEASIBLE_PROVED",
+      "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
+      "offending_nodes": [
+       "C",
+       "D"
+      ],
+      "minimum_fix": "raise daily budget to at least 10 minutes",
+      "notes": "Adding extra days will not resolve an indivisible activity duration constraint."
+     },
+     "days": [],
+     "assessment_candidates": [],
+     "no_plan_trace": {
+      "status": "INFEASIBLE_PROVED",
+      "reason_code": "BLOCK_EXCEEDS_DAILY_BUDGET",
+      "constraints": {
+       "budget": 8,
+       "deadline_days": 5
+      }
+     }
+    }
+   }
+  },
+  "too_few_days": {
+   "input": {
+    "target": "D",
+    "budget": 10,
+    "deadline_days": 2,
+    "answers": {}
+   },
+   "output": {
+    "is_valid": true,
+    "status": "INFEASIBLE_PROVED",
+    "error_codes": [],
+    "message": "Plan generated successfully",
+    "states": {
+     "A": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "B": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "C": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "D": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     }
+    },
+    "plan": {
+     "status": "INFEASIBLE_PROVED",
+     "feasibility": {
+      "status": "INFEASIBLE_PROVED",
+      "reason_code": "CAPACITY_EXCEEDED",
+      "w_req": 30,
+      "total_capacity": 20,
+      "necessary_not_sufficient_fixes": {
+       "extend_deadline_by_days": 1,
+       "increase_daily_budget_by_minutes": 5
+      },
+      "notes": "Calculated fixes are necessary lower bounds, but not guaranteed sufficient due to block indivisibility."
+     },
+     "days": [],
+     "assessment_candidates": [],
+     "no_plan_trace": {
+      "status": "INFEASIBLE_PROVED",
+      "reason_code": "CAPACITY_EXCEEDED",
+      "constraints": {
+       "budget": 10,
+       "deadline_days": 2
+      }
+     }
+    }
+   }
+  },
+  "replan_two_wrong": {
+   "input": {
+    "target": "D",
+    "budget": 10,
+    "deadline_days": 5,
+    "answers": {
+     "A": "1111"
+    },
+    "event": {
+     "type": "assessment_result",
+     "node": "B",
+     "answers": "00"
+    }
+   },
+   "output": {
+    "is_valid": true,
+    "status": "FEASIBLE",
+    "error_codes": [],
+    "message": "Plan generated successfully",
+    "states": {
+     "A": {
+      "p": 0.9962,
+      "n": 4,
+      "sigma2": 0.0005,
+      "class": "Mastered",
+      "history": [
+       1,
+       1,
+       1,
+       1
+      ]
+     },
+     "B": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "C": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     },
+     "D": {
+      "p": 0.5,
+      "n": 0,
+      "sigma2": 0.0833,
+      "class": "Uncertain",
+      "history": []
+     }
+    },
+    "plan": {
+     "status": "FEASIBLE",
+     "feasibility": {
+      "status": "FEASIBLE",
+      "w_req": 25,
+      "total_capacity": 50
+     },
+     "days": [
+      {
+       "day": 1,
+       "activities": [
+        "B"
+       ],
+       "conditional_activities": [],
+       "minutes_used": 5,
+       "minutes_remaining": 5
+      },
+      {
+       "day": 2,
+       "activities": [
+        "C"
+       ],
+       "conditional_activities": [],
+       "minutes_used": 10,
+       "minutes_remaining": 0
+      },
+      {
+       "day": 3,
+       "activities": [
+        "D"
+       ],
+       "conditional_activities": [
+        "D"
+       ],
+       "minutes_used": 10,
+       "minutes_remaining": 0
+      },
+      {
+       "day": 4,
+       "activities": [],
+       "conditional_activities": [],
+       "minutes_used": 0,
+       "minutes_remaining": 10
+      },
+      {
+       "day": 5,
+       "activities": [],
+       "conditional_activities": [],
+       "minutes_used": 0,
+       "minutes_remaining": 10
+      }
+     ],
+     "assessment_candidates": [
+      "C"
+     ],
+     "trace": [
+      {
+       "day": 1,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 1,
+       "node_id": "B",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 1,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "BUDGET_EXCEEDED",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 1,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 2,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "C",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "BUDGET_EXCEEDED",
+       "class": "Uncertain",
+       "remaining_budget": 0
+      },
+      {
+       "day": 3,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 3,
+       "node_id": "D",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      }
+     ]
+    },
+    "replan": {
+     "status": "FEASIBLE",
+     "feasibility": {
+      "status": "FEASIBLE",
+      "w_req": 25,
+      "total_capacity": 50
+     },
+     "days": [
+      {
+       "day": 1,
+       "activities": [
+        "B"
+       ],
+       "conditional_activities": [],
+       "minutes_used": 5,
+       "minutes_remaining": 5
+      },
+      {
+       "day": 2,
+       "activities": [
+        "C"
+       ],
+       "conditional_activities": [],
+       "minutes_used": 10,
+       "minutes_remaining": 0
+      },
+      {
+       "day": 3,
+       "activities": [
+        "D"
+       ],
+       "conditional_activities": [
+        "D"
+       ],
+       "minutes_used": 10,
+       "minutes_remaining": 0
+      },
+      {
+       "day": 4,
+       "activities": [
+        "A"
+       ],
+       "conditional_activities": [],
+       "minutes_used": 5,
+       "minutes_remaining": 5
+      },
+      {
+       "day": 5,
+       "activities": [],
+       "conditional_activities": [],
+       "minutes_used": 0,
+       "minutes_remaining": 10
+      }
+     ],
+     "assessment_candidates": [
+      "C"
+     ],
+     "trace": [
+      {
+       "day": 1,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 5
+      },
+      {
+       "day": 1,
+       "node_id": "B",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 1,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "BUDGET_EXCEEDED",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 1,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "UNCERTAIN_NEEDS_ASSESSMENT",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 2,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 0
+      },
+      {
+       "day": 2,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 0
+      },
+      {
+       "day": 2,
+       "node_id": "C",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 2,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "BUDGET_EXCEEDED",
+       "class": "Uncertain",
+       "remaining_budget": 0
+      },
+      {
+       "day": 3,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 0
+      },
+      {
+       "day": 3,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 0
+      },
+      {
+       "day": 3,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 0
+      },
+      {
+       "day": 3,
+       "node_id": "D",
+       "decision": "SELECTED",
+       "reason_code": "SELECTED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "A",
+       "decision": "SELECTED",
+       "reason_code": "REVIEW_DUE",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 4,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 4,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 4,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 5
+      },
+      {
+       "day": 5,
+       "node_id": "A",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_MASTERED",
+       "class": "Mastered",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "B",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "C",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      },
+      {
+       "day": 5,
+       "node_id": "D",
+       "decision": "FILTERED",
+       "reason_code": "ALREADY_SCHEDULED",
+       "class": "Uncertain",
+       "remaining_budget": 10
+      }
+     ],
+     "event": {
+      "type": "assessment_result",
+      "node": "B",
+      "answers": "00"
+     },
+     "states": {
+      "A": {
+       "p": 0.9962,
+       "n": 4,
+       "sigma2": 0.0005,
+       "class": "Mastered",
+       "history": [
+        1,
+        1,
+        1,
+        1
+       ]
+      },
+      "B": {
+       "p": 0.1301,
+       "n": 2,
+       "sigma2": 0.0226,
+       "class": "Uncertain",
+       "history": [
+        0,
+        0
+       ]
+      },
+      "C": {
+       "p": 0.5,
+       "n": 0,
+       "sigma2": 0.0833,
+       "class": "Uncertain",
+       "history": []
+      },
+      "D": {
+       "p": 0.5,
+       "n": 0,
+       "sigma2": 0.0833,
+       "class": "Uncertain",
+       "history": []
+      }
+     }
+    }
+   }
+  }
+ },
+ "states": {
+  "": {
+   "p": 0.5,
+   "n": 0,
+   "sigma2": 0.0833,
+   "class": "Uncertain",
+   "history": []
+  },
+  "1111": {
+   "p": 0.9962,
+   "n": 4,
+   "sigma2": 0.0005,
+   "class": "Mastered",
+   "history": [
+    1,
+    1,
+    1,
+    1
+   ]
+  },
+  "0000": {
+   "p": 0.1157,
+   "n": 4,
+   "sigma2": 0.0146,
+   "class": "Weak",
+   "history": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "1010": {
+   "p": 0.3566,
+   "n": 4,
+   "sigma2": 0.0328,
+   "class": "Developing",
+   "history": [
+    1,
+    0,
+    1,
+    0
+   ]
+  },
+  "11": {
+   "p": 0.943,
+   "n": 2,
+   "sigma2": 0.0107,
+   "class": "Uncertain",
+   "history": [
+    1,
+    1
+   ]
+  },
+  "0": {
+   "p": 0.2059,
+   "n": 1,
+   "sigma2": 0.0409,
+   "class": "Uncertain",
+   "history": [
+    0
+   ]
+  }
+ },
+ "curriculum": {
+  "nodes": [
+   {
+    "id": "A",
+    "name": "Addition",
+    "minutes": 5
+   },
+   {
+    "id": "B",
+    "name": "Subtraction",
+    "minutes": 5
+   },
+   {
+    "id": "C",
+    "name": "Multiplication",
+    "minutes": 10
+   },
+   {
+    "id": "D",
+    "name": "Division",
+    "minutes": 10
+   }
+  ],
+  "edges": [
+   [
+    "A",
+    "B"
+   ],
+   [
+    "A",
+    "C"
+   ],
+   [
+    "B",
+    "D"
+   ],
+   [
+    "C",
+    "D"
+   ]
+  ]
+ }
+}

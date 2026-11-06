@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scheduling Benchmark</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js"></script>
+</head>
+<body>
+<main>
+  <h1>Scheduling benchmark</h1>
+  <p class="lede">One day, one budget: pick prerequisite-safe study items to maximise total score. Each policy's score is
+    divided by the exact optimum from the exhaustive oracle (ratio 1.0 = optimal). 250 synthetic instances
+    (seeds 7, 17, 27, 37, 47 × 50).</p>
+  <div class="note">Synthetic scheduling instances from one generator configuration; no learners are involved here.</div>
+
+  <h2>Summary</h2>
+  <div class="card table-wrap" id="summary"><p class="small">Loading…</p></div>
+
+  <h2>Paired difference in ratio</h2>
+  <div class="card" id="diff"></div>
+
+  <h2>Distribution of ratios</h2>
+  <div class="card">
+    <div class="legend" id="hist-legend"></div>
+    <div id="hist"></div>
+    <div id="hist-src"></div>
+  </div>
+
+  <h2>Instances where the score changed</h2>
+  <div class="card table-wrap" id="changed"></div>
+
+  <h2>Saved bad cases</h2>
+  <p>Two hand-kept cases in the test fixtures. They are not part of the 250-instance statistics. Open either one in the
+    <a href="demos.html#a">greedy vs oracle playground</a> to run it live.</p>
+  <div class="card table-wrap" id="bad"></div>
+</main>
+<script>
+(async () => {
+  let s;
+  try { s = await Site.getJSON("data/scheduling.json"); } catch (e) { return Site.fail(document.getElementById("summary"), e); }
+  const S = s.sources;
+
+  // 1. summary table, cells exactly as in summary.md
+  const t = s.summary_table;
+  document.getElementById("summary").innerHTML = `<table><thead><tr>${t.header.map((h, i) => `<th class="${i ? "num" : ""}">${h}</th>`).join("")}</tr></thead>
+    <tbody>${t.rows.map(r => `<tr>${r.map((c, i) => `<td class="${i ? "num" : ""}">${i ? c : `<span class="swatch" style="background:var(--series-${r[0] === "greedy" ? 1 : 2})"></span><code>${c}</code>`}</td>`).join("")}</tr>`).join("")}</tbody></table>
+    ${Site.src(S.summary)}
+    <p class="small">Recomputed from <code>${S.per_instance}</code> by <code>site/build_data.py</code>: identical means, 5th percentiles, minima and counts (the build stops otherwise).
+    ${s.changed_line}; instances where best-singleton scores lower than greedy: ${s.recomputed.lower} / 250.</p>`;
+
+  // 2. CI plot
+  const d = s.paired_diff, m = +d.mean, lo = +d.lo, hi = +d.hi;
+  const W = 640, H = 90, x0 = 30, x1 = W - 30, dmin = -0.01, dmax = 0.025;
+  const X = v => x0 + (v - dmin) / (dmax - dmin) * (x1 - x0);
+  let ticks = "";
+  for (let v = -0.01; v <= 0.0251; v += 0.005) {
+    ticks += `<line class="gridline" x1="${X(v)}" x2="${X(v)}" y1="20" y2="60"/><text x="${X(v)}" y="78" text-anchor="middle">${v.toFixed(3)}</text>`;
+  }
+  document.getElementById("diff").innerHTML = `
+    <p><b>greedy_best_singleton − greedy: ${Site.signed4(m)}</b> mean ratio, 95% CI [${d.lo}, ${d.hi}] (paired bootstrap, B = 1000).
+      Claim (as written in the summary): <span class="pill good">${Site.esc(d.claim)}</span></p>
+    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Paired difference ${d.mean} with 95% CI ${d.lo} to ${d.hi}">
+      ${ticks}<line class="zero" x1="${X(0)}" x2="${X(0)}" y1="14" y2="64"/>
+      <text x="${X(0)}" y="11" text-anchor="middle">no difference</text>
+      <g data-tip="Mean ${d.mean}<br>95% CI [${d.lo}, ${d.hi}]">
+        <line x1="${X(lo)}" x2="${X(hi)}" y1="40" y2="40" stroke="var(--series-2)" stroke-width="2"/>
+        <line x1="${X(lo)}" x2="${X(lo)}" y1="33" y2="47" stroke="var(--series-2)" stroke-width="2"/>
+        <line x1="${X(hi)}" x2="${X(hi)}" y1="33" y2="47" stroke="var(--series-2)" stroke-width="2"/>
+        <circle cx="${X(m)}" cy="40" r="6" fill="var(--series-2)" stroke="var(--surface)" stroke-width="2"/>
+        <rect x="${X(lo) - 6}" y="26" width="${X(hi) - X(lo) + 12}" height="28" fill="transparent"/>
+      </g></svg>
+    ${Site.src(S.summary, "line: “" + Site.esc(d.line) + "”")}`;
+  Site.bindTips(document.getElementById("diff"));
+
+  // 3. histogram of ratios below 1.0; exactly-1.0 counts stated separately
+  const edges = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1.0];
+  const series = [["greedy_ratio", "greedy", 1], ["bs_ratio", "greedy_best_singleton", 2]];
+  const counts = series.map(([k]) => {
+    const c = new Array(edges.length - 1).fill(0);
+    s.instances.forEach(r => { const v = r[k]; if (v < 1) for (let i = 0; i < c.length; i++) if (v >= edges[i] && v < edges[i + 1]) c[i]++; });
+    return c;
+  });
+  const ones = series.map(([k]) => s.instances.filter(r => r[k] === 1).length);
+  const below = series.map(([k]) => s.instances.filter(r => r[k] < 1).length);
+  const maxC = Math.max(...counts.flat());
+  const HW = 660, HH = 260, L = 36, R = 10, T = 16, B = 46;
+  const bw = (HW - L - R) / (edges.length - 1);
+  const Y = v => T + (HH - T - B) * (1 - v / Math.ceil(maxC / 5) / 5);
+  const ymax = Math.ceil(maxC / 5) * 5;
+  let h = `<svg class="chart" viewBox="0 0 ${HW} ${HH}" role="img" aria-label="Histogram of ratios below 1.0">`;
+  for (let v = 0; v <= ymax; v += 5) h += `<line class="gridline" x1="${L}" x2="${HW - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
+  for (let i = 0; i < edges.length - 1; i++) {
+    const gx = L + i * bw, inner = bw - 10, w = inner / 2 - 1;
+    series.forEach(([k, name, c], j) => {
+      const n = counts[j][i], x = gx + 5 + j * (w + 2), y = Y(n), hh = Y(0) - y;
+      h += `<g data-tip="<b>${name}</b><br>ratio in [${edges[i]}, ${edges[i + 1]}): ${n} instance${n === 1 ? "" : "s"}">
+        <rect x="${gx}" y="${T}" width="${bw}" height="${HH - T - B}" fill="transparent"/>
+        ${n ? `<path d="M${x},${Y(0)} V${y + 3} q0,-3 3,-3 h${w - 6} q3,0 3,3 V${Y(0)} z" fill="var(--series-${c})"/>
+        <text x="${x + w / 2}" y="${y - 4}" text-anchor="middle">${n}</text>` : ""}</g>`;
+    });
+    h += `<text x="${gx + bw / 2}" y="${HH - B + 16}" text-anchor="middle">${edges[i]}–${edges[i + 1]}</text>`;
+  }
+  h += `<line x1="${L}" x2="${HW - R}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--text-2)"/>
+    <text x="${(HW + L) / 2}" y="${HH - 8}" text-anchor="middle">ratio to optimum (bins below 1.0)</text>
+    <text x="10" y="${T + (HH - T - B) / 2}" transform="rotate(-90 10 ${T + (HH - T - B) / 2})" text-anchor="middle">instances</text></svg>`;
+  document.getElementById("hist").innerHTML = h;
+  document.getElementById("hist-legend").innerHTML = series.map(([k, name, c], j) =>
+    `<span><span class="swatch" style="background:var(--series-${c})"></span><code>${name}</code>: ${below[j]} below 1.0, ${ones[j]} exactly 1.0 (optimal)</span>`).join("");
+  document.getElementById("hist-src").innerHTML = Site.src(S.per_instance, "columns <code>greedy_ratio</code>, <code>greedy_best_singleton_ratio</code>; 250 non-fixture rows");
+  Site.bindTips(document.getElementById("hist"));
+
+  // 4. changed instances
+  const ch = s.instances.filter(r => r.bs !== r.greedy);
+  document.getElementById("changed").innerHTML = `<table><thead><tr><th>case_id</th><th class="num">Items</th><th class="num">Budget</th>
+    <th class="num">Oracle</th><th class="num">Greedy</th><th class="num">Greedy ratio</th><th class="num">Best-singleton</th><th class="num">New ratio</th></tr></thead>
+    <tbody>${ch.map(r => `<tr><td><code>${r.case_id}</code></td><td class="num">${r.n_items}</td><td class="num">${r.budget}</td><td class="num">${r.oracle}</td>
+      <td class="num">${r.greedy}</td><td class="num">${r.greedy_ratio.toFixed(4)}</td><td class="num">${r.bs}</td><td class="num">${r.bs_ratio.toFixed(4)}</td></tr>`).join("")}</tbody></table>
+    ${Site.src(S.per_instance, `rows where <code>greedy_best_singleton_score != greedy_score</code> (${ch.length} / 250)`)}`;
+
+  // 5. bad cases
+  const fx = Object.fromEntries(s.fixtures_csv.map(r => [r.case_id, r]));
+  document.getElementById("bad").innerHTML = `<table><thead><tr><th>Case</th><th class="num">Budget</th><th class="num">Items</th><th class="num">Oracle</th>
+    <th class="num">Greedy</th><th class="num">Greedy ratio</th><th class="num">Best-singleton</th><th class="num">New ratio</th><th></th></tr></thead>
+    <tbody>${s.bad_cases.map(c => { const r = fx[c.id]; return `<tr><td><code>${c.id}</code></td><td class="num">${c.budget}</td><td class="num">${c.items.length}</td>
+      <td class="num">${r.oracle}</td><td class="num">${r.greedy}</td><td class="num">${r.greedy_ratio.toFixed(4)}</td><td class="num">${r.bs}</td><td class="num">${r.bs_ratio.toFixed(4)}</td>
+      <td><a href="demos.html?preset=${c.id}#a">Run live</a></td></tr>`; }).join("")}</tbody></table>
+    ${Site.src([S.bad_cases, S.per_instance], "fixture rows (<code>is_fixture = True</code>); same values in the summary's fixture table")}`;
+})();
+</script>
+</body>
+</html>
