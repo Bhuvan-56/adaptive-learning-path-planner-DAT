@@ -1,0 +1,58 @@
+{
+  "benchmark_name": "w5_integrated_multiseed",
+  "config_hash": "3e563d39aa9d990d3b47430e1489adacc7356fbfbbe0145cab7f53cad70e1f9e",
+  "git": {
+    "commit_sha": "19986852fa6dd647fc0d823fe77e5f7dc35cebb1",
+    "dirty": true
+  },
+  "input_files": {
+    "config": {
+      "path": "experiments/w7_improvement.yaml",
+      "sha256": "a3452479e82bec8c0376e9f220d465ad231780b82cea0dd4b59ec16218daa6e2"
+    },
+    "curriculum": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\data\\curricula\\demo_curriculum.json",
+      "sha256": "828ce77d69051334ce94affdbc221b11d3bed3d127067a282472eb34238542b0"
+    },
+    "item_bank": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\data\\processed\\item_bank_synthetic.csv",
+      "sha256": "4ecb9c2679d7d7557e6062ed6e002940633a5eb5bdfd63ad796d3a55c6e8e6c3"
+    },
+    "profiles": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\config\\profiles.yaml",
+      "sha256": "7f8a67a8941c15cea8671e03fa20931ea6a845bc604aecda884edb04728beea4"
+    },
+    "q_matrix": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\data\\processed\\q_matrix_synthetic.csv",
+      "sha256": "ee534e6c1312cec3be8baa8d8c5ce09cf9b53b25292a8eb6826bd0dc588c5320"
+    }
+  },
+  "output_files": {
+    "per_learner.csv": "a2e874afe57cfac42b05c17392eccde37a2b355a181d9f567705c124c4c1dfaf",
+    "per_learner_seed_101.csv": "2e190bcbf63b02b0ad5df850c8a1a90f043adead2b7422231b4b1248b4c5ba70",
+    "per_learner_seed_2024.csv": "d3dd832d53a029daa80a0769a090819c2240e1a062131410ffe92c0445833976",
+    "per_learner_seed_42.csv": "a2e874afe57cfac42b05c17392eccde37a2b355a181d9f567705c124c4c1dfaf",
+    "per_learner_seed_777.csv": "0b0a69e15a10fdaf0efb4bb6d3854a3b5f2f31eb6baef3de0f11f6a671ee7ca1",
+    "per_learner_seed_999.csv": "75b8c720c90151eb56826b2ec6bd771307b321f1e4e7471e4b2804242e89e168",
+    "summary.md": "595b71774e6a81837a79abd0fd079047c2f225db0e585db5ef6f4e009b4e1157",
+    "summary_seed_101.md": "0292226058deb3c0b89701e4d0b5988eec725cf9544ec80e5af1cac20e6a8acf",
+    "summary_seed_2024.md": "8a60c192decb4f6ef59d9abb84e9fe1d54b2457349db618865a67e1aac5241c7",
+    "summary_seed_42.md": "6792239afba9ad262f74f7067dc7b567986753d540194b097dcba3d275664e5c",
+    "summary_seed_777.md": "ea0abf8ffe3de2e39639749f4a5666a2f8df49ea01b5666ae20e669c8e9485d7",
+    "summary_seed_999.md": "fa8818b1250be68d9831bf81932e9371c1f08d8578bc750e922dec8dca56b036"
+  },
+  "package_versions": {
+    "networkx": "3.1",
+    "numpy": "1.24.3",
+    "pytest": "7.3.1",
+    "yaml": "6.0.1"
+  },
+  "seeds": [
+    42,
+    101,
+    2024,
+    777,
+    999
+  ],
+  "timestamp": "2026-11-06T12:29:37Z"
+}

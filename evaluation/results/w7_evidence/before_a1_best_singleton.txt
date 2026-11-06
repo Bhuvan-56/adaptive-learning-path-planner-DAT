@@ -1,0 +1,62 @@
+FFFFFF                                                                   [100%]
+================================== FAILURES ===================================
+____________________ test_12_18_counterexample_stays_at_12 ____________________
+
+    @XFAIL
+    def test_12_18_counterexample_stays_at_12():
+>       from src.planning.greedy_fallback import best_single_score, run_greedy_best_singleton
+E       ModuleNotFoundError: No module named 'src.planning.greedy_fallback'
+
+tests\test_w7_a1_best_singleton.py:16: ModuleNotFoundError
+_____________________ test_single_large_item_beats_greedy _____________________
+
+    @XFAIL
+    def test_single_large_item_beats_greedy():
+>       from src.planning.greedy_fallback import best_singleton_fallback, run_greedy_best_singleton
+E       ModuleNotFoundError: No module named 'src.planning.greedy_fallback'
+
+tests\test_w7_a1_best_singleton.py:27: ModuleNotFoundError
+_________________ test_unmet_prerequisites_never_single_pick __________________
+
+    @XFAIL
+    def test_unmet_prerequisites_never_single_pick():
+>       from src.planning.greedy_fallback import best_single_score, best_singleton_fallback
+E       ModuleNotFoundError: No module named 'src.planning.greedy_fallback'
+
+tests\test_w7_a1_best_singleton.py:38: ModuleNotFoundError
+_________________________ test_tie_keeps_greedy_picks _________________________
+
+    @XFAIL
+    def test_tie_keeps_greedy_picks():
+>       from src.planning.greedy_fallback import best_singleton_fallback, run_greedy_best_singleton
+E       ModuleNotFoundError: No module named 'src.planning.greedy_fallback'
+
+tests\test_w7_a1_best_singleton.py:51: ModuleNotFoundError
+______________________ test_single_pick_tie_break_order _______________________
+
+    @XFAIL
+    def test_single_pick_tie_break_order():
+>       from src.planning.greedy_fallback import best_singleton_fallback
+E       ModuleNotFoundError: No module named 'src.planning.greedy_fallback'
+
+tests\test_w7_a1_best_singleton.py:61: ModuleNotFoundError
+________________________________ test_no_items ________________________________
+
+    @XFAIL
+    def test_no_items():
+>       from src.planning.greedy_fallback import (
+            best_single_score,
+            best_singleton_fallback,
+            run_greedy_best_singleton,
+        )
+E       ModuleNotFoundError: No module named 'src.planning.greedy_fallback'
+
+tests\test_w7_a1_best_singleton.py:70: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED tests/test_w7_a1_best_singleton.py::test_12_18_counterexample_stays_at_12
+FAILED tests/test_w7_a1_best_singleton.py::test_single_large_item_beats_greedy
+FAILED tests/test_w7_a1_best_singleton.py::test_unmet_prerequisites_never_single_pick
+FAILED tests/test_w7_a1_best_singleton.py::test_tie_keeps_greedy_picks - Modu...
+FAILED tests/test_w7_a1_best_singleton.py::test_single_pick_tie_break_order
+FAILED tests/test_w7_a1_best_singleton.py::test_no_items - ModuleNotFoundErro...
+6 failed in 0.50s

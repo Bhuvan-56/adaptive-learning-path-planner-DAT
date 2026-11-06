@@ -66,6 +66,7 @@ from src.diagnostic.diagnostic import (
 )
 from src.simulation.simulator import SimulatedLearner, MatchedBKTGenerator
 from src.evaluation.retention import administer_retention_quiz
+from src.planning.greedy_fallback import best_singleton_fallback
 from src.provenance import (
     compute_file_sha256,
     get_git_info,
@@ -449,7 +450,7 @@ def _evaluate_single_seed(
                             diff_states[act] = step_difficulty(diff_states[act], score)
                         completed_so_far.add(act)
 
-            elif arm == "non_adaptive_greedy":
+            elif arm in ("non_adaptive_greedy", "non_adaptive_greedy_best_singleton"):
                 # Non-Adaptive Greedy Frontier Baseline
                 # Diagnostic information passed only as initial evidence-mastered set
                 init_mastered = {
@@ -484,6 +485,8 @@ def _evaluate_single_seed(
                         if c_item["duration"] <= rem_b:
                             day_picks.append(c_item["node_id"])
                             rem_b -= c_item["duration"]
+                    if arm == "non_adaptive_greedy_best_singleton":
+                        day_picks = best_singleton_fallback(day_picks, scored, daily_budget)
 
                     t1 = time.perf_counter()
                     arm_runtime_ms += (t1 - t0) * 1000.0
@@ -922,6 +925,8 @@ def _build_summary_markdown(
     lines.append("| **adaptive_full** | Initial priors (IRT CAT) | Dynamic Replan (`src.planning.replan`) | 2-Up / 1-Down staircase | On | On (HLR decay baseline) | On (k=2 failures) |")
     lines.append("| **static_prerequisite_order** | Initial priors (IRT CAT) | Static Topological Sort (`generate_static_plan`) | Static base | Off | Off | Off |")
     lines.append("| **non_adaptive_greedy** | Mastered set ($n < \\text{min\\_obs} \\implies \\emptyset$) | Score/duration frontier packing | Static base | Off | Off | Off |")
+    if "non_adaptive_greedy_best_singleton" in primary_arms:
+        lines.append("| **non_adaptive_greedy_best_singleton** | Same as non_adaptive_greedy | Frontier packing, then best-singleton fallback (`src.planning.greedy_fallback`) | Static base | Off | Off | Off |")
     lines.append("| **ablation_no_diagnostic** | Cold-start priors (p=0.5) | Dynamic Replan (`src.planning.replan`) | 2-Up / 1-Down staircase | On | On | On |")
     lines.append("| **ablation_no_replan** | Initial priors (IRT CAT) | Static Topological Sort (`generate_static_plan`) | 2-Up / 1-Down staircase | Off | Off | Off |")
     lines.append("| **ablation_no_difficulty_step** | Initial priors (IRT CAT) | Dynamic Replan (`src.planning.replan`) | Static base | On | On | On |")
@@ -958,6 +963,8 @@ def _build_summary_markdown(
         ("adaptive_full", "non_adaptive_greedy"),
         ("non_adaptive_greedy", "static_prerequisite_order"),
     ]
+    if "non_adaptive_greedy_best_singleton" in primary_arms:
+        comparisons.append(("non_adaptive_greedy_best_singleton", "non_adaptive_greedy"))
 
     for arm_a, arm_b in comparisons:
         diffs = [

@@ -1,0 +1,142 @@
+{
+  "cases": [
+    {
+      "id": "counterexample_12_18",
+      "budget": 10,
+      "items": [
+        {
+          "node_id": "item_1",
+          "duration": 6,
+          "score": 12,
+          "prerequisites": []
+        },
+        {
+          "node_id": "item_2",
+          "duration": 5,
+          "score": 9,
+          "prerequisites": []
+        },
+        {
+          "node_id": "item_3",
+          "duration": 5,
+          "score": 9,
+          "prerequisites": []
+        }
+      ],
+      "greedy_score": 12,
+      "oracle_score": 18,
+      "source": "src/planning/benchmark.py run_benchmark 12/18 counterexample (ce_items)"
+    },
+    {
+      "id": "benchmark_seed47_instance215",
+      "budget": 5,
+      "items": [
+        {
+          "node_id": "item_1",
+          "duration": 9,
+          "score": 12,
+          "prerequisites": []
+        },
+        {
+          "node_id": "item_2",
+          "duration": 1,
+          "score": 3,
+          "prerequisites": []
+        },
+        {
+          "node_id": "item_3",
+          "duration": 5,
+          "score": 20,
+          "prerequisites": [
+            "item_2",
+            "item_1"
+          ]
+        },
+        {
+          "node_id": "item_4",
+          "duration": 5,
+          "score": 2,
+          "prerequisites": []
+        },
+        {
+          "node_id": "item_5",
+          "duration": 10,
+          "score": 15,
+          "prerequisites": [
+            "item_4",
+            "item_1",
+            "item_2",
+            "item_3"
+          ]
+        },
+        {
+          "node_id": "item_6",
+          "duration": 8,
+          "score": 14,
+          "prerequisites": [
+            "item_1",
+            "item_3",
+            "item_4",
+            "item_5",
+            "item_2"
+          ]
+        },
+        {
+          "node_id": "item_7",
+          "duration": 6,
+          "score": 3,
+          "prerequisites": []
+        },
+        {
+          "node_id": "item_8",
+          "duration": 5,
+          "score": 14,
+          "prerequisites": []
+        },
+        {
+          "node_id": "item_9",
+          "duration": 6,
+          "score": 4,
+          "prerequisites": [
+            "item_7"
+          ]
+        },
+        {
+          "node_id": "item_10",
+          "duration": 7,
+          "score": 13,
+          "prerequisites": [
+            "item_6",
+            "item_1",
+            "item_8",
+            "item_7",
+            "item_3",
+            "item_9",
+            "item_5",
+            "item_4",
+            "item_2"
+          ]
+        },
+        {
+          "node_id": "item_11",
+          "duration": 3,
+          "score": 10,
+          "prerequisites": [
+            "item_10",
+            "item_1",
+            "item_7",
+            "item_8",
+            "item_4",
+            "item_2",
+            "item_9",
+            "item_5",
+            "item_3"
+          ]
+        }
+      ],
+      "greedy_score": 3,
+      "oracle_score": 14,
+      "source": "experiments/w2_scheduling_benchmark.yaml via src.planning.benchmark.generate_benchmark_instance, seed 47, instance 215; row in evaluation/results/w2_greedy_vs_oracle.csv"
+    }
+  ]
+}
