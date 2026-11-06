@@ -96,4 +96,4 @@ $ awk -F, 'NR>1 && $3=="non_adaptive_greedy_best_singleton"{s+=$6; n++} END{prin
 ```
 Matches the non_adaptive_greedy_best_singleton mean mastered 2.0490 in section 3.
 
-Decision: ______
+Decision: Keep the best-singleton fallback as an opt-in policy and arm; the default greedy scheduler and `non_adaptive_greedy` stay unchanged. The scheduling result (section 1) is better under the claim rule. The integrated result (section 3) is better only on the pooled analysis and not in any single seed, so it does not justify changing the default. Revisit after the S1 fix with a new pre-registration.
