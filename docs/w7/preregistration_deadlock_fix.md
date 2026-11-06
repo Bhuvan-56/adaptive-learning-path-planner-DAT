@@ -75,3 +75,17 @@ Expected before running
   budget on repeated practice, so it may reach fewer new concepts in 5 days
   than static while practising each more.
 - All claims are about simulator behaviour only.
+
+Amendment after the first full run (2026-11-06; disclosed, not hidden)
+- First run (code c5d1a8f): replan arms showed 40% trace coverage, failing the
+  hard constraint above. Cause: the adaptive loop in integrated.py never passed
+  past days' trace back to replan (replan returns past_trace + future trace),
+  so every mid-horizon plan's trace missed days 1..d and failed check_trace;
+  and a HEURISTIC_NO_PLAN list trace was validated with the dict-only
+  check_no_plan_trace. Before the fix no mid-horizon plan was ever feasible,
+  which hid both.
+- Change: the loop carries each day's trace (as planned at the start of the
+  day) into ReplanState.past_trace, and validates list traces with check_trace.
+  Bookkeeping only: replan does not read past_trace when planning, so
+  schedules and every per-learner column are unchanged (checked against the
+  first run). Reported numbers come from the rerun.

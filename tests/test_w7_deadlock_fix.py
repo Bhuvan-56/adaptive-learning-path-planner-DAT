@@ -127,3 +127,5 @@ def test_integrated_adaptive_arm_no_longer_starves(tmp_path):
         g = df[df.arm == arm]
         assert (g.prereq_violations == 0).all(), arm
         assert (g.budget_violations == 0).all(), arm
+        # Mid-horizon replans must keep a complete trace (past days carried by the loop).
+        assert res["arm_results"][arm].trace_coverage == 100.0, arm
