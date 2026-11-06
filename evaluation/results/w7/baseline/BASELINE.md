@@ -4,7 +4,7 @@ All figures are simulator behaviour on synthetic learners. Nothing here is calib
 
 ## Code state
 
-- Code SHA for both runs: `d8cec16db7ee4028d82202a40618fbe854a7f3b2` (from both manifests, `git.commit_sha` / `git_sha`).
+- Code SHA for both runs: `d8cec16db7ee4028d82202a40618fbe854a7f3b2` (from both manifests, `git.commit_sha` / `git_sha`). This is the pre-rewrite SHA; the same commit is now `2a1603c` (see `docs/w7/sha_map.md`).
 - Interpreter: `.venv_w2/Scripts/python.exe` (Python 3.11.4, from `scheduling/manifest.json`).
 - Both runs were produced by an earlier session that stopped partway through Phase 0. They were not rerun.
 

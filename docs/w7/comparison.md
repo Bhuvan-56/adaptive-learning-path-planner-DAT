@@ -1,13 +1,13 @@
 # Week 7 Comparison: greedy vs greedy + best-singleton fallback
 
-Pre-registration: `docs/w7/preregistration.md` (commit `d8cec16`). Baseline: `evaluation/results/w7/baseline/BASELINE.md` (commit `408be9a`).
+Pre-registration: `docs/w7/preregistration.md` (commit `2a1603c`). Baseline: `evaluation/results/w7/baseline/BASELINE.md` (commit `c317a77`).
 Every number below is followed by the file it comes from. All results describe simulator behaviour on synthetic instances and synthetic learners only.
 
 Claim rule (pre-registered): a policy is called better only if the paired 95% CI excludes zero in the favourable direction (higher ratio, higher mastery, fewer no-plan days). Otherwise "no difference shown". A loss is reported as a loss.
 
 ## 1. Scheduling benchmark (250 instances, oracle once per instance)
 
-Config `experiments/w2_scheduling_benchmark.yaml`, config hash `70e78c7e...c6505`, seeds 7, 17, 27, 37, 47 × 50 instances. Code SHA `0ec795c` (`evaluation/results/w7/improvement/scheduling/manifest.json`).
+Config `experiments/w2_scheduling_benchmark.yaml`, config hash `70e78c7e...c6505`, seeds 7, 17, 27, 37, 47 × 50 instances. Code SHA `f223b9d` (the manifest `evaluation/results/w7/improvement/scheduling/manifest.json` records the pre-rewrite SHA `0ec795c`; see `docs/w7/sha_map.md`).
 
 | Policy | Mean ratio | 5th pct | Min | Count < 0.95 | Source |
 |---|---|---|---|---|---|
@@ -34,7 +34,7 @@ Instance 215 was regenerated with `src.planning.benchmark.generate_benchmark_ins
 
 ## 3. Integrated S0 (5 seeds × 200 learners = 1,000, 5 days, 10-minute budget, B = 1000)
 
-Config `experiments/w7_improvement.yaml` (= `experiments/w5_final.yaml` plus the new arm), config hash `3e563d39...0f9e`, code SHA `1998685` (`evaluation/results/w7/improvement/integrated_s0/manifest.json`).
+Config `experiments/w7_improvement.yaml` (= `experiments/w5_final.yaml` plus the new arm), config hash `3e563d39...0f9e`, code SHA `d97da01` (the manifest `evaluation/results/w7/improvement/integrated_s0/manifest.json` records the pre-rewrite SHA `1998685`; see `docs/w7/sha_map.md`).
 Figures pooled over the five `per_learner_seed_<s>.csv` files with `scripts/w7_pooled_s0.py` (`compute_paired_bootstrap_ci`, seed 42, rows sorted by learner seed), because `per_learner.csv` and the arm table in `summary.md` hold seed 42 only.
 
 | Arm | Mastered [95% CI] | No-plan days | Prereq viol. | Budget viol. | Trace coverage | Source |
