@@ -5,7 +5,7 @@ import json
 import yaml
 
 from src.planning.benchmark import load_benchmark_config, run_benchmark
-from src.planning.compare_policies import run_policy_comparison
+from src.evaluation.compare_policies import run_policy_comparison
 
 
 def _tiny_config(tmp_path):
