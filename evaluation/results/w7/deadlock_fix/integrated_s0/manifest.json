@@ -1,0 +1,58 @@
+{
+  "benchmark_name": "w5_integrated_multiseed",
+  "config_hash": "3e563d39aa9d990d3b47430e1489adacc7356fbfbbe0145cab7f53cad70e1f9e",
+  "git": {
+    "commit_sha": "963c71c2deeb71ace3655de52ef1d58766fd9cfe",
+    "dirty": true
+  },
+  "input_files": {
+    "config": {
+      "path": "experiments/w7_improvement.yaml",
+      "sha256": "a3452479e82bec8c0376e9f220d465ad231780b82cea0dd4b59ec16218daa6e2"
+    },
+    "curriculum": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\.claude\\worktrees\\festive-varahamihira-b893ee\\data\\curricula\\demo_curriculum.json",
+      "sha256": "828ce77d69051334ce94affdbc221b11d3bed3d127067a282472eb34238542b0"
+    },
+    "item_bank": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\.claude\\worktrees\\festive-varahamihira-b893ee\\data\\processed\\item_bank_synthetic.csv",
+      "sha256": "4ecb9c2679d7d7557e6062ed6e002940633a5eb5bdfd63ad796d3a55c6e8e6c3"
+    },
+    "profiles": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\.claude\\worktrees\\festive-varahamihira-b893ee\\config\\profiles.yaml",
+      "sha256": "7f8a67a8941c15cea8671e03fa20931ea6a845bc604aecda884edb04728beea4"
+    },
+    "q_matrix": {
+      "path": "C:\\Users\\5520\\Documents\\IITH BTECH ENGINEERING\\SEM 7\\distributued Ai\\Project\\adaptive-learning-path-planner-DAT\\.claude\\worktrees\\festive-varahamihira-b893ee\\data\\processed\\q_matrix_synthetic.csv",
+      "sha256": "ee534e6c1312cec3be8baa8d8c5ce09cf9b53b25292a8eb6826bd0dc588c5320"
+    }
+  },
+  "output_files": {
+    "per_learner.csv": "ee23ba29456ac238a7e4faa2722f21ae46762c79c57a57b8bfce6ee47929a3a6",
+    "per_learner_seed_101.csv": "d94e5d640f045fcd110c3a925e49c0a350b4de01a94dbde2ce0a58bbd437c00d",
+    "per_learner_seed_2024.csv": "a732409d5dd6f91e2ca755c0a7dfdcb6ddf0918d47a476ca525b3054c148dc71",
+    "per_learner_seed_42.csv": "ee23ba29456ac238a7e4faa2722f21ae46762c79c57a57b8bfce6ee47929a3a6",
+    "per_learner_seed_777.csv": "eab16871715863d93e8fac37fe66569d6f02412eb83f8ad77a0fce486ac4b55c",
+    "per_learner_seed_999.csv": "f279a275c3bb38716ab6fda2604ab311cecfcbc8ce48db5387469b2ff154cdd3",
+    "summary.md": "8f14b0d42c3f2bc9e54486932bf7918df85cb4086065008fbd4e0aeabc9e3134",
+    "summary_seed_101.md": "af65f096e3bba1d1541e5e3f1e21354e0375139b04d5dfa24a6154401bd3c524",
+    "summary_seed_2024.md": "f4a6d6583becef8fd03aebdc6e1093b4fd733555de775e51170b5afdef2e313e",
+    "summary_seed_42.md": "a8c7e2b25b968c07d478d14469bf1c456abdf7320dd78a620c0e17e58f3c5950",
+    "summary_seed_777.md": "011a057a924f0f273ff4937d458671a2d5f42b7d85a0c71ca49a6a2c8535124c",
+    "summary_seed_999.md": "c82009d7f8bc3f6d79420635f0dbcc0245d1153449a540929368b499b35c2d06"
+  },
+  "package_versions": {
+    "networkx": "3.1",
+    "numpy": "1.24.3",
+    "pytest": "7.3.1",
+    "yaml": "6.0.1"
+  },
+  "seeds": [
+    42,
+    101,
+    2024,
+    777,
+    999
+  ],
+  "timestamp": "2026-11-06T14:29:10Z"
+}
