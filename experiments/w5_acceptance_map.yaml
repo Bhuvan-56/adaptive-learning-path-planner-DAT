@@ -160,7 +160,7 @@ M6-a:
     - "tests/test_m6_replanning_events.py::test_event_missed_day_keeps_completed_work"
     - "tests/test_m6_replanning_events.py::test_event_budget_reduced_gives_valid_plan_or_structured_infeasibility"
     - "tests/test_m6_replanning_events.py::test_event_uncertain_prereq_assessment_passes_dependent_admissible"
-    - "tests/test_m6_replanning_events.py::test_event_failed_assessment_prereq_dependent_stays_blocked"
+    - "tests/test_m6_replanning_events.py::test_event_failed_assessment_prereq_dependent_waits_for_practice"
   missing_citations: []
   asserts_criterion: "tests/test_m6_replanning_events.py:163"
 

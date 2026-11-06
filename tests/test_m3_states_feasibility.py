@@ -157,7 +157,8 @@ def test_every_reason_code_in_enum_is_covered():
         "BUDGET_EXCEEDED",
         "UNCERTAIN_NEEDS_ASSESSMENT",
         "REVIEW_DUE",
-        "REMEDIATION_TRIGGERED"
+        "REMEDIATION_TRIGGERED",
+        "PRACTICE_FOR_EVIDENCE",
     }
     actual_codes = {c.value for c in ReasonCode}
     assert actual_codes == expected_codes

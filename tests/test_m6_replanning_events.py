@@ -54,8 +54,13 @@ def test_event_uncertain_prereq_assessment_passes_dependent_admissible():
     assert check_trace(universe, result["trace"], num_days=2)
 
 
-def test_event_failed_assessment_prereq_dependent_stays_blocked():
-    """Test 2: Uncertain prerequisite -> failed assessment -> BKT update (Weak) -> dependent stays blocked."""
+def test_event_failed_assessment_prereq_dependent_waits_for_practice():
+    """Test 2: Uncertain prerequisite -> failed assessment -> BKT update (Weak).
+
+    The dependent is blocked on the day the Weak prerequisite is studied and
+    follows conditionally on the next day (W7 deadlock fix: a prerequisite
+    planned on an earlier day satisfies the gate conditionally, also when Weak).
+    Before the fix B was never scheduled and the plan was HEURISTIC_NO_PLAN."""
     g = nx.DiGraph()
     g.add_node("A", baseline_duration=5)
     g.add_node("B", baseline_duration=5)
@@ -83,15 +88,18 @@ def test_event_failed_assessment_prereq_dependent_stays_blocked():
     # 1. BKT update executed: A is now Weak
     assert states["A"].classify() == "Weak"
 
-    # 2. Dependent B stays blocked and is not scheduled
-    assert result["status"] == FeasibilityStatus.HEURISTIC_NO_PLAN
-    for d in result["days"]:
-        assert "B" not in d["activities"]
+    # 2. A is studied on day 1; B is blocked that day and follows conditionally on day 2
+    assert result["status"] == FeasibilityStatus.FEASIBLE
+    days = {d["day"]: d for d in result["days"]}
+    assert days[1]["activities"] == ["A"]
+    assert days[2]["activities"] == ["B"]
+    assert days[2]["conditional_activities"] == ["B"]
 
-    # B entries carry PREREQUISITE_UNMET
-    b_entries = [e for e in result["trace"] if e["node_id"] == "B"]
-    assert all(e["decision"] == "FILTERED" for e in b_entries)
-    assert any(e["reason_code"] == ReasonCode.PREREQUISITE_UNMET.value for e in b_entries)
+    b_entries = {e["day"]: e for e in result["trace"] if e["node_id"] == "B"}
+    assert b_entries[1]["decision"] == "FILTERED"
+    assert b_entries[1]["reason_code"] == ReasonCode.PREREQUISITE_UNMET.value
+    assert b_entries[2]["decision"] == "SELECTED"
+    assert b_entries[2]["constraints"]["revalidate_before_execution"] is True
 
     # 3. Trace passes check_trace
     universe = {"A", "B"}

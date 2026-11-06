@@ -151,8 +151,10 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     4. changed_deadline(new_days): updates deadline days and rechecks feasibility.
 
     Daily Budget Rule (PROPOSED):
-    Remediation first, then planned work toward the target, then due reviews
-    fill the leftover budget, lowest recall first. A review that does not fit
+    Remediation first, then one practice block for each completed prerequisite
+    that is still Uncertain or Weak and blocks remaining work
+    (PRACTICE_FOR_EVIDENCE), then planned work toward the target, then due
+    reviews fill the leftover budget, lowest recall first. A review that does not fit
     is traced with the existing BUDGET_EXCEEDED code. Reviews never displace required work.
 
     Returns plan dictionary with days, trace (passing check_trace), and feasibility explanation.
@@ -370,6 +372,20 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     future_trace = []
     assessment_candidates = set()
 
+    # Practice for evidence (W7 deadlock fix, docs/w7/preregistration_deadlock_fix.md):
+    # a completed concept that is still Uncertain or Weak and is a direct
+    # prerequisite of remaining required work gets one more practice block, so
+    # new evidence can arrive instead of the plan stalling on it.
+    needed_work = set(remaining_nodes) | set(remed_queue)
+    practice_candidates = {
+        p for nid in needed_work for p in g.predecessors(nid)
+        if p in candidate_universe and p in completed_nodes and p not in evidence_mastered
+        and p not in remed_queue
+        and learner_states.get(p, ConceptState.cold_start()).classify(active_policy) in ("Uncertain", "Weak")
+    }
+    practice_queue = list(nx.lexicographical_topological_sort(g.subgraph(practice_candidates)))
+    practiced: Dict[str, int] = {}
+
     for day_num in range(current_day, deadline_days + 1):
         rem_budget = budget
         day_activities = []
@@ -474,6 +490,46 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                 ).to_dict()
 
         # -------------------------------------------------------------
+        # Part 1b: Practice for evidence on blocking prerequisites
+        # -------------------------------------------------------------
+        for p_node in list(practice_queue):
+            if p_node in day_trace_map:
+                continue
+            dur = g.nodes[p_node].get("baseline_duration", 0)
+            if dur > rem_budget:
+                # Does not fit today; left for a later day (traced in Part 4 as COMPLETED).
+                continue
+            st = learner_states.get(p_node, ConceptState.cold_start())
+            prereqs = set(g.predecessors(p_node)).intersection(candidate_universe)
+            prereq_status = {p: (p in evidence_mastered or p in completed_nodes) for p in prereqs}
+            cur_rem = rem_budget
+            day_activities.append(p_node)
+            scheduled_today.add(p_node)
+            practiced[p_node] = day_num
+            rem_budget -= dur
+            practice_queue.remove(p_node)
+            day_trace_map[p_node] = TraceEntry(
+                node_id=p_node,
+                day=day_num,
+                concept_state={
+                    "p": st.p,
+                    "kappa": st.kappa,
+                    "sigma2": st.sigma2,
+                    "n": st.n,
+                    "class": st.classify(active_policy)
+                },
+                constraints={
+                    "budget": budget,
+                    "remaining_budget": cur_rem,
+                    "prerequisites": prereq_status
+                },
+                score_terms={"exercise_difficulty": difficulty_states[p_node].difficulty} if p_node in difficulty_states else {},
+                decision="SELECTED",
+                reason_code=ReasonCode.PRACTICE_FOR_EVIDENCE,
+                policy_version=policy_version
+            ).to_dict()
+
+        # -------------------------------------------------------------
         # Part 2: Planned work toward the target
         # -------------------------------------------------------------
         for node_id in list(remaining_nodes):
@@ -496,14 +552,16 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
 
                 if p in evidence_mastered:
                     prereq_status[p] = True
+                elif (p in planned and planned[p] < day_num) or (p in practiced and practiced[p] < day_num):
+                    # Planned or practised on an earlier day of this plan: satisfied
+                    # conditionally (revalidated before execution), also when Weak.
+                    prereq_status[p] = True
+                    has_conditional_prereq = True
                 elif p_class == "Weak":
                     prereq_status[p] = False
                     prereqs_met = False
                     failed_prereqs.append(p)
-                elif p in planned and planned[p] < day_num:
-                    prereq_status[p] = True
-                    has_conditional_prereq = True
-                elif p in scheduled_today:
+                elif p in scheduled_today and p not in practiced:
                     prereq_status[p] = True
                     has_conditional_prereq = True
                 elif p in completed_nodes and p_class not in ("Weak", "Uncertain"):

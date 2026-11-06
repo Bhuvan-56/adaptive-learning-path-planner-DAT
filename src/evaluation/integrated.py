@@ -355,7 +355,15 @@ def _evaluate_single_seed(
                         reason_k = active_plan.get("feasibility_explanation", {}).get("reason_code", "UNKNOWN")
                         reason_name = reason_k.value if hasattr(reason_k, "value") else str(reason_k)
                         no_plan_reasons_counter[reason_name] = no_plan_reasons_counter.get(reason_name, 0) + 1
+                        # W7 deadlock fix: a HEURISTIC_NO_PLAN plan (list trace) can still
+                        # list work for today; execute it instead of idling. The day is
+                        # still counted as a no-plan day above.
                         day_activities = []
+                        if isinstance(trace_obj, list):
+                            for d_entry in active_plan.get("days", []):
+                                if d_entry.get("day") == day_idx and not d_entry.get("missed"):
+                                    day_activities = d_entry.get("activities", [])
+                                    break
                     else:
                         try:
                             if check_trace(candidate_universe, trace_obj, num_days=horizon_days, budget=daily_budget):
