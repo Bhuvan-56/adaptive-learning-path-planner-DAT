@@ -10,3 +10,4 @@
 | 2026-11-06 | Claude Code, Opus 5.5 (claude-opus-5-5) | 5 Comparison | docs/w7/comparison.md | two numbers recomputed with awk one-liners (0.9814 over 250, 2.0490 over 1000) and matched; claim rule applied; pytest -q: 261 passed, 2 xfailed | |
 | 2026-11-06 | Claude Code, Opus 5.5 (claude-opus-5-5) | 6 Weekly report | weekly/W7.md | fresh pytest -q: 261 passed, 2 xfailed; 43 test files, 263 tests collected; grep for "calibrated", "fitted", "real learners" in weekly/W7.md: no matches | |
 | 2026-11-06 | Claude Code, Opus 5.5 (claude-opus-5-5) | 6 follow-up (user request) | weekly/W7.md, docs/w7/comparison.md | Decision lines filled (opt-in, default unchanged); Reviewer row removed from W7.md; docs only, no code changed | |
+| 2026-11-06 | Claude Code, Opus 5.5 (claude-opus-5-5) | 6 follow-up (user request) | weekly/W7.md | Bandit no-go reason filled; docs only, no code changed | |
