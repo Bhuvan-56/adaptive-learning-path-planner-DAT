@@ -111,10 +111,11 @@ def check_trace(
                 ReasonCode.SELECTED.value,
                 ReasonCode.REVIEW_DUE.value,
                 ReasonCode.REMEDIATION_TRIGGERED.value,
+                ReasonCode.PRACTICE_FOR_EVIDENCE.value,
             }
             if decision == "SELECTED" and reason_code not in SELECTED_REASON_CODES:
                 raise ValueError(
-                    f"Selected entry for node '{node_id}' on day {day} must carry reason SELECTED, REVIEW_DUE, or REMEDIATION_TRIGGERED, got '{reason_code}'."
+                    f"Selected entry for node '{node_id}' on day {day} must carry reason SELECTED, REVIEW_DUE, REMEDIATION_TRIGGERED, or PRACTICE_FOR_EVIDENCE, got '{reason_code}'."
                 )
 
             if decision == "FILTERED" and reason_code in SELECTED_REASON_CODES:

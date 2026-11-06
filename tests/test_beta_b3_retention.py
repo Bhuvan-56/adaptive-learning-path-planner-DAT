@@ -59,7 +59,14 @@ def test_existing_outputs_unchanged_apart_from_new_value(tmp_path):
     Verifies that existing learner metrics (learner_id, seed, arm, theta_true, theta_hat,
     mastered_concepts, prereq_violations, budget_violations, no_plan_days) remain identical
     to baseline expectations.
+
+    The W7 deadlock fix (docs/w7/preregistration_deadlock_fix.md) deliberately changes the
+    replan arms' schedules, so for those arms only the learner and diagnostic columns are
+    compared with the golden file, and the hard constraints (0 prerequisite and 0 budget
+    violations) are checked directly. Every other arm must still match exactly.
     """
+    replan_arms = {"adaptive_full", "ablation_no_diagnostic", "ablation_no_difficulty_step",
+                   "ablation_no_review", "ablation_no_remediation"}
     out_dir = str(tmp_path / "eval_unchanged_check")
     res = run_integrated_evaluation(
         config_path="experiments/w5_final.yaml",
@@ -91,7 +98,10 @@ def test_existing_outputs_unchanged_apart_from_new_value(tmp_path):
         df_new_arm = df_new_arm[df_new_arm["arm"] == arm].head(4).reset_index(drop=True)
         df_gold_arm = df_golden[df_golden["arm"] == arm].head(4).reset_index(drop=True)
 
-        for col in cols_to_check:
+        if arm in replan_arms:
+            assert (df_new_arm["prereq_violations"] == 0).all(), arm
+            assert (df_new_arm["budget_violations"] == 0).all(), arm
+        for col in (cols_to_check if arm not in replan_arms else ["learner_id", "arm", "theta_true", "theta_hat"]):
             val_new = list(df_new_arm[col])
             val_gold = list(df_gold_arm[col])
             assert val_new == val_gold, f"Mismatch in arm {arm}, column {col}: {val_new} != {val_gold}"

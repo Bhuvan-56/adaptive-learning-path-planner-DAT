@@ -184,13 +184,15 @@ def generate_static_plan(
 
                 if p in evidence_mastered:
                     prereq_status[p] = True
+                elif p in planned and planned[p] < day_num:
+                    # Planned on an earlier day: satisfied conditionally (revalidated
+                    # before execution), also when Weak (W7 deadlock fix).
+                    prereq_status[p] = True
+                    has_conditional_prereq = True
                 elif p_class == "Weak":
                     prereq_status[p] = False
                     prereqs_met = False
                     failed_prereqs.append(p)
-                elif p in planned and planned[p] < day_num:
-                    prereq_status[p] = True
-                    has_conditional_prereq = True
                 elif p in scheduled_today:
                     prereq_status[p] = True
                     has_conditional_prereq = True

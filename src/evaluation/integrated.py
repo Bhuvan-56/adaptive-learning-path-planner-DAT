@@ -335,6 +335,7 @@ def _evaluate_single_seed(
                 )
 
                 past_days: List[Dict[str, Any]] = []
+                past_trace: List[Dict[str, Any]] = []
 
                 for day_idx in range(1, horizon_days + 1):
                     total_days_evaluated += 1
@@ -346,7 +347,13 @@ def _evaluate_single_seed(
 
                     if status_str in ("INFEASIBLE_PROVED", "INVALID_INPUT", "HEURISTIC_NO_PLAN") or isinstance(trace_obj, dict):
                         try:
-                            if check_no_plan_trace(trace_obj):
+                            # A HEURISTIC_NO_PLAN plan keeps a full list trace (W7 deadlock fix:
+                            # its listed work is executed), so validate it as a trace.
+                            if isinstance(trace_obj, list):
+                                ok = check_trace(candidate_universe, trace_obj, num_days=horizon_days, budget=daily_budget)
+                            else:
+                                ok = check_no_plan_trace(trace_obj)
+                            if ok:
                                 total_days_valid_trace += 1
                         except Exception:
                             pass
@@ -355,7 +362,15 @@ def _evaluate_single_seed(
                         reason_k = active_plan.get("feasibility_explanation", {}).get("reason_code", "UNKNOWN")
                         reason_name = reason_k.value if hasattr(reason_k, "value") else str(reason_k)
                         no_plan_reasons_counter[reason_name] = no_plan_reasons_counter.get(reason_name, 0) + 1
+                        # W7 deadlock fix: a HEURISTIC_NO_PLAN plan (list trace) can still
+                        # list work for today; execute it instead of idling. The day is
+                        # still counted as a no-plan day above.
                         day_activities = []
+                        if isinstance(trace_obj, list):
+                            for d_entry in active_plan.get("days", []):
+                                if d_entry.get("day") == day_idx and not d_entry.get("missed"):
+                                    day_activities = d_entry.get("activities", [])
+                                    break
                     else:
                         try:
                             if check_trace(candidate_universe, trace_obj, num_days=horizon_days, budget=daily_budget):
@@ -371,6 +386,13 @@ def _evaluate_single_seed(
                                 break
 
                     executed_days.append({"day": day_idx, "activities": list(day_activities)})
+
+                    # W7 deadlock fix: replan returns past_trace + future trace, so carry the
+                    # trace of each day as planned at its start; otherwise every mid-horizon
+                    # plan's trace misses days 1..day_idx and fails check_trace.
+                    if isinstance(trace_obj, list):
+                        past_trace.extend(dict(t) for t in trace_obj if t.get("day") == day_idx)
+                    cur_replan_state.past_trace = list(past_trace)
 
                     # Execute daily scheduled activities
                     for act in day_activities:

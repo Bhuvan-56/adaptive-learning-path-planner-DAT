@@ -81,13 +81,14 @@ def test_replan_prerequisite_gate_blocks_on_uncertain_with_reason_code(tmp_path)
     assert "A" in result["assessment_candidates"]
 
 
-def test_replan_starvation_when_all_prereqs_uncertain(tmp_path):
+def test_replan_practises_uncertain_prereqs_instead_of_starving(tmp_path):
     """
-    Characterization: On Day 2, after Day 1 completed A and B with 1 observation each:
-    - Both A and B are Uncertain (n=1 < min_obs=3).
-    - Downstream candidates C and D are blocked by Uncertain prerequisites.
-    - Completed nodes A and B are not in remaining_nodes, not in remed_queue, and not in review.
-    - Planner schedules 0 activities, remaining budget stays 10, resulting in HEURISTIC_NO_PLAN.
+    W7 deadlock fix (docs/w7/preregistration_deadlock_fix.md). Before the fix this
+    setup starved: 0 activities on Day 2 and HEURISTIC_NO_PLAN.
+    On Day 2, after Day 1 completed A and B with 1 observation each:
+    - Both A and B are Uncertain (n=1 < min_obs=3) and block C and D.
+    - Day 2 practises A and B (PRACTICE_FOR_EVIDENCE); C and D stay blocked that day.
+    - C (Day 3) and D (Day 4) follow conditionally, and the plan is FEASIBLE.
     """
     policy, _ = default_policy()
     g = load_graph("data/curricula/demo_curriculum.json")
@@ -122,26 +123,31 @@ def test_replan_starvation_when_all_prereqs_uncertain(tmp_path):
     ev = assessment_result("B", [1])
     result = replan(replan_state, ev)
 
-    assert result["status"] == FeasibilityStatus.HEURISTIC_NO_PLAN
-    assert result["feasibility_explanation"]["reason_code"] == InfeasibilityReason.SCHEDULING_CONSTRAINTS_UNMET
+    assert result["status"] == FeasibilityStatus.FEASIBLE
 
-    # Day 2 activities are empty despite 10 minutes of remaining budget
-    day2_plan = next((d for d in result["days"] if d["day"] == 2), None)
-    assert day2_plan is not None
-    assert day2_plan["activities"] == []
-    assert day2_plan["minutes_remaining"] == 10
+    days = {d["day"]: d for d in result["days"]}
+    assert days[2]["activities"] == ["A", "B"]
+    assert days[2]["minutes_remaining"] == 0
+    assert days[3]["activities"] == ["C"] and days[3]["conditional_activities"] == ["C"]
+    assert days[4]["activities"] == ["D"] and days[4]["conditional_activities"] == ["D"]
 
-    # Assessment candidates collected but never scheduled
+    day2 = {t["node_id"]: t for t in result["trace"] if isinstance(t, dict) and t.get("day") == 2}
+    assert day2["A"]["reason_code"] == ReasonCode.PRACTICE_FOR_EVIDENCE
+    assert day2["B"]["reason_code"] == ReasonCode.PRACTICE_FOR_EVIDENCE
+    assert day2["C"]["reason_code"] == ReasonCode.UNCERTAIN_NEEDS_ASSESSMENT
+    assert day2["D"]["reason_code"] == ReasonCode.UNCERTAIN_NEEDS_ASSESSMENT
+
     assert set(result["assessment_candidates"]) == {"A", "B", "C"}
 
 
-def test_five_day_adaptive_horizon_reproduces_four_no_plan_days(tmp_path):
+def test_five_day_adaptive_horizon_keeps_learner_working(tmp_path):
     """
-    Characterization: Simulates a 5-day horizon for an adaptive learner:
-    - Day 1: Schedules and executes ['A', 'B'].
-    - Days 2-5: Each day evaluates to HEURISTIC_NO_PLAN with SCHEDULING_CONSTRAINTS_UNMET
-      and 0 scheduled activities.
-    Total no-plan days for this learner = 4.
+    W7 deadlock fix. Before the fix this always-correct learner did A and B on Day 1
+    and then got 4 no-plan days with nothing to do.
+    Now (loop as in src/evaluation/integrated.py, which runs a HEURISTIC_NO_PLAN
+    plan's listed work): A and B are practised until they leave Uncertain
+    (min_obs 3), then C starts. Every day has work; only Day 5 starts from a
+    plan that cannot fit D any more.
     """
     policy, _ = default_policy()
     g = load_graph("data/curricula/demo_curriculum.json")
@@ -178,13 +184,11 @@ def test_five_day_adaptive_horizon_reproduces_four_no_plan_days(tmp_path):
         status_str = str(active_plan.get("status"))
         if status_str in ("HEURISTIC_NO_PLAN", "FeasibilityStatus.HEURISTIC_NO_PLAN"):
             no_plan_count += 1
-            day_activities = []
-        else:
-            day_activities = []
-            for d in active_plan.get("days", []):
-                if d.get("day") == day_idx:
-                    day_activities = d.get("activities", [])
-                    break
+        day_activities = []
+        for d in active_plan.get("days", []):
+            if d.get("day") == day_idx:
+                day_activities = d.get("activities", [])
+                break
 
         executed_per_day[day_idx] = list(day_activities)
 
@@ -197,22 +201,22 @@ def test_five_day_adaptive_horizon_reproduces_four_no_plan_days(tmp_path):
             cur_replan_state.learner_states = active_plan["learner_states"]
 
     assert executed_per_day[1] == ["A", "B"]
-    assert executed_per_day[2] == []
-    assert executed_per_day[3] == []
-    assert executed_per_day[4] == []
-    assert executed_per_day[5] == []
-    assert no_plan_count == 4
+    assert executed_per_day[2] == ["A", "B"]
+    assert executed_per_day[3] == ["A", "B"]
+    assert executed_per_day[4] == ["C"]
+    assert executed_per_day[5] == ["C"]
+    assert no_plan_count == 1
 
 
-@pytest.mark.xfail(strict=True, reason="Candidate pending D1: learner whose only blocker is an Uncertain prerequisite still gets a non-empty plan")
 def test_candidate_pending_d1_uncertain_prereq_yields_non_empty_plan(tmp_path):
     """
     Candidate test pending D1 decision:
     When a learner has completed prerequisite A (with n=1, Uncertain), and has 10 minutes of daily
     budget available, downstream candidate C (duration 10, requires A) or practice on A itself
     should be scheduled so the learner receives a non-empty daily plan rather than halting.
-    Under the unfixed codebase, this test strictly fails because replan returns 0 activities
-    and HEURISTIC_NO_PLAN.
+    Under the unfixed codebase, this test strictly failed because replan returned 0 activities
+    and HEURISTIC_NO_PLAN. It passes since the W7 deadlock fix, which reverses D1
+    (docs/w7/preregistration_deadlock_fix.md); the xfail marker was removed.
     """
     policy, _ = default_policy()
     g = load_graph("data/curricula/demo_curriculum.json")
