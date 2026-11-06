@@ -196,3 +196,5 @@ a.card { color: inherit; text-decoration: none; }
 a.card:hover { border-color: var(--accent); }
 td .pill { white-space: normal; }
 code, .src a { overflow-wrap: anywhere; }
+.chip.review { border-style: dashed; color: var(--text-2); }
+.chip.remediation { border-color: var(--warn); }

@@ -55,10 +55,11 @@
       <span class="small">Presets:</span>
       <button data-preset-b="cold_start">Cold start</button>
       <button data-preset-b="a_mastered">A mastered</button>
-      <button data-preset-b="weak_prereq">B weak</button>
+      <button data-preset-b="weak_prereq">B weak (no plan)</button>
       <button data-preset-b="block_too_big">Budget 8 (infeasible)</button>
       <button data-preset-b="too_few_days">2 days (infeasible)</button>
-      <button data-preset-b="replan_two_wrong">Replan: 2 wrong on B</button>
+      <button data-preset-b="replan_b_mastered">Replan: B answered 1111</button>
+      <button data-preset-b="replan_missed_day">Replan: missed day</button>
     </div>
     <div class="card">
       <div class="row">
@@ -287,15 +288,57 @@ function statusBlock(status, feas) {
   return h;
 }
 
-function daysBlock(days) {
+// Why each scheduled item was selected on its day (SELECTED, REVIEW_DUE, REMEDIATION_TRIGGERED), from the trace.
+function selectedReasons(trace) {
+  const m = {};
+  (trace || []).forEach(t => { if (t.decision === "SELECTED") m[t.day + ":" + t.node_id] = t.reason_code; });
+  return m;
+}
+const KIND = { REVIEW_DUE: "review", REMEDIATION_TRIGGERED: "remediation" };
+
+function daysBlock(days, trace) {
   if (!days.length) return `<p class="small">No days planned.</p>`;
-  return `<div class="days">${days.map(d => {
+  const why = selectedReasons(trace);
+  let sawReview = false, sawCond = false, sawRem = false;
+  const html = `<div class="days">${days.map(d => {
     const total = d.minutes_used + d.minutes_remaining;
+    const chips = d.activities.map(a => {
+      const kind = KIND[why[d.day + ":" + a]];
+      const cond = (d.conditional_activities || []).includes(a);
+      sawReview ||= kind === "review"; sawRem ||= kind === "remediation"; sawCond ||= cond;
+      const title = kind === "review" ? "spaced review of a mastered concept (REVIEW_DUE)" :
+        kind === "remediation" ? "remediation of a prerequisite (REMEDIATION_TRIGGERED)" :
+        cond ? "conditional: re-check prerequisites before doing it" : "new learning";
+      return `<span class="chip${kind ? " " + kind : ""}" title="${title}">${a}${cond ? "*" : ""}${kind ? ` · ${kind}` : ""}</span>`;
+    }).join("");
     return `<div class="card day"><b>Day ${d.day}</b>${d.missed ? ' <span class="pill bad">missed</span>' : ""}
       <div class="bar"><span style="width:${total ? 100 * d.minutes_used / total : 0}%"></span></div>
       <div class="small">${d.minutes_used} / ${total} min</div>
-      <div class="chips">${d.activities.map(a => `<span class="chip" title="${(d.conditional_activities || []).includes(a) ? "conditional: re-check prerequisites before doing it" : ""}">${a}${(d.conditional_activities || []).includes(a) ? "*" : ""}</span>`).join("") || '<span class="small">rest</span>'}</div></div>`;
-  }).join("")}</div><p class="small">* conditional: depends on a prerequisite planned earlier, so it is re-checked before it is done.</p>`;
+      <div class="chips">${chips || '<span class="small">rest</span>'}</div></div>`;
+  }).join("")}</div>`;
+  const notes = [];
+  if (sawCond) notes.push("* conditional: depends on a prerequisite planned earlier, so it is re-checked before it is done.");
+  if (sawReview) notes.push("review: a Mastered concept comes back once its estimated recall falls below 0.85 (14-day half-life), using leftover minutes only.");
+  if (sawRem) notes.push("remediation: a prerequisite scheduled first after repeated wrong answers on a later concept.");
+  return html + notes.map(n => `<p class="small" style="margin:4px 0">${n}</p>`).join("");
+}
+
+// For HEURISTIC_NO_PLAN: which needed concepts never got a day, and the planner's last reason for each.
+function unplacedBlock(plan) {
+  if (plan.status !== "HEURISTIC_NO_PLAN" || !plan.trace) return "";
+  const placed = new Set(plan.days.flatMap(d => d.activities));
+  const last = {};
+  plan.trace.forEach(t => { if (!placed.has(t.node_id) && t.class !== "Mastered") last[t.node_id] = t; });
+  const rows = Object.values(last);
+  if (!rows.length) return "";
+  const explain = {
+    PREREQUISITE_UNMET: "a prerequisite is Weak or not planned yet; the planner will not build on a Weak concept until new answers show it has improved",
+    UNCERTAIN_NEEDS_ASSESSMENT: "a prerequisite is Uncertain and not planned; it should be assessed first",
+    BUDGET_EXCEEDED: "it did not fit in the minutes left on any day with this left-to-right order",
+  };
+  return `<p>The planner could not place every concept before the deadline. This is the planner giving up, not a proof that no plan exists (that would be INFEASIBLE_PROVED).</p>
+    <table><thead><tr><th>Not placed</th><th>Last reason</th><th>Meaning</th></tr></thead><tbody>${
+    rows.map(t => `<tr><td>${t.node_id} (${t.class})</td><td><code>${t.reason_code}</code></td><td>${explain[t.reason_code] || ""}</td></tr>`).join("")}</tbody></table>`;
 }
 
 function traceBlock(trace, key) {
@@ -317,7 +360,7 @@ function traceBlock(trace, key) {
 }
 
 function planBlock(plan, key) {
-  let h = statusBlock(plan.status, plan.feasibility) + daysBlock(plan.days);
+  let h = statusBlock(plan.status, plan.feasibility) + unplacedBlock(plan) + daysBlock(plan.days, plan.trace);
   if (plan.assessment_candidates && plan.assessment_candidates.length)
     h += `<p class="small">Assessment candidates (Uncertain prerequisites worth testing): ${plan.assessment_candidates.join(", ")}</p>`;
   if (plan.trace) h += traceBlock(plan.trace, key);

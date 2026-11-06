@@ -218,9 +218,13 @@ DEMO_B_PRESETS = {
     "weak_prereq": {"target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1111", "B": "0000"}},
     "block_too_big": {"target": "D", "budget": 8, "deadline_days": 5, "answers": {}},
     "too_few_days": {"target": "D", "budget": 10, "deadline_days": 2, "answers": {}},
-    "replan_two_wrong": {
+    "replan_b_mastered": {
         "target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1111"},
-        "event": {"type": "assessment_result", "node": "B", "answers": "00"},
+        "event": {"type": "assessment_result", "node": "B", "answers": "1111"},
+    },
+    "replan_missed_day": {
+        "target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1111"},
+        "event": {"type": "missed_day"},
     },
 }
 
