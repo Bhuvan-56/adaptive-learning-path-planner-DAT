@@ -12,8 +12,14 @@
   <h1>Integrated S0 results</h1>
   <p class="lede">The whole loop (diagnostic, learner state, planning, replanning) run for 5 days with a 10-minute daily
     budget on 1,000 synthetic learners: 5 seeds × 200 learners, every arm on the same learners. Outcome: number of
-    concepts mastered at the end (out of 4).</p>
+    concepts mastered at the end (out of 4). Numbers are from the run after the Week 7 adaptive deadlock fix.</p>
   <div class="note">Results from a simulator with synthetic learners (<code>MatchedBKTGenerator</code>), scenario S0 only.</div>
+
+  <h2>Week 7 fix: the adaptive planner no longer stalls</h2>
+  <p>Before the fix, a concept studied once stayed Uncertain and blocked everything after it, but was never practised
+    again, so adaptive plans stopped after day 1. Now such a concept gets another practice session
+    (<code>PRACTICE_FOR_EVIDENCE</code>) and its dependents follow. Same 1,000 learners before and after.</p>
+  <div class="card"><div class="table-wrap" id="fix"></div></div>
 
   <h2>Arms</h2>
   <div class="card">
@@ -40,8 +46,23 @@
   let r;
   try { r = await Site.getJSON("data/s0_pooled.json"); } catch (e) { return Site.fail(document.getElementById("arms"), e); }
   const S = r.sources;
-  const csvs = "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_*.csv";
+  const runDir = S.per_learner[0].slice(0, S.per_learner[0].lastIndexOf("/"));
+  const csvs = runDir + "/per_learner_seed_*.csv";
+  const beforeDir = S.per_learner_before[0].slice(0, S.per_learner_before[0].lastIndexOf("/"));
   const n = x => x.toLocaleString("en-US");
+
+  const after = Object.fromEntries(r.arms.map(a => [a.arm, a]));
+  document.getElementById("fix").innerHTML = `<table><thead><tr><th>Arm</th><th class="num">Mastered before [95% CI]</th><th class="num">Mastered after [95% CI]</th>
+    <th class="num">After − before [95% CI]</th><th class="num">Learners changed (+ / −)</th><th class="num">No-plan days before → after</th></tr></thead>
+    <tbody>${r.fix.map(f => { const a = after[f.arm]; return `<tr${f.arm === "adaptive_full" ? ' class="hl"' : ""}><td><code>${f.arm}</code></td>
+      <td class="num">${Site.fmt4(f.before_mastered)} [${Site.fmt4(f.before_lo)}, ${Site.fmt4(f.before_hi)}]</td>
+      <td class="num">${Site.fmt4(a.mastered)} [${Site.fmt4(a.lo)}, ${Site.fmt4(a.hi)}]</td>
+      <td class="num">${Site.signed4(f.mean)} [${Site.fmt4(f.lo)}, ${Site.fmt4(f.hi)}]</td>
+      <td class="num">${f.changed} (+${f.up} / −${f.down})</td>
+      <td class="num">${n(f.before_no_plan)} → ${n(f.after_no_plan)} / 5,000</td></tr>`; }).join("")}</tbody></table>
+    <p class="small">The other four arms do not use the replanner and are identical before and after (checked column by column by the build).
+      The remaining no-plan day is the last day for every learner, when the remaining concepts no longer fit; that day's planned work is still done.</p>
+    ${Site.src([beforeDir + "/per_learner_seed_*.csv", csvs], `method of <code>${S.fix_method}</code>; pre-registered in <a href="../${S.fix_prereg}"><code>${S.fix_prereg}</code></a>; write-up <a href="../${S.checked_against}"><code>${S.checked_against}</code></a>`)}`;
 
   document.getElementById("arms").innerHTML = `<table><thead><tr><th>Arm</th><th class="num">Learners</th><th class="num">Mastered [95% CI]</th>
     <th class="num">No-plan days</th><th class="num">Prereq viol.</th><th class="num">Budget viol.</th><th class="num">Trace coverage</th></tr></thead>
@@ -99,8 +120,9 @@
     <p><code>per_learner.csv</code> and the arm table in <code>summary.md</code> hold seed 42 only, so the five per-seed files are pooled.
     <code>site/build_data.py</code> follows <a href="../${S.method}"><code>${S.method}</code></a>: the five files are concatenated in the order 42, 101, 2024, 777, 999;
     each arm's mean and CI use <code>compute_paired_bootstrap_ci</code> (B = 1000, seed 42); paired differences use rows sorted by the per-learner seed.</p>
-    <p>The build checks its arm means, CIs and no-plan days for the four primary arms, the best-singleton − greedy difference (+0.0130 [0.0040, 0.0230], 23 learners: 18 up, 5 down)
-    and adaptive_full − static (−0.1020 [−0.1210, −0.0830]) against <a href="../${S.checked_against}"><code>${S.checked_against}</code></a> and stops if any differs.</p>
+    <p>The build checks its arm means, CIs and no-plan days for the four primary arms, the best-singleton − greedy difference (+0.0130 [0.0040, 0.0230], 23 learners: 18 up, 5 down),
+    adaptive_full − static (+0.1400 [0.1110, 0.1690], 194 learners: 156 up, 38 down), adaptive_full after − before (+0.2420 [0.2110, 0.2740]) and 100% trace coverage
+    against <a href="../${S.checked_against}"><code>${S.checked_against}</code></a> and <a href="../docs/w7/comparison.md"><code>docs/w7/comparison.md</code></a>, and stops if any differs.</p>
     <p>Sources: ${S.per_learner.map(p => `<a href="../${p}"><code>${p}</code></a>`).join(", ")}.</p>`;
 })();
 </script>

@@ -50,9 +50,12 @@
     </div>
   </div>
 
-  <h2>Week 7 change: best-singleton fallback</h2>
-  <p>The daily scheduler picks items by score per minute (greedy). Week 7 added an opt-in fallback: also look at the
-    best single item that fits, and keep whichever is worth more.</p>
+  <h2>Week 7 changes</h2>
+  <p><b>Adaptive deadlock fix.</b> A concept studied once stayed Uncertain and blocked everything after it, but was never
+    practised again, so adaptive plans stopped after day 1. It now gets another practice session, and its dependents follow.</p>
+  <div class="grid cols-2" id="headline-fix"><p class="small">Loading…</p></div>
+  <p style="margin-top:16px"><b>Best-singleton fallback.</b> The daily scheduler picks items by score per minute (greedy).
+    An opt-in fallback also looks at the best single item that fits and keeps whichever is worth more.</p>
   <div class="grid cols-2" id="headline"><p class="small">Loading…</p></div>
   <div class="note">All results on this site come from a simulator with synthetic learners and synthetic scheduling
     instances, not from real learners.</div>
@@ -61,7 +64,7 @@
   <div class="grid cols-2">
     <a class="card" href="curriculum.html"><b>Curriculum</b><br><span class="small">The 4-concept demo graph the planner uses.</span></a>
     <a class="card" href="scheduling.html"><b>Scheduling benchmark</b><br><span class="small">Greedy vs greedy + best-singleton against the exact optimum on 250 instances.</span></a>
-    <a class="card" href="results.html"><b>Integrated S0</b><br><span class="small">All nine arms, 1,000 synthetic learners, pooled over five seeds.</span></a>
+    <a class="card" href="results.html"><b>Integrated S0</b><br><span class="small">All nine arms, 1,000 synthetic learners, pooled over five seeds, before and after the deadlock fix.</span></a>
     <a class="card" href="demos.html"><b>Live demos</b><br><span class="small">The real project code running in your browser.</span></a>
   </div>
 </main>
@@ -72,14 +75,25 @@
     const [s, r] = await Promise.all([Site.getJSON("data/scheduling.json"), Site.getJSON("data/s0_pooled.json")]);
     const d = s.paired_diff;
     const bs = r.diffs.find(x => x.a === "non_adaptive_greedy_best_singleton" && x.b === "non_adaptive_greedy");
+    const runDir = r.sources.per_learner[0].slice(0, r.sources.per_learner[0].lastIndexOf("/"));
+    const vsStatic = r.diffs.find(x => x.a === "adaptive_full" && x.b === "static_prerequisite_order");
+    const fix = r.fix.find(x => x.arm === "adaptive_full");
+    const nf = x => x.toLocaleString("en-US");
+    document.getElementById("headline-fix").innerHTML = `
+      <div class="card stat"><div class="k">Adaptive arm: days with no plan (1,000 learners × 5 days)</div>
+        <div class="v">${nf(fix.before_no_plan)} → ${nf(fix.after_no_plan)}</div><div class="ci">concepts mastered ${Site.fmt4(fix.before_mastered)} → ${Site.fmt4(r.arms.find(a => a.arm === "adaptive_full").mastered)}</div>
+        ${Site.src(r.sources.checked_against)}</div>
+      <div class="card stat"><div class="k">Concepts mastered, adaptive minus static prerequisite order (paired, 1,000 learners)</div>
+        <div class="v">${Site.signed4(vsStatic.mean)}</div><div class="ci">95% CI [${Site.fmt4(vsStatic.lo)}, ${Site.fmt4(vsStatic.hi)}] (before the fix: −0.1020)</div>
+        ${Site.src(runDir + "/per_learner_seed_*.csv", "pooled as in <code>scripts/w7_pooled_s0.py</code>")}</div>`;
     el.innerHTML = `
       <div class="card stat"><div class="k">Scheduling: mean ratio to optimum, best-singleton minus greedy (250 instances)</div>
         <div class="v">${Site.signed4(d.mean)}</div><div class="ci">95% CI [${d.lo}, ${d.hi}]</div>
         ${Site.src(s.sources.summary)}</div>
       <div class="card stat"><div class="k">Integrated S0: concepts mastered, best-singleton arm minus greedy arm (1,000 learners)</div>
         <div class="v">${Site.signed4(bs.mean)}</div><div class="ci">95% CI [${Site.fmt4(bs.lo)}, ${Site.fmt4(bs.hi)}]</div>
-        ${Site.src("evaluation/results/w7/improvement/integrated_s0/per_learner_seed_*.csv", "pooled as in <code>scripts/w7_pooled_s0.py</code>")}</div>`;
-  } catch (e) { Site.fail(el, e); }
+        ${Site.src(runDir + "/per_learner_seed_*.csv", "pooled as in <code>scripts/w7_pooled_s0.py</code>")}</div>`;
+  } catch (e) { Site.fail(el, e); Site.fail(document.getElementById("headline-fix"), e); }
 })();
 </script>
 </body>

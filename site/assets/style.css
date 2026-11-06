@@ -198,3 +198,4 @@ td .pill { white-space: normal; }
 code, .src a { overflow-wrap: anywhere; }
 .chip.review { border-style: dashed; color: var(--text-2); }
 .chip.remediation { border-color: var(--warn); }
+.chip.practice { border-color: var(--accent); }

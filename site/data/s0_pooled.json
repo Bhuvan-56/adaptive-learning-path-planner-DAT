@@ -1,30 +1,39 @@
 {
  "sources": {
   "per_learner": [
+   "evaluation/results/w7/deadlock_fix/integrated_s0/per_learner_seed_42.csv",
+   "evaluation/results/w7/deadlock_fix/integrated_s0/per_learner_seed_101.csv",
+   "evaluation/results/w7/deadlock_fix/integrated_s0/per_learner_seed_2024.csv",
+   "evaluation/results/w7/deadlock_fix/integrated_s0/per_learner_seed_777.csv",
+   "evaluation/results/w7/deadlock_fix/integrated_s0/per_learner_seed_999.csv"
+  ],
+  "coverage": [
+   "evaluation/results/w7/deadlock_fix/integrated_s0/summary_seed_42.md",
+   "evaluation/results/w7/deadlock_fix/integrated_s0/summary_seed_101.md",
+   "evaluation/results/w7/deadlock_fix/integrated_s0/summary_seed_2024.md",
+   "evaluation/results/w7/deadlock_fix/integrated_s0/summary_seed_777.md",
+   "evaluation/results/w7/deadlock_fix/integrated_s0/summary_seed_999.md"
+  ],
+  "per_learner_before": [
    "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_42.csv",
    "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_101.csv",
    "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_2024.csv",
    "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_777.csv",
    "evaluation/results/w7/improvement/integrated_s0/per_learner_seed_999.csv"
   ],
-  "coverage": [
-   "evaluation/results/w7/improvement/integrated_s0/summary_seed_42.md",
-   "evaluation/results/w7/improvement/integrated_s0/summary_seed_101.md",
-   "evaluation/results/w7/improvement/integrated_s0/summary_seed_2024.md",
-   "evaluation/results/w7/improvement/integrated_s0/summary_seed_777.md",
-   "evaluation/results/w7/improvement/integrated_s0/summary_seed_999.md"
-  ],
   "method": "scripts/w7_pooled_s0.py",
-  "checked_against": "docs/w7/comparison.md"
+  "fix_method": "scripts/w7_deadlock_fix_compare.py",
+  "checked_against": "docs/w7/deadlock_fix_results.md",
+  "fix_prereg": "docs/w7/preregistration_deadlock_fix.md"
  },
  "arms": [
   {
    "arm": "adaptive_full",
    "n": 1000,
-   "mastered": 1.934,
-   "lo": 1.8309,
-   "hi": 2.038,
-   "no_plan_days": 4000,
+   "mastered": 2.176,
+   "lo": 2.08,
+   "hi": 2.268,
+   "no_plan_days": 1000,
    "learner_days": 5000,
    "prereq_violations": 0,
    "budget_violations": 0,
@@ -69,10 +78,10 @@
   {
    "arm": "ablation_no_diagnostic",
    "n": 1000,
-   "mastered": 1.934,
-   "lo": 1.8309,
-   "hi": 2.038,
-   "no_plan_days": 4000,
+   "mastered": 2.176,
+   "lo": 2.08,
+   "hi": 2.268,
+   "no_plan_days": 1000,
    "learner_days": 5000,
    "prereq_violations": 0,
    "budget_violations": 0,
@@ -93,10 +102,10 @@
   {
    "arm": "ablation_no_difficulty_step",
    "n": 1000,
-   "mastered": 1.934,
-   "lo": 1.8309,
-   "hi": 2.038,
-   "no_plan_days": 4000,
+   "mastered": 2.176,
+   "lo": 2.08,
+   "hi": 2.268,
+   "no_plan_days": 1000,
    "learner_days": 5000,
    "prereq_violations": 0,
    "budget_violations": 0,
@@ -105,10 +114,10 @@
   {
    "arm": "ablation_no_review",
    "n": 1000,
-   "mastered": 1.934,
-   "lo": 1.8309,
-   "hi": 2.038,
-   "no_plan_days": 4000,
+   "mastered": 2.176,
+   "lo": 2.08,
+   "hi": 2.268,
+   "no_plan_days": 1000,
    "learner_days": 5000,
    "prereq_violations": 0,
    "budget_violations": 0,
@@ -117,10 +126,10 @@
   {
    "arm": "ablation_no_remediation",
    "n": 1000,
-   "mastered": 1.934,
-   "lo": 1.8309,
-   "hi": 2.038,
-   "no_plan_days": 4000,
+   "mastered": 2.176,
+   "lo": 2.08,
+   "hi": 2.268,
+   "no_plan_days": 1000,
    "learner_days": 5000,
    "prereq_violations": 0,
    "budget_violations": 0,
@@ -131,24 +140,24 @@
   {
    "a": "adaptive_full",
    "b": "static_prerequisite_order",
-   "mean": -0.102,
-   "lo": -0.121,
-   "hi": -0.083,
-   "changed": 99,
-   "up": 0,
-   "down": 99,
-   "claim": "static_prerequisite_order better (higher mastery)"
+   "mean": 0.14,
+   "lo": 0.111,
+   "hi": 0.169,
+   "changed": 194,
+   "up": 156,
+   "down": 38,
+   "claim": "adaptive_full better (higher mastery)"
   },
   {
    "a": "adaptive_full",
    "b": "non_adaptive_greedy",
-   "mean": -0.102,
-   "lo": -0.121,
-   "hi": -0.083,
-   "changed": 99,
-   "up": 0,
-   "down": 99,
-   "claim": "non_adaptive_greedy better (higher mastery)"
+   "mean": 0.14,
+   "lo": 0.111,
+   "hi": 0.169,
+   "changed": 194,
+   "up": 156,
+   "down": 38,
+   "claim": "adaptive_full better (higher mastery)"
   },
   {
    "a": "non_adaptive_greedy",
@@ -186,13 +195,13 @@
   {
    "a": "ablation_no_replan",
    "b": "adaptive_full",
-   "mean": 0.102,
-   "lo": 0.083,
-   "hi": 0.121,
-   "changed": 99,
-   "up": 99,
-   "down": 0,
-   "claim": "ablation_no_replan better (higher mastery)"
+   "mean": -0.14,
+   "lo": -0.169,
+   "hi": -0.111,
+   "changed": 194,
+   "up": 38,
+   "down": 156,
+   "claim": "adaptive_full better (higher mastery)"
   },
   {
    "a": "ablation_no_difficulty_step",
@@ -226,6 +235,78 @@
    "up": 0,
    "down": 0,
    "claim": "no difference shown"
+  }
+ ],
+ "fix": [
+  {
+   "arm": "adaptive_full",
+   "before_mastered": 1.934,
+   "before_lo": 1.8309,
+   "before_hi": 2.038,
+   "before_no_plan": 4000,
+   "after_no_plan": 1000,
+   "mean": 0.242,
+   "lo": 0.211,
+   "hi": 0.274,
+   "changed": 204,
+   "up": 204,
+   "down": 0
+  },
+  {
+   "arm": "ablation_no_diagnostic",
+   "before_mastered": 1.934,
+   "before_lo": 1.8309,
+   "before_hi": 2.038,
+   "before_no_plan": 4000,
+   "after_no_plan": 1000,
+   "mean": 0.242,
+   "lo": 0.211,
+   "hi": 0.274,
+   "changed": 204,
+   "up": 204,
+   "down": 0
+  },
+  {
+   "arm": "ablation_no_difficulty_step",
+   "before_mastered": 1.934,
+   "before_lo": 1.8309,
+   "before_hi": 2.038,
+   "before_no_plan": 4000,
+   "after_no_plan": 1000,
+   "mean": 0.242,
+   "lo": 0.211,
+   "hi": 0.274,
+   "changed": 204,
+   "up": 204,
+   "down": 0
+  },
+  {
+   "arm": "ablation_no_review",
+   "before_mastered": 1.934,
+   "before_lo": 1.8309,
+   "before_hi": 2.038,
+   "before_no_plan": 4000,
+   "after_no_plan": 1000,
+   "mean": 0.242,
+   "lo": 0.211,
+   "hi": 0.274,
+   "changed": 204,
+   "up": 204,
+   "down": 0
+  },
+  {
+   "arm": "ablation_no_remediation",
+   "before_mastered": 1.934,
+   "before_lo": 1.8309,
+   "before_hi": 2.038,
+   "before_no_plan": 4000,
+   "after_no_plan": 1000,
+   "mean": 0.242,
+   "lo": 0.211,
+   "hi": 0.274,
+   "changed": 204,
+   "up": 204,
+   "down": 0
   }
  ]
 }

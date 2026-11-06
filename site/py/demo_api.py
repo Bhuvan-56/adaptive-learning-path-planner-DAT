@@ -278,6 +278,7 @@ def _replan(g, states, payload, policy, event) -> Dict[str, Any]:
         budget=int(payload["budget"]),
         deadline_days=int(payload["deadline_days"]),
         target_node=payload["target"],
+        completed_nodes=set(payload.get("studied", [])),
         policy=policy,
     )
     raw = replan(state, ev)

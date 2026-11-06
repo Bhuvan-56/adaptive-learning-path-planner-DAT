@@ -55,9 +55,10 @@
       <span class="small">Presets:</span>
       <button data-preset-b="cold_start">Cold start</button>
       <button data-preset-b="a_mastered">A mastered</button>
-      <button data-preset-b="weak_prereq">B weak (no plan)</button>
+      <button data-preset-b="weak_prereq">B weak</button>
       <button data-preset-b="block_too_big">Budget 8 (infeasible)</button>
       <button data-preset-b="too_few_days">2 days (infeasible)</button>
+      <button data-preset-b="replan_practice">Replan: A, B studied once</button>
       <button data-preset-b="replan_b_mastered">Replan: B answered 1111</button>
       <button data-preset-b="replan_missed_day">Replan: missed day</button>
     </div>
@@ -68,7 +69,8 @@
         <label for="b-days">Deadline (days)</label><input type="number" id="b-days" value="5" step="1">
       </div>
       <h3>Learner state per concept</h3>
-      <p class="small">Answers so far: <code>1</code> = right, <code>0</code> = wrong, oldest first (empty = cold start).</p>
+      <p class="small">Answers so far: <code>1</code> = right, <code>0</code> = wrong, oldest first (empty = cold start).
+        “Studied already” marks a concept the learner has done once; only the replan event uses it.</p>
       <div class="concepts" id="b-concepts"></div>
       <h3>Replan event (optional)</h3>
       <div class="row">
@@ -212,7 +214,8 @@ function buildConcepts() {
   $("b-concepts").innerHTML = nodes.map(n => `<div class="card">
       <label for="ans-${n.id}"><b>${n.id}</b> · ${esc(n.name)} <span class="small">(${n.minutes} min)</span></label>
       <input id="ans-${n.id}" data-node="${n.id}" inputmode="numeric" pattern="[01]*" placeholder="e.g. 1111" maxlength="12">
-      <div class="small" id="st-${n.id}" style="margin-top:4px"></div></div>`).join("");
+      <div class="small" id="st-${n.id}" style="margin-top:4px"></div>
+      <label class="small" style="display:block;margin-top:4px"><input type="checkbox" id="done-${n.id}"> studied already</label></div>`).join("");
   nodes.forEach(n => $("ans-" + n.id).addEventListener("input", e => {
     e.target.value = e.target.value.replace(/[^01]/g, ""); refreshState(n.id);
   }));
@@ -247,6 +250,8 @@ function payloadB() {
   const answers = {};
   nodes.forEach(n => { const v = $("ans-" + n.id).value; if (v) answers[n.id] = v; });
   const p = { target: $("b-target").value, budget: Math.round(Number($("b-budget").value)), deadline_days: Math.round(Number($("b-days").value)), answers };
+  const studied = nodes.filter(n => $("done-" + n.id).checked).map(n => n.id);
+  if (studied.length) p.studied = studied;
   const kind = $("b-event").value;
   if (kind === "assessment_result") p.event = { type: kind, node: $("ev-node").value, answers: $("ev-ans").value };
   else if (kind === "missed_day") p.event = { type: kind };
@@ -259,7 +264,7 @@ function loadPresetB(id) {
   if (!fb) return;
   const p = fb.input;
   $("b-target").value = p.target; $("b-budget").value = p.budget; $("b-days").value = p.deadline_days;
-  nodes.forEach(n => { $("ans-" + n.id).value = (p.answers || {})[n.id] || ""; refreshState(n.id); });
+  nodes.forEach(n => { $("ans-" + n.id).value = (p.answers || {})[n.id] || ""; $("done-" + n.id).checked = (p.studied || []).includes(n.id); refreshState(n.id); });
   $("b-event").value = p.event ? p.event.type : ""; eventArgs();
   if (p.event && p.event.type === "assessment_result") { $("ev-node").value = p.event.node; $("ev-ans").value = p.event.answers; }
   if (p.event && "value" in p.event) $("ev-val").value = p.event.value;
@@ -294,19 +299,20 @@ function selectedReasons(trace) {
   (trace || []).forEach(t => { if (t.decision === "SELECTED") m[t.day + ":" + t.node_id] = t.reason_code; });
   return m;
 }
-const KIND = { REVIEW_DUE: "review", REMEDIATION_TRIGGERED: "remediation" };
+const KIND = { REVIEW_DUE: "review", REMEDIATION_TRIGGERED: "remediation", PRACTICE_FOR_EVIDENCE: "practice" };
 
 function daysBlock(days, trace) {
   if (!days.length) return `<p class="small">No days planned.</p>`;
   const why = selectedReasons(trace);
-  let sawReview = false, sawCond = false, sawRem = false;
+  let sawReview = false, sawCond = false, sawRem = false, sawPractice = false;
   const html = `<div class="days">${days.map(d => {
     const total = d.minutes_used + d.minutes_remaining;
     const chips = d.activities.map(a => {
       const kind = KIND[why[d.day + ":" + a]];
       const cond = (d.conditional_activities || []).includes(a);
-      sawReview ||= kind === "review"; sawRem ||= kind === "remediation"; sawCond ||= cond;
+      sawReview ||= kind === "review"; sawRem ||= kind === "remediation"; sawPractice ||= kind === "practice"; sawCond ||= cond;
       const title = kind === "review" ? "spaced review of a mastered concept (REVIEW_DUE)" :
+        kind === "practice" ? "more practice on a studied concept that is not proven yet (PRACTICE_FOR_EVIDENCE)" :
         kind === "remediation" ? "remediation of a prerequisite (REMEDIATION_TRIGGERED)" :
         cond ? "conditional: re-check prerequisites before doing it" : "new learning";
       return `<span class="chip${kind ? " " + kind : ""}" title="${title}">${a}${cond ? "*" : ""}${kind ? ` · ${kind}` : ""}</span>`;
@@ -319,6 +325,7 @@ function daysBlock(days, trace) {
   const notes = [];
   if (sawCond) notes.push("* conditional: depends on a prerequisite planned earlier, so it is re-checked before it is done.");
   if (sawReview) notes.push("review: a Mastered concept comes back once its estimated recall falls below 0.85 (14-day half-life), using leftover minutes only.");
+  if (sawPractice) notes.push("practice: a concept already studied but still Uncertain or Weak gets another session, so new answers can unlock what depends on it; dependents follow from the next day.");
   if (sawRem) notes.push("remediation: a prerequisite scheduled first after repeated wrong answers on a later concept.");
   return html + notes.map(n => `<p class="small" style="margin:4px 0">${n}</p>`).join("");
 }
@@ -332,7 +339,7 @@ function unplacedBlock(plan) {
   const rows = Object.values(last);
   if (!rows.length) return "";
   const explain = {
-    PREREQUISITE_UNMET: "a prerequisite is Weak or not planned yet; the planner will not build on a Weak concept until new answers show it has improved",
+    PREREQUISITE_UNMET: "a prerequisite is Weak and not planned on an earlier day, or not planned at all",
     UNCERTAIN_NEEDS_ASSESSMENT: "a prerequisite is Uncertain and not planned; it should be assessed first",
     BUDGET_EXCEEDED: "it did not fit in the minutes left on any day with this left-to-right order",
   };
@@ -352,7 +359,7 @@ function traceBlock(trace, key) {
       $(id).querySelectorAll("tbody tr").forEach(tr => tr.hidden = sel.value !== "" && tr.dataset.day !== sel.value);
     });
   });
-  const rc = c => c === "SELECTED" ? "good" : (c === "PREREQUISITE_UNMET" || c === "BLOCK_EXCEEDS_DAILY_BUDGET" ? "bad" : (c === "UNCERTAIN_NEEDS_ASSESSMENT" || c === "BUDGET_EXCEEDED" || c === "REMEDIATION_TRIGGERED" ? "warn" : ""));
+  const rc = c => c === "SELECTED" || c === "PRACTICE_FOR_EVIDENCE" ? "good" : (c === "PREREQUISITE_UNMET" || c === "BLOCK_EXCEEDS_DAILY_BUDGET" ? "bad" : (c === "UNCERTAIN_NEEDS_ASSESSMENT" || c === "BUDGET_EXCEEDED" || c === "REMEDIATION_TRIGGERED" ? "warn" : ""));
   return `<div class="row" style="margin:8px 0"><label for="${id}-day">Trace (${trace.length} entries), show</label><select id="${id}-day">${opts}</select></div>
     <div class="table-wrap"><table id="${id}"><thead><tr><th class="num">Day</th><th>Concept</th><th>State</th><th>Decision</th><th>Reason code</th><th class="num">Budget left</th></tr></thead>
     <tbody>${trace.map(t => `<tr data-day="${t.day}"><td class="num">${t.day}</td><td>${t.node_id}</td><td>${t.class}</td><td>${t.decision}</td>
