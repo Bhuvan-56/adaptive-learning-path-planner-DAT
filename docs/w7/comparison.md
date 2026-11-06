@@ -59,7 +59,7 @@ Identity check: existing arms' per-learner values (all columns except `runtime_m
 |---|---|---|---|
 | Scheduling, per instance, p50 / p95 (ms) | 0.0219 / 0.0657 | 0.0266 / 0.0730 | `evaluation/results/w7/improvement/scheduling/summary.md` |
 | Integrated, per learner over 5 days, p50 / p95 (ms) | 0.0204 / 0.0638 | 0.0427 / 0.1541 | `evaluation/results/w7/improvement/integrated_s0/per_learner_seed_*.csv` via `scripts/w7_pooled_s0.py` |
-| Integrated evaluate command, wall clock | 267 s for all 9 arms × 1,000 learners | | this session's run, logged in `weekly/W7_AI_LOG.md` |
+| Integrated evaluate command, wall clock | 267 s for all 9 arms × 1,000 learners | | this session's run (Phase 4) |
 
 `run_greedy_best_singleton` calls `run_greedy_scheduler` and then scans single items, so its time includes greedy's. Both policies were timed on the same machine in the same run. Between runs, timings move a lot: adaptive_full p50 was 6.664 ms in the baseline run and 13.354 ms in this run with identical outputs (`BASELINE.md`; this run via `scripts/w7_pooled_s0.py`). Only within-run runtime comparisons are meaningful.
 
