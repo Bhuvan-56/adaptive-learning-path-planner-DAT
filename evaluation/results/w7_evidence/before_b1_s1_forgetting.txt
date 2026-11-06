@@ -1,0 +1,88 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+____________________ test_s1_daily_loop_calls_advance_day _____________________
+
+tmp_path = WindowsPath('C:/Users/5520/AppData/Local/Temp/pytest-of-5520/pytest-150/test_s1_daily_loop_calls_advan0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000131A7F26950>
+
+    @pytest.mark.xfail(strict=True, reason="W7: integrated loop never applies daily forgetting")
+    def test_s1_daily_loop_calls_advance_day(tmp_path, monkeypatch):
+        with open(W5_FINAL, "r", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+        cfg["scenario"] = "S1"
+        cfg["seeds"] = [42]
+        cfg_path = tmp_path / "w7_s1.yaml"
+        cfg_path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+        assert integrated.resolve_scenario_name(cfg) == "S1"
+    
+        integrated_file = os.path.normcase(os.path.abspath(integrated.__file__))
+        calls = {"daily_loop": 0, "other": 0}
+        original = SimulatedLearner.advance_day
+    
+        def spy(self, *args, **kwargs):
+            caller = inspect.stack()[1].filename
+            if os.path.normcase(os.path.abspath(caller)) == integrated_file:
+                calls["daily_loop"] += 1
+            else:
+                calls["other"] += 1
+            return original(self, *args, **kwargs)
+    
+        monkeypatch.setattr(SimulatedLearner, "advance_day", spy)
+    
+        integrated.run_integrated_evaluation(
+            config_path=str(cfg_path),
+            output_dir=str(tmp_path / "out"),
+            override_learners=5,
+        )
+    
+        # The retention quiz does run under S1, so the spy is wired correctly.
+        assert calls["other"] > 0
+>       assert calls["daily_loop"] > 0, f"advance_day calls from integrated.py: {calls}"
+E       AssertionError: advance_day calls from integrated.py: {'daily_loop': 0, 'other': 40}
+E       assert 0 > 0
+
+tests\test_w7_b1_s1_forgetting.py:51: AssertionError
+---------------------------- Captured stdout call -----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=========================== short test summary info ===========================
+FAILED tests/test_w7_b1_s1_forgetting.py::test_s1_daily_loop_calls_advance_day
+1 failed in 5.22s
