@@ -429,6 +429,8 @@ def _evaluate_single_seed(
 
                     past_days.append({"day": day_idx, "activities": day_activities})
                     cur_replan_state.past_days = list(past_days)
+                    # W8 S1 fix: forgetting between study days (no-op, 0 draws, when p_F = 0).
+                    sim_learner.advance_day(1)
 
             elif arm in ("static_prerequisite_order", "ablation_no_replan"):
                 # Static Baseline Arm
@@ -471,6 +473,7 @@ def _evaluate_single_seed(
                         if arm == "ablation_no_replan":
                             diff_states[act] = step_difficulty(diff_states[act], score)
                         completed_so_far.add(act)
+                    sim_learner.advance_day(1)  # W8 S1 fix
 
             elif arm in ("non_adaptive_greedy", "non_adaptive_greedy_best_singleton"):
                 # Non-Adaptive Greedy Frontier Baseline
@@ -520,6 +523,7 @@ def _evaluate_single_seed(
                         diff = float(g.nodes[pick].get("base_difficulty", 0.5))
                         _ = sim_learner.respond(concept=pick, difficulty=diff)
                         completed_so_far.add(pick)
+                    sim_learner.advance_day(1)  # W8 S1 fix
             else:
                 raise ValueError(f"Unknown evaluation arm: {arm}")
 

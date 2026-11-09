@@ -16,7 +16,6 @@ from src.simulation.simulator import SimulatedLearner
 W5_FINAL = os.path.join(os.path.dirname(__file__), "..", "experiments", "w5_final.yaml")
 
 
-@pytest.mark.xfail(strict=True, reason="W7: integrated loop never applies daily forgetting")
 def test_s1_daily_loop_calls_advance_day(tmp_path, monkeypatch):
     with open(W5_FINAL, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
