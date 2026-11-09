@@ -59,8 +59,8 @@ The data pipeline progresses through 9 strictly isolated stages from curriculum 
 ## 2. BKT Probability vs. Uncertainty Proxy
 
 ### Code Locations
-- Posterior probability and uncertainty proxy formulas: [`src/state/learner_state.py:25-30`](file:///c:/Users/5520/Documents/IITH%20BTECH%20ENGINEERING/SEM%207/distributued%20Ai/Project/adaptive-learning-path-planner-DAT/src/state/learner_state.py#L25-L30)
-- BKT belief updates: [`src/state/bkt_adapter.py:35-85`](file:///c:/Users/5520/Documents/IITH%20BTECH%20ENGINEERING/SEM%207/distributued%20Ai/Project/adaptive-learning-path-planner-DAT/src/state/bkt_adapter.py#L35-L85)
+- Posterior probability and uncertainty proxy formulas: [`src/state/learner_state.py:25-30`](../../src/state/learner_state.py#L25-L30)
+- BKT belief updates: [`src/state/bkt_adapter.py:35-85`](../../src/state/bkt_adapter.py#L35-L85)
 
 ### Mathematical Distinction
 - **$p$ (Posterior Mastery Probability):**
@@ -148,27 +148,27 @@ To understand or extend the evaluation and planning systems, read files in this 
 
 ### Q1: Why does `SimulatedLearner` never import from `src/planning` or `src/state`?
 **A:** Architectural decoupling: true latent mastery ($L \in \{0, 1\}$) must never leak into planning algorithms. Planners only observe noisy binary exercise responses.
-*Code:* [`src/evaluation/integrated.py:4-12`](file:///c:/Users/5520/Documents/IITH%20BTECH%20ENGINEERING/SEM%207/distributued%20Ai/Project/adaptive-learning-path-planner-DAT/src/evaluation/integrated.py#L4-L12).
+*Code:* [`src/evaluation/integrated.py:4-12`](../../src/evaluation/integrated.py#L4-L12).
 
 ### Q2: Why did all 5 ablations produce identical mastery outcomes under Scenario S0?
 **A:** Under default scenario S0, `MatchedBKTGenerator` has forgetting rate $p_F = 0.0$ and difficulty sensitivity $d_{sens} = 0.0$. Thus, spaced review and difficulty-stepping ablations do not alter latent transition probabilities in simulator behavior.
-*Code:* [`src/simulation/simulator.py:180-220`](file:///c:/Users/5520/Documents/IITH%20BTECH%20ENGINEERING/SEM%207/distributued%20Ai/Project/adaptive-learning-path-planner-DAT/src/simulation/simulator.py#L180-L220).
+*Code:* [`src/simulation/simulator.py:180-220`](../../src/simulation/simulator.py#L180-L220).
 
 ### Q3: What guarantees that an infeasible schedule emits a structured trace instead of failing silently?
 **A:** When remaining budget is strictly less than the minimal activity block, the planner emits a no-plan trace with status `INFEASIBLE_PROVED` and reason code `BLOCK_EXCEEDS_DAILY_BUDGET`, validated by `check_no_plan_trace`.
-*Code:* [`src/trace/checker.py:65-90`](file:///c:/Users/5520/Documents/IITH%20BTECH%20ENGINEERING/SEM%207/distributued%20Ai/Project/adaptive-learning-path-planner-DAT/src/trace/checker.py#L65-L90).
+*Code:* [`src/trace/checker.py:65-90`](../../src/trace/checker.py#L65-L90).
 
 ### Q4: How does the retention quiz avoid data leakage from the simulation?
 **A:** Retention administration reads `studied_concepts` and evaluates post-horizon responses on a cloned learner state without feeding any feedback or state updates back into the planner.
-*Code:* [`src/evaluation/retention.py:100-145`](file:///c:/Users/5520/Documents/IITH%20BTECH%20ENGINEERING/SEM%207/distributued%20Ai/Project/adaptive-learning-path-planner-DAT/src/evaluation/retention.py#L100-L145).
+*Code:* [`src/evaluation/retention.py:100-145`](../../src/evaluation/retention.py#L100-L145).
 
 ### Q5: Why is $\sigma^2$ considered an uncalibrated proxy rather than a Bayesian credible interval?
 **A:** $\sigma^2$ is purely the variance of an idealized Beta distribution with arbitrary prior pseudo-counts $\kappa = A+B$. It has not been calibrated or empirically validated against real-world posterior predictive intervals.
-*Code:* [`src/state/learner_state.py:29-30`](file:///c:/Users/5520/Documents/IITH%20BTECH%20ENGINEERING/SEM%207/distributued%20Ai/Project/adaptive-learning-path-planner-DAT/src/state/learner_state.py#L29-L30).
+*Code:* [`src/state/learner_state.py:29-30`](../../src/state/learner_state.py#L29-L30).
 
 ### Q6: How does multi-seed evaluation prevent cohort contamination across arms?
 **A:** Each seed constructs an independent cohort of `SimulatedLearner` instances. For each arm, identical clones of that cohort are simulated independently, ensuring arms are paired across learners within each seed.
-*Code:* [`src/evaluation/integrated.py:530-580`](file:///c:/Users/5520/Documents/IITH%20BTECH%20ENGINEERING/SEM%207/distributued%20Ai/Project/adaptive-learning-path-planner-DAT/src/evaluation/integrated.py#L530-L580).
+*Code:* [`src/evaluation/integrated.py:530-580`](../../src/evaluation/integrated.py#L530-L580).
 
 ---
 

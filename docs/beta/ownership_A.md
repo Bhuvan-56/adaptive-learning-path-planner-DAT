@@ -139,45 +139,45 @@ ValueError: Trace missing candidate nodes on day 1: ['B']
 
 When onboarding to the planning and state architecture, read the files in the following order:
 
-1. [src/curriculum/graph.py](file:///c:/Users/bhuva/Downloads/DAT11/src/curriculum/graph.py): Curriculum DAG parsing and validation rules.
-2. [src/state/policy.py](file:///c:/Users/bhuva/Downloads/DAT11/src/state/policy.py): Hyperparameter schema (`PolicyConfig`) and threshold definitions.
-3. [src/state/learner_state.py](file:///c:/Users/bhuva/Downloads/DAT11/src/state/learner_state.py): Cognitive state representation, BKT Bayesian updates, and classification gate logic.
-4. [src/diagnostic/diagnostic.py](file:///c:/Users/bhuva/Downloads/DAT11/src/diagnostic/diagnostic.py): CAT adaptive test engine and ability-to-prior mapping.
-5. [src/planning/feasibility.py](file:///c:/Users/bhuva/Downloads/DAT11/src/planning/feasibility.py): Mathematical feasibility checks (block budget and horizon capacity).
-6. [src/planning/static_baseline.py](file:///c:/Users/bhuva/Downloads/DAT11/src/planning/static_baseline.py): Deterministic topological sort planner.
-7. [src/planning/difficulty.py](file:///c:/Users/bhuva/Downloads/DAT11/src/planning/difficulty.py): 2-Up / 1-Down staircase difficulty stepping.
-8. [src/planning/review.py](file:///c:/Users/bhuva/Downloads/DAT11/src/planning/review.py): Half-Life Regression memory decay and remediation ancestor selection.
-9. [src/planning/replan.py](file:///c:/Users/bhuva/Downloads/DAT11/src/planning/replan.py): Core closed-loop dynamic replanning engine.
-10. [src/planning/service.py](file:///c:/Users/bhuva/Downloads/DAT11/src/planning/service.py): Public service endpoint for plan requests.
-11. [src/trace/checker.py](file:///c:/Users/bhuva/Downloads/DAT11/src/trace/checker.py): Rigorous validation harness for plan and trace contracts.
+1. [src/curriculum/graph.py](../../src/curriculum/graph.py): Curriculum DAG parsing and validation rules.
+2. [src/state/policy.py](../../src/state/policy.py): Hyperparameter schema (`PolicyConfig`) and threshold definitions.
+3. [src/state/learner_state.py](../../src/state/learner_state.py): Cognitive state representation, BKT Bayesian updates, and classification gate logic.
+4. [src/diagnostic/diagnostic.py](../../src/diagnostic/diagnostic.py): CAT adaptive test engine and ability-to-prior mapping.
+5. [src/planning/feasibility.py](../../src/planning/feasibility.py): Mathematical feasibility checks (block budget and horizon capacity).
+6. [src/planning/static_baseline.py](../../src/planning/static_baseline.py): Deterministic topological sort planner.
+7. [src/planning/difficulty.py](../../src/planning/difficulty.py): 2-Up / 1-Down staircase difficulty stepping.
+8. [src/planning/review.py](../../src/planning/review.py): Half-Life Regression memory decay and remediation ancestor selection.
+9. [src/planning/replan.py](../../src/planning/replan.py): Core closed-loop dynamic replanning engine.
+10. [src/planning/service.py](../../src/planning/service.py): Public service endpoint for plan requests.
+11. [src/trace/checker.py](../../src/trace/checker.py): Rigorous validation harness for plan and trace contracts.
 
 ---
 
 ## 5. Six Likely Questions with Code Pointers
 
 ### Q1: How does a concept state transition from `Uncertain` to `Mastered`?
-**Answer:** In [src/state/learner_state.py](file:///c:/Users/bhuva/Downloads/DAT11/src/state/learner_state.py#L178-L189) (`ConceptState.classify`), a concept must satisfy all of the following:
+**Answer:** In [src/state/learner_state.py](../../src/state/learner_state.py#L178-L189) (`ConceptState.classify`), a concept must satisfy all of the following:
 1. $n \ge \text{min\_obs}$ (default: 3)
 2. $\sigma^2 \le \sigma^2_{\max}$ (default: 0.05)
 3. $p \ge \text{mastered\_p}$ (default: 0.85)
 4. History window must be full ($\ge \text{window\_size}$, default: 4) with at least $\text{quorum}$ (default: 3) correct outcomes.
 
 ### Q2: Why does dynamic replanning produce 0 activities when a prerequisite is Uncertain?
-**Answer:** In [src/planning/replan.py](file:///c:/Users/bhuva/Downloads/DAT11/src/planning/replan.py#L509-L520), line 509 specifies: `elif p in completed_nodes and p_class not in ("Weak", "Uncertain"):`. If a prerequisite is `Uncertain`, it falls through to `else:`, marking `prereqs_met = False` and filtering downstream nodes with `UNCERTAIN_NEEDS_ASSESSMENT`. Because completed nodes are omitted from `remaining_nodes` and `remed_queue`, no candidate can be scheduled.
+**Answer:** In [src/planning/replan.py](../../src/planning/replan.py#L509-L520), line 509 specifies: `elif p in completed_nodes and p_class not in ("Weak", "Uncertain"):`. If a prerequisite is `Uncertain`, it falls through to `else:`, marking `prereqs_met = False` and filtering downstream nodes with `UNCERTAIN_NEEDS_ASSESSMENT`. Because completed nodes are omitted from `remaining_nodes` and `remed_queue`, no candidate can be scheduled.
 
 ### Q3: How does the static baseline planner avoid this deadlock?
-**Answer:** In [src/planning/static_baseline.py](file:///c:/Users/bhuva/Downloads/DAT11/src/planning/static_baseline.py#L44-L50), the static planner checks `state.classify() == "Mastered"`. Unmastered concepts are placed in `required_nodes` and scheduled in topological order. It assumes future scheduled execution clears prerequisites without re-checking intermediate runtime uncertainty.
+**Answer:** In [src/planning/static_baseline.py](../../src/planning/static_baseline.py#L44-L50), the static planner checks `state.classify() == "Mastered"`. Unmastered concepts are placed in `required_nodes` and scheduled in topological order. It assumes future scheduled execution clears prerequisites without re-checking intermediate runtime uncertainty.
 
 ### Q4: What is the architectural boundary between `src/simulation` and `src/planning`?
-**Answer:** As specified in [src/evaluation/integrated.py](file:///c:/Users/bhuva/Downloads/DAT11/src/evaluation/integrated.py#L6-L12) and enforced by AST test in [tests/test_simulation.py](file:///c:/Users/bhuva/Downloads/DAT11/tests/test_simulation.py), code in `src/planning` and `src/state` must NEVER import `EvaluatorView` or read latent mastery. Planners receive only observable binary scored outcomes from `SimulatedLearner.respond()`.
+**Answer:** As specified in [src/evaluation/integrated.py](../../src/evaluation/integrated.py#L6-L12) and enforced by AST test in [tests/test_simulation.py](../../tests/test_simulation.py), code in `src/planning` and `src/state` must NEVER import `EvaluatorView` or read latent mastery. Planners receive only observable binary scored outcomes from `SimulatedLearner.respond()`.
 
 ### Q5: How are budget and deadline feasibility verified mathematically before scheduling?
-**Answer:** In [src/planning/feasibility.py](file:///c:/Users/bhuva/Downloads/DAT11/src/planning/feasibility.py#L37-L85) (`check_feasibility`):
+**Answer:** In [src/planning/feasibility.py](../../src/planning/feasibility.py#L37-L85) (`check_feasibility`):
 1. **Per-activity check:** If $\exists u \in \text{req}: \text{dur}(u) > \text{budget}$, returns `INFEASIBLE_PROVED` with `BLOCK_EXCEEDS_DAILY_BUDGET`.
 2. **Aggregate capacity check:** If $\sum_{u \in \text{req}} \text{dur}(u) > \text{deadline\_days} \times \text{budget}$, returns `INFEASIBLE_PROVED` with `CAPACITY_EXCEEDED` and lower-bound fix recommendations.
 
 ### Q6: How does the trace checker enforce explainability?
-**Answer:** In [src/trace/checker.py](file:///c:/Users/bhuva/Downloads/DAT11/src/trace/checker.py#L50-L120) (`check_trace`), every candidate node in `candidate_universe` must have an entry for each day in $1 \dots \text{num\_days}$, with valid `decision` in `{SELECTED, FILTERED}`, valid `reason_code` in `ReasonCode`, observable `concept_state`, and consistent remaining budget bounds.
+**Answer:** In [src/trace/checker.py](../../src/trace/checker.py#L50-L120) (`check_trace`), every candidate node in `candidate_universe` must have an entry for each day in $1 \dots \text{num\_days}$, with valid `decision` in `{SELECTED, FILTERED}`, valid `reason_code` in `ReasonCode`, observable `concept_state`, and consistent remaining budget bounds.
 
 ---
 

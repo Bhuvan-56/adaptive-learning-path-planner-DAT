@@ -24,7 +24,7 @@ The Beta milestone was designed to validate the robustness, transparency, and st
 The clean-run audit was executed against target SHA `c6ff658666260c90d6091c46ae249a99fe4cdf19` using the committed audit script (`scripts/clean_run.ps1`).
 
 - **Target SHA:** `c6ff658666260c90d6091c46ae249a99fe4cdf19`
-- **Execution Log:** [`evaluation/results/beta_evidence/J_cleanrun_final.txt`](file:///c:/Users/bhuva/Downloads/DAT11/evaluation/results/beta_evidence/J_cleanrun_final.txt)
+- **Execution Log:** [`evaluation/results/beta_evidence/J_cleanrun_final.txt`](../../evaluation/results/beta_evidence/J_cleanrun_final.txt)
 - **Environment:** Clean clone into temporary directory (`dat11_clean_ed797049`), clean virtual environment (`.venv_clean`), dependencies installed via PyPI from `requirements.txt`.
 - **Test Suite Result:** 248 passed, 1 xfailed (`test_candidate_pending_d1_uncertain_prereq_yields_non_empty_plan`), 0 skipped in 236.81s.
 - **CLI Demo Subcommand:** 14 artifacts verified in `evaluation/results/w3/demo`.
@@ -46,8 +46,8 @@ The clean-run audit was executed against target SHA `c6ff658666260c90d6091c46ae2
 ### Defect Identified
 In the Week 5 evaluation harness (`src/evaluation/integrated.py`), line 172 selected strictly `config["seeds"][0]`, discarding all subsequent seeds in `config["seeds"]`. Consequently, the Week 5 report claimed evaluation over 5 seeds, but only single seed 42 executed (200 learners evaluated instead of 1,000).
 
-- **Evidence Before Fix:** [`evaluation/results/beta_evidence/before_B1_seeds.txt`](file:///c:/Users/bhuva/Downloads/DAT11/evaluation/results/beta_evidence/before_B1_seeds.txt) (Strict xfail failure demonstrating multi-seed omission).
-- **Evidence After Fix:** [`evaluation/results/beta_evidence/after_B1_seeds.txt`](file:///c:/Users/bhuva/Downloads/DAT11/evaluation/results/beta_evidence/after_B1_seeds.txt) (3 passed in 7.88s: `test_two_seeds_yields_two_result_sets_with_different_cohorts`, `test_seed_42_in_multiseed_run_equals_single_seed_run`, `test_single_seed_path_is_unchanged`).
+- **Evidence Before Fix:** [`evaluation/results/beta_evidence/before_B1_seeds.txt`](../../evaluation/results/beta_evidence/before_B1_seeds.txt) (Strict xfail failure demonstrating multi-seed omission).
+- **Evidence After Fix:** [`evaluation/results/beta_evidence/after_B1_seeds.txt`](../../evaluation/results/beta_evidence/after_B1_seeds.txt) (3 passed in 7.88s: `test_two_seeds_yields_two_result_sets_with_different_cohorts`, `test_seed_42_in_multiseed_run_equals_single_seed_run`, `test_single_seed_path_is_unchanged`).
 
 ### Correction Implemented
 In `src/evaluation/integrated.py`, the evaluation runner now loops over all declared seeds in `config["seeds"]`, seeds the synthetic learner cohort deterministically (`seed * 1000 + learner_idx`), aggregates results across all seeds, and writes per-seed manifests and combined metrics. The single-seed backward compatibility path remains exact: running seed 42 in a multi-seed run reproduces identical values to the single-seed run.
@@ -59,8 +59,8 @@ In `src/evaluation/integrated.py`, the evaluation runner now loops over all decl
 ### Investigation Findings
 In the Week 5 baseline run (`evaluation/results/w5/final/summary.md`), `adaptive_full` generated **800 no-plan days** (out of 1,000 learner-days, 200 learners $\times$ 5 days), whereas `static_prerequisite_order` and `non_adaptive_greedy` generated 0 no-plan days.
 
-- **Documented Investigation:** [`docs/beta/a1_noplan_findings.md`](file:///c:/Users/bhuva/Downloads/DAT11/docs/beta/a1_noplan_findings.md)
-- **Before Evidence:** [`evaluation/results/beta_evidence/before_a1_noplan.txt`](file:///c:/Users/bhuva/Downloads/DAT11/evaluation/results/beta_evidence/before_a1_noplan.txt)
+- **Documented Investigation:** [`docs/beta/a1_noplan_findings.md`](a1_noplan_findings.md)
+- **Before Evidence:** [`evaluation/results/beta_evidence/before_a1_noplan.txt`](../../evaluation/results/beta_evidence/before_a1_noplan.txt)
 - **Causal Mechanism (Confirmed):**
   1. On Day 1, all 200 learners execute activities `A` (5 min) and `B` (5 min).
   2. Following one observation, observation count is $n = 1 < \text{min\_obs} = 3$. Under `PolicyConfig`, concepts `A` and `B` classify as `Uncertain`.
@@ -167,8 +167,8 @@ Task B3 integrated the deferred retention quiz (`administer_retention_quiz`) int
 
 Investigation Task A3 audited the Computerized Adaptive Testing diagnostic stopping rule (`experiments/w5_final.yaml`): stopping variance $\le 0.15$ or item cap $= 10$.
 
-- **Documented Report:** [`docs/beta/a3_cat_stopping.md`](file:///c:/Users/bhuva/Downloads/DAT11/docs/beta/a3_cat_stopping.md)
-- **Test File:** [`tests/test_beta_a3_cat.py`](file:///c:/Users/bhuva/Downloads/DAT11/tests/test_beta_a3_cat.py)
+- **Documented Report:** [`docs/beta/a3_cat_stopping.md`](a3_cat_stopping.md)
+- **Test File:** [`tests/test_beta_a3_cat.py`](../../tests/test_beta_a3_cat.py)
 
 ### Empirical Variance Trajectory ($N = 1,003$ runs)
 
@@ -217,7 +217,7 @@ In Week 5, acceptance test `test_tc_8_1` in `tests/test_m8_evaluation.py` was co
 To ensure independent codebase ownership without agent dependency, both members developed complete architecture packs and verified live code modifications on unmerged scratch branches:
 
 ### Member A: Planning, State & CAT Architecture
-- **Ownership Pack:** [`docs/beta/ownership_A.md`](file:///c:/Users/bhuva/Downloads/DAT11/docs/beta/ownership_A.md)
+- **Ownership Pack:** [`docs/beta/ownership_A.md`](ownership_A.md)
   - End-to-end data-to-plan pipeline with 9 formal stage signatures.
   - Mathematical and programmatic distinction between BKT probability ($p$) and uncertainty proxy ($\sigma^2$), citing code locations and computing a verified numeric example ($p_0=0.50 \to p_1=0.6667 \to p_2=0.75$; $\sigma^2_0=0.0833 \to \sigma^2_1=0.0556 \to \sigma^2_2=0.0375$).
   - Reproducible commands and exact console outputs for the 12 vs 18 knapsack oracle counterexample ($\rho = 0.6667$) and trace completeness checker.
@@ -226,7 +226,7 @@ To ensure independent codebase ownership without agent dependency, both members 
 - **Practice Task Demonstration (`practice/a-task`):** Added `is_plan_feasible` to `src/planning/service.py`; test `tests/test_practice_a_task.py` passed (1 passed in 1.26s). Unmerged.
 
 ### Member B: Evaluation Harness, Simulator Variants & Retention
-- **Ownership Pack:** [`docs/beta/ownership_B.md`](file:///c:/Users/bhuva/Downloads/DAT11/docs/beta/ownership_B.md)
+- **Ownership Pack:** [`docs/beta/ownership_B.md`](ownership_B.md)
   - Data-to-plan pipeline focusing on evaluation harness, candidate universe filtering, and deferred retention quiz mechanics.
   - Mathematical and code analysis of BKT updating vs. uncertainty proxy.
   - Knapsack and trace validation counterexamples.
