@@ -17,6 +17,19 @@ interface, authoring of extensive educational curriculum content, natural-langua
 content-generation pipelines, or collection of private/proprietary student telemetry.
 See `docs/PROBLEM_BOUNDARY.md` for the full scope statement and actor definitions.
 
+## Final Deliverables (Week 8)
+
+| Document | Contents |
+| --- | --- |
+| [`docs/final/FINAL_REPORT.md`](docs/final/FINAL_REPORT.md) | Problem, system, method, final results, reproduction commands |
+| [`docs/final/LIMITATIONS.md`](docs/final/LIMITATIONS.md) | What the evidence cannot support; open defects |
+| [`docs/final/DEMO.md`](docs/final/DEMO.md) | Final demo script (website and live demos) |
+| [`docs/final/ownership_track_A.md`](docs/final/ownership_track_A.md), [`ownership_track_B.md`](docs/final/ownership_track_B.md) | Code explanation and live change task per track |
+| [`docs/w8/results.md`](docs/w8/results.md) | Week 8 fixes: S1 daily forgetting, best-effort plan on infeasible days |
+| [`weekly/W8.md`](weekly/W8.md) | Week 8 report |
+
+Project website: <https://bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/> (source in `site/`).
+
 ## System Components
 
 The architecture consists of eight distinct modular components (M1 through M8):

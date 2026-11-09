@@ -1,6 +1,6 @@
-# Project website (Week 7)
+# Project website (Weeks 7 and 8)
 
-Static site for the final presentation: four pages with Week 7 results and two live demos that run the project's own
+Static site for the final presentation: four pages with Week 7 and Week 8 results and two live demos that run the project's own
 Python code (`src/`) in the browser through [Pyodide](https://pyodide.org) 0.26.4.
 
 Made by: Bhuvan and Abdur
@@ -10,7 +10,8 @@ Made by: Bhuvan and Abdur
 | Overview | `index.html` | headline numbers from `data/scheduling.json`, `data/s0_pooled.json` |
 | Curriculum | `curriculum.html` | `../data/curricula/demo_curriculum.json` (read directly) |
 | Scheduling benchmark | `scheduling.html` | `data/scheduling.json` ← `evaluation/results/w7/improvement/scheduling/`, `tests/fixtures/w7/bad_cases.json` |
-| Integrated S0 | `results.html` | `data/s0_pooled.json` ← the five `evaluation/results/w7/deadlock_fix/integrated_s0/per_learner_seed_*.csv` (after the adaptive deadlock fix), with `evaluation/results/w7/improvement/integrated_s0/` as the before run |
+| Integrated S0 and S1 | `results.html` | `data/s0_pooled.json` ← the five `evaluation/results/w7/deadlock_fix/integrated_s0/per_learner_seed_*.csv` (after the adaptive deadlock fix), with `evaluation/results/w7/improvement/integrated_s0/` as the before run |
+|  |  | `data/s1_pooled.json` ← `evaluation/results/w8/final/integrated_s1/` (Week 8, forgetting during study), with `evaluation/results/w8/before/integrated_s1/` as the before run |
 | Live demos | `demos.html` | Pyodide + `py/demo_api.py` + the `src/` files listed in `assets/pyrunner.js`; fallback `data/fallback.json` |
 
 All results come from a simulator with synthetic learners.

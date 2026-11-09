@@ -1,8 +1,9 @@
 """Build the data files the website reads (site/data/*.json).
 
 Integrated S0 numbers are from the run after the Week 7 adaptive deadlock fix
-(identical in the Week 8 run, checked below); integrated S1 is the Week 8 run
-(docs/w7/deadlock_fix_results.md), with the run before it for comparison.
+(docs/w7/deadlock_fix_results.md), with the run before it for comparison; the
+Week 8 S0 run is identical (checked below). Integrated S1 is the Week 8 run
+(docs/w8/results.md), with the pre-fix S1 run for comparison.
 
 Run from the repository root with the project venv:
     .venv_w2/Scripts/python.exe site/build_data.py
