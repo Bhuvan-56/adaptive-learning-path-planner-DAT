@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Integrated S0 Results</title>
+<title>Integrated Results</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/common.js"></script>
 </head>
 <body>
 <main>
-  <h1>Integrated S0 results</h1>
+  <h1>Integrated results (S0 and S1)</h1>
   <p class="lede">The whole loop (diagnostic, learner state, planning, replanning) run for 5 days with a 10-minute daily
     budget on 1,000 synthetic learners: 5 seeds × 200 learners, every arm on the same learners. Outcome: number of
     concepts mastered at the end (out of 4). Numbers are from the run after the Week 7 adaptive deadlock fix.</p>
-  <div class="note">Results from a simulator with synthetic learners (<code>MatchedBKTGenerator</code>), scenario S0 only.</div>
+  <div class="note">Results from a simulator with synthetic learners (<code>MatchedBKTGenerator</code>), scenarios S0 and S1.</div>
 
   <h2>Week 7 fix: the adaptive planner no longer stalls</h2>
   <p>Before the fix, a concept studied once stayed Uncertain and blocked everything after it, but was never practised
@@ -40,6 +40,13 @@
 
   <h2>How these numbers are computed</h2>
   <div class="card small" id="method"></div>
+
+  <h2 id="s1">Week 8: S1, forgetting during study</h2>
+  <p>Scenario S1 adds forgetting: each day, a mastered concept is lost with probability 0.05. Until Week 8 the study
+    loop never applied it, so S1 gave the same numbers as S0. Now it does. Same 1,000 learners, before and after
+    the fix; retained recall is a quiz 7 days after the horizon.</p>
+  <div class="card"><div class="table-wrap" id="s1-arms"><p class="small">Loading…</p></div></div>
+  <div class="card" style="margin-top:12px"><div class="table-wrap" id="s1-diffs"></div></div>
 </main>
 <script>
 (async () => {
@@ -124,6 +131,28 @@
     adaptive_full − static (+0.1400 [0.1110, 0.1690], 194 learners: 156 up, 38 down), adaptive_full after − before (+0.2420 [0.2110, 0.2740]) and 100% trace coverage
     against <a href="../${S.checked_against}"><code>${S.checked_against}</code></a> and <a href="../docs/w7/comparison.md"><code>docs/w7/comparison.md</code></a>, and stops if any differs.</p>
     <p>Sources: ${S.per_learner.map(p => `<a href="../${p}"><code>${p}</code></a>`).join(", ")}.</p>`;
+
+  // ---------------- Week 8: S1
+  let s1;
+  try { s1 = await Site.getJSON("data/s1_pooled.json"); } catch (e) { return Site.fail(document.getElementById("s1-arms"), e); }
+  const S1 = s1.sources;
+  const ci = (m, lo, hi, signed) => `${signed ? Site.signed4(m) : Site.fmt4(m)} [${Site.fmt4(lo)}, ${Site.fmt4(hi)}]`;
+  document.getElementById("s1-arms").innerHTML = `<table><thead><tr><th>Arm</th><th class="num">Mastered before</th>
+    <th class="num">Mastered after [95% CI]</th><th class="num">After − before [95% CI]</th><th class="num">Retained recall before → after</th>
+    <th class="num">Prereq / budget viol.</th></tr></thead>
+    <tbody>${s1.arms.map(a => `<tr${a.arm === "adaptive_full" ? ' class="hl"' : ""}><td><code>${a.arm}</code></td>
+      <td class="num">${Site.fmt4(a.before_mastered)}</td><td class="num">${ci(a.mastered, a.lo, a.hi)}</td>
+      <td class="num">${ci(a.delta, a.delta_lo, a.delta_hi, true)}</td>
+      <td class="num">${Site.fmt4(a.before_retained)} → ${Site.fmt4(a.retained)}</td>
+      <td class="num">${a.prereq_violations} / ${a.budget_violations}</td></tr>`).join("")}</tbody></table>
+    ${Site.src([S1.before + "/per_learner_seed_*.csv", S1.after + "/per_learner_seed_*.csv"], `method of <code>${S1.method}</code>; pre-registered in <a href="../${S1.prereg}"><code>${S1.prereg}</code></a>; write-up <a href="../${S1.checked_against}"><code>${S1.checked_against}</code></a>`)}`;
+  document.getElementById("s1-diffs").innerHTML = `<table><thead><tr><th>Comparison under S1 (A − B)</th>
+    <th class="num">Concepts mastered [95% CI]</th><th class="num">Retained recall [95% CI]</th><th>Claim</th></tr></thead>
+    <tbody>${s1.diffs.map(d => { const m = d.mastered, r = d.retained;
+      const claim = m.claim === "A better" ? `${d.a} better` : m.claim === "B better" ? `${d.b} better` : "no difference shown";
+      return `<tr><td><code>${d.a}</code> − <code>${d.b}</code></td><td class="num">${ci(m.mean, m.lo, m.hi, true)}</td>
+      <td class="num">${ci(r.mean, r.lo, r.hi, true)}</td><td><span class="pill ${claim === "no difference shown" ? "" : "warn"}">${Site.esc(claim)}</span></td></tr>`; }).join("")}</tbody></table>
+    <p class="small">The adaptive advantage holds under forgetting, on mastery and on retained recall. The small best-singleton gain seen under S0 is not seen under S1.</p>`;
 })();
 </script>
 </body>

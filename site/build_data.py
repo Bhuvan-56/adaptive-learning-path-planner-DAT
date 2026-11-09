@@ -1,6 +1,7 @@
 """Build the data files the website reads (site/data/*.json).
 
 Integrated S0 numbers are from the run after the Week 7 adaptive deadlock fix
+(identical in the Week 8 run, checked below); integrated S1 is the Week 8 run
 (docs/w7/deadlock_fix_results.md), with the run before it for comparison.
 
 Run from the repository root with the project venv:
@@ -9,6 +10,7 @@ Run from the repository root with the project venv:
 Writes
   site/data/scheduling.json  per-instance ratios + summary numbers (Week 7 scheduling)
   site/data/s0_pooled.json   pooled five-seed integrated S0 arm table + paired differences
+  site/data/s1_pooled.json   pooled five-seed integrated S1, before/after the W8 fix
   site/data/fallback.json    saved outputs of every demo preset (shown when Pyodide is unavailable)
 
 Every number is read from a committed file or computed from one with the
@@ -252,6 +254,71 @@ def build_s0():
     }
 
 
+# ---------------------------------------------------------------- integrated S1 (Week 8)
+S1_DIR = "evaluation/results/w8/final/integrated_s1"
+S1_BEFORE_DIR = "evaluation/results/w8/before/integrated_s1"
+S0_W8_DIR = "evaluation/results/w8/final/integrated_s0"
+
+
+def _pooled(d):
+    return pd.concat([pd.read_csv(f"{d}/per_learner_seed_{s}.csv") for s in SEEDS], ignore_index=True)
+
+
+def _paired(df_a, df_b, col):
+    a = df_a.sort_values("seed", kind="mergesort").reset_index(drop=True)
+    b = df_b.sort_values("seed", kind="mergesort").reset_index(drop=True)
+    assert (a[["seed", "learner_id"]].values == b[["seed", "learner_id"]].values).all()
+    d = (a[col] - b[col]).values
+    m, lo, hi = compute_paired_bootstrap_ci(d, 1000, 0.95, 42)
+    claim = "A better" if lo > 0 else ("B better" if hi < 0 else "no difference shown")
+    return {"mean": f4(m), "lo": f4(lo), "hi": f4(hi), "claim": claim}
+
+
+def build_s1():
+    df, before = _pooled(S1_DIR), _pooled(S1_BEFORE_DIR)
+    assert len(df) == len(before) == 9000
+    # The Week 8 S0 run must equal the Week 7 S0 run the page shows (all columns but runtime_ms).
+    cols = [c for c in df.columns if c != "runtime_ms"]
+    assert _pooled(S0_W8_DIR)[cols].equals(_pooled(S0_DIR)[cols]), "W8 S0 differs from W7 S0"
+
+    arms = []
+    for arm, g in df.groupby("arm", sort=False):
+        m, lo, hi = compute_paired_bootstrap_ci(g.mastered_concepts.values, 1000, 0.95, 42)
+        gb = before[before.arm == arm]
+        delta = _paired(g, gb, "mastered_concepts")
+        arms.append({
+            "arm": arm, "n": int(len(g)), "mastered": f4(m), "lo": f4(lo), "hi": f4(hi),
+            "retained": f4(g.retained_recall.mean()), "before_mastered": f4(gb.mastered_concepts.mean()),
+            "before_retained": f4(gb.retained_recall.mean()),
+            "delta": delta["mean"], "delta_lo": delta["lo"], "delta_hi": delta["hi"],
+            "no_plan_days": int(g.no_plan_days.sum()), "learner_days": int(len(g) * 5),
+            "prereq_violations": int(g.prereq_violations.sum()), "budget_violations": int(g.budget_violations.sum()),
+        })
+    diffs = []
+    for a, b in (("adaptive_full", "static_prerequisite_order"), ("adaptive_full", "non_adaptive_greedy"),
+                 ("non_adaptive_greedy_best_singleton", "non_adaptive_greedy")):
+        diffs.append({"a": a, "b": b,
+                      "mastered": _paired(df[df.arm == a], df[df.arm == b], "mastered_concepts"),
+                      "retained": _paired(df[df.arm == a], df[df.arm == b], "retained_recall")})
+
+    # Cross-check against docs/w8/results.md.
+    by = {a["arm"]: a for a in arms}
+    assert (by["adaptive_full"]["mastered"], by["adaptive_full"]["lo"], by["adaptive_full"]["hi"]) == (1.7300, 1.6490, 1.8190)
+    assert (by["static_prerequisite_order"]["mastered"], by["static_prerequisite_order"]["lo"]) == (1.5870, 1.5010)
+    assert (by["adaptive_full"]["delta"], by["adaptive_full"]["delta_lo"], by["adaptive_full"]["delta_hi"]) == (-0.4460, -0.4940, -0.4000)
+    assert (diffs[0]["mastered"]["mean"], diffs[0]["mastered"]["lo"], diffs[0]["mastered"]["hi"]) == (0.1430, 0.1000, 0.1830)
+    assert (diffs[0]["retained"]["mean"], diffs[0]["retained"]["lo"], diffs[0]["retained"]["hi"]) == (0.0383, 0.0279, 0.0481)
+    assert (diffs[2]["mastered"]["mean"], diffs[2]["mastered"]["lo"], diffs[2]["mastered"]["hi"]) == (-0.0040, -0.0190, 0.0130)
+    assert all(a["prereq_violations"] == 0 and a["budget_violations"] == 0 for a in arms)
+
+    return {
+        "sources": {"after": S1_DIR, "before": S1_BEFORE_DIR, "method": "scripts/w8_s1_compare.py",
+                    "checked_against": "docs/w8/results.md", "prereg": "docs/w8/preregistration.md"},
+        "arms": arms,
+        "diffs": diffs,
+    }
+
+
 # ---------------------------------------------------------------- demo fallbacks
 DEMO_A_PRESETS = {}
 DEMO_B_PRESETS = {
@@ -272,6 +339,11 @@ DEMO_B_PRESETS = {
         "target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1111"},
         "event": {"type": "missed_day"},
     },
+    # Week 8: 25 minutes of work, 20 of capacity -> INFEASIBLE_PROVED plus a best-effort plan.
+    "replan_deadline_cut": {
+        "target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1111"},
+        "event": {"type": "changed_deadline", "value": 2},
+    },
 }
 
 
@@ -286,6 +358,9 @@ def build_fallback(sched):
         assert o["greedy"]["score"] == c["greedy_score"] and o["oracle"]["score"] == c["oracle_score"], c["id"]
     for k, p in DEMO_B_PRESETS.items():
         out["b"][k] = {"input": p, "output": json.loads(json.dumps(demo_api.build_plan(p)))}
+    be = out["b"]["replan_deadline_cut"]["output"]["replan"]  # tests/test_w8_best_effort.py case
+    assert be["status"] == "INFEASIBLE_PROVED", be["status"]
+    assert [d["activities"] for d in be["best_effort_days"]] == [["B"], ["C"]], be["best_effort_days"]
     for ans in ["", "1111", "0000", "1010", "11", "0"]:
         out["states"][ans] = demo_api.concept_state(ans)
     out["curriculum"] = demo_api.curriculum()
@@ -315,8 +390,9 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     sched = build_scheduling()
     s0 = build_s0()
+    s1 = build_s1()
     fb = build_fallback(sched)
-    for name, obj in (("scheduling.json", sched), ("s0_pooled.json", s0), ("fallback.json", fb)):
+    for name, obj in (("scheduling.json", sched), ("s0_pooled.json", s0), ("s1_pooled.json", s1), ("fallback.json", fb)):
         with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as f:
             json.dump(obj, f, indent=1)
             f.write("\n")

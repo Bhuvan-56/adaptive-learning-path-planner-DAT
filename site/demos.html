@@ -61,6 +61,7 @@
       <button data-preset-b="replan_practice">Replan: A, B studied once</button>
       <button data-preset-b="replan_b_mastered">Replan: B answered 1111</button>
       <button data-preset-b="replan_missed_day">Replan: missed day</button>
+      <button data-preset-b="replan_deadline_cut">Replan: deadline cut to 2 days</button>
     </div>
     <div class="card">
       <div class="row">
@@ -372,6 +373,12 @@ function planBlock(plan, key) {
     h += `<p class="small">Assessment candidates (Uncertain prerequisites worth testing): ${plan.assessment_candidates.join(", ")}</p>`;
   if (plan.trace) h += traceBlock(plan.trace, key);
   if (plan.no_plan_trace) h += `<p class="small">No-plan trace: <code>${esc(JSON.stringify(plan.no_plan_trace))}</code></p>`;
+  if (plan.best_effort_days) {
+    h += `<h3>Best-effort plan (Week 8)</h3>
+      <p class="small">The deadline cannot be met, but the learner does not idle: the same daily rules plan the work that still fits,
+        with the same prerequisite gate and budget. The infeasibility report above is unchanged.</p>`;
+    h += daysBlock(plan.best_effort_days, plan.best_effort_trace) + traceBlock(plan.best_effort_trace, key + "-be");
+  }
   return h;
 }
 

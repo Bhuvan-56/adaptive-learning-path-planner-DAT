@@ -207,6 +207,20 @@ def concept_state(answers: str) -> Dict[str, Any]:
     return _state_view(_state_from_answers(answers))
 
 
+def _trace_view(trace: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return [
+        {
+            "day": t["day"],
+            "node_id": t["node_id"],
+            "decision": t["decision"],
+            "reason_code": _plain(t["reason_code"]),
+            "class": t["concept_state"].get("class"),
+            "remaining_budget": t["constraints"].get("remaining_budget"),
+        }
+        for t in trace
+    ]
+
+
 def _plan_view(raw: Dict[str, Any]) -> Dict[str, Any]:
     trace = raw.get("trace")
     view = {
@@ -216,19 +230,13 @@ def _plan_view(raw: Dict[str, Any]) -> Dict[str, Any]:
         "assessment_candidates": _plain(raw.get("assessment_candidates", [])),
     }
     if isinstance(trace, list):
-        view["trace"] = [
-            {
-                "day": t["day"],
-                "node_id": t["node_id"],
-                "decision": t["decision"],
-                "reason_code": _plain(t["reason_code"]),
-                "class": t["concept_state"].get("class"),
-                "remaining_budget": t["constraints"].get("remaining_budget"),
-            }
-            for t in trace
-        ]
+        view["trace"] = _trace_view(trace)
     else:
         view["no_plan_trace"] = _plain(trace)
+    # Week 8: a capacity-infeasible replan also carries the work that still fits.
+    if "best_effort_days" in raw:
+        view["best_effort_days"] = _plain(raw["best_effort_days"])
+        view["best_effort_trace"] = _trace_view(raw.get("best_effort_trace") or [])
     return view
 
 

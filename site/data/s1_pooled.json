@@ -1,0 +1,214 @@
+{
+ "sources": {
+  "after": "evaluation/results/w8/final/integrated_s1",
+  "before": "evaluation/results/w8/before/integrated_s1",
+  "method": "scripts/w8_s1_compare.py",
+  "checked_against": "docs/w8/results.md",
+  "prereg": "docs/w8/preregistration.md"
+ },
+ "arms": [
+  {
+   "arm": "adaptive_full",
+   "n": 1000,
+   "mastered": 1.73,
+   "lo": 1.649,
+   "hi": 1.819,
+   "retained": 0.5542,
+   "before_mastered": 2.176,
+   "before_retained": 0.6022,
+   "delta": -0.446,
+   "delta_lo": -0.494,
+   "delta_hi": -0.4,
+   "no_plan_days": 1000,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0
+  },
+  {
+   "arm": "static_prerequisite_order",
+   "n": 1000,
+   "mastered": 1.587,
+   "lo": 1.501,
+   "hi": 1.674,
+   "retained": 0.5159,
+   "before_mastered": 2.036,
+   "before_retained": 0.5566,
+   "delta": -0.449,
+   "delta_lo": -0.494,
+   "delta_hi": -0.402,
+   "no_plan_days": 0,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0
+  },
+  {
+   "arm": "non_adaptive_greedy",
+   "n": 1000,
+   "mastered": 1.594,
+   "lo": 1.505,
+   "hi": 1.682,
+   "retained": 0.518,
+   "before_mastered": 2.036,
+   "before_retained": 0.5566,
+   "delta": -0.442,
+   "delta_lo": -0.488,
+   "delta_hi": -0.393,
+   "no_plan_days": 0,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0
+  },
+  {
+   "arm": "non_adaptive_greedy_best_singleton",
+   "n": 1000,
+   "mastered": 1.59,
+   "lo": 1.501,
+   "hi": 1.6761,
+   "retained": 0.516,
+   "before_mastered": 2.049,
+   "before_retained": 0.5573,
+   "delta": -0.459,
+   "delta_lo": -0.5071,
+   "delta_hi": -0.41,
+   "no_plan_days": 0,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0
+  },
+  {
+   "arm": "ablation_no_diagnostic",
+   "n": 1000,
+   "mastered": 1.73,
+   "lo": 1.649,
+   "hi": 1.819,
+   "retained": 0.5542,
+   "before_mastered": 2.176,
+   "before_retained": 0.6022,
+   "delta": -0.446,
+   "delta_lo": -0.494,
+   "delta_hi": -0.4,
+   "no_plan_days": 1000,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0
+  },
+  {
+   "arm": "ablation_no_replan",
+   "n": 1000,
+   "mastered": 1.587,
+   "lo": 1.501,
+   "hi": 1.674,
+   "retained": 0.5159,
+   "before_mastered": 2.036,
+   "before_retained": 0.5566,
+   "delta": -0.449,
+   "delta_lo": -0.494,
+   "delta_hi": -0.402,
+   "no_plan_days": 0,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0
+  },
+  {
+   "arm": "ablation_no_difficulty_step",
+   "n": 1000,
+   "mastered": 1.73,
+   "lo": 1.649,
+   "hi": 1.819,
+   "retained": 0.5542,
+   "before_mastered": 2.176,
+   "before_retained": 0.6022,
+   "delta": -0.446,
+   "delta_lo": -0.494,
+   "delta_hi": -0.4,
+   "no_plan_days": 1000,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0
+  },
+  {
+   "arm": "ablation_no_review",
+   "n": 1000,
+   "mastered": 1.73,
+   "lo": 1.649,
+   "hi": 1.819,
+   "retained": 0.5542,
+   "before_mastered": 2.176,
+   "before_retained": 0.6022,
+   "delta": -0.446,
+   "delta_lo": -0.494,
+   "delta_hi": -0.4,
+   "no_plan_days": 1000,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0
+  },
+  {
+   "arm": "ablation_no_remediation",
+   "n": 1000,
+   "mastered": 1.73,
+   "lo": 1.649,
+   "hi": 1.819,
+   "retained": 0.5542,
+   "before_mastered": 2.176,
+   "before_retained": 0.6022,
+   "delta": -0.446,
+   "delta_lo": -0.494,
+   "delta_hi": -0.4,
+   "no_plan_days": 1000,
+   "learner_days": 5000,
+   "prereq_violations": 0,
+   "budget_violations": 0
+  }
+ ],
+ "diffs": [
+  {
+   "a": "adaptive_full",
+   "b": "static_prerequisite_order",
+   "mastered": {
+    "mean": 0.143,
+    "lo": 0.1,
+    "hi": 0.183,
+    "claim": "A better"
+   },
+   "retained": {
+    "mean": 0.0383,
+    "lo": 0.0279,
+    "hi": 0.0481,
+    "claim": "A better"
+   }
+  },
+  {
+   "a": "adaptive_full",
+   "b": "non_adaptive_greedy",
+   "mastered": {
+    "mean": 0.136,
+    "lo": 0.086,
+    "hi": 0.183,
+    "claim": "A better"
+   },
+   "retained": {
+    "mean": 0.0362,
+    "lo": 0.0243,
+    "hi": 0.0472,
+    "claim": "A better"
+   }
+  },
+  {
+   "a": "non_adaptive_greedy_best_singleton",
+   "b": "non_adaptive_greedy",
+   "mastered": {
+    "mean": -0.004,
+    "lo": -0.019,
+    "hi": 0.013,
+    "claim": "no difference shown"
+   },
+   "retained": {
+    "mean": -0.0019,
+    "lo": -0.0053,
+    "hi": 0.0013,
+    "claim": "no difference shown"
+   }
+  }
+ ]
+}
