@@ -118,6 +118,7 @@ M4-a:
   node_ids:
     - "tests/test_m3_path_planning.py::test_infeasible_block_10min_under_5min_cap"
     - "tests/test_m3_states_feasibility.py::test_defect_4_three_six_minute_tasks_heuristic_no_plan_consistent_nested_status"
+    - "tests/test_w8_best_effort.py::test_capacity_infeasible_replan_returns_best_effort_days"
   missing_citations: []
   asserts_criterion: "tests/test_m3_path_planning.py:53"
 
@@ -195,13 +196,13 @@ M7-b:
 
 M8-a:
   name: "Learner Profile Plan Differentiation"
-  doc_status: "partial"
+  doc_status: "passing"
   node_ids:
     - "tests/test_m8_evaluation.py::test_tc_8_1_different_mastery_profiles_produce_distinct_plans"
     - "tests/test_w4_b2_provenance_profiles.py::test_w4_d8_profile_expansion_to_concept_priors"
     - "tests/test_w4_t2_slice.py::test_slice_two_learners_differ"
   missing_citations: []
-  asserts_criterion: "NONE FOUND"
+  asserts_criterion: "tests/test_m8_evaluation.py:13"
 
 M8-b:
   name: "Single Runnable End-to-End Command (Hard Correctness)"
@@ -233,6 +234,8 @@ M8-d:
     - "tests/test_w4_b4_comparison.py::test_paired_bootstrap_ci_computation"
     - "tests/test_w4_b4_comparison.py::test_planner_controls_comparison"
     - "tests/test_simulation.py::test_mismatched_generator_interface_raises_not_implemented"
-  missing_citations:
-    - "test_independent_retention_outcome"
-  asserts_criterion: "NONE FOUND"
+    - "tests/test_beta_b3_retention.py::test_integrated_run_writes_retained_recall_per_learner"
+    - "tests/test_beta_b3_retention.py::test_retained_recall_range"
+    - "tests/test_w7_b1_s1_forgetting.py::test_s1_daily_loop_calls_advance_day"
+  missing_citations: []
+  asserts_criterion: "tests/test_beta_b3_retention.py:17"
