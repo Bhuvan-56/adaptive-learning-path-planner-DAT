@@ -1,0 +1,43 @@
+{
+  "description": "Website demo curriculum (Week 8): school algebra to first-year calculus, 16 concepts. Used by the live demos and the curriculum page only; every evaluation result in this repository uses demo_curriculum.json.",
+  "nodes": [
+    {"node_id": "ARITH", "concept_name": "Fractions and ratios", "baseline_duration": 10, "exercises": ["ex_arith1", "ex_arith2"], "base_difficulty": 0.15},
+    {"node_id": "EXPO", "concept_name": "Exponents and roots", "baseline_duration": 10, "exercises": ["ex_expo1", "ex_expo2"], "base_difficulty": 0.25},
+    {"node_id": "VARS", "concept_name": "Variables and expressions", "baseline_duration": 10, "exercises": ["ex_vars1", "ex_vars2"], "base_difficulty": 0.20},
+    {"node_id": "LIN", "concept_name": "Linear equations", "baseline_duration": 15, "exercises": ["ex_lin1", "ex_lin2", "ex_lin3"], "base_difficulty": 0.30},
+    {"node_id": "INEQ", "concept_name": "Linear inequalities", "baseline_duration": 10, "exercises": ["ex_ineq1", "ex_ineq2"], "base_difficulty": 0.35},
+    {"node_id": "SYS", "concept_name": "Systems of equations", "baseline_duration": 15, "exercises": ["ex_sys1", "ex_sys2"], "base_difficulty": 0.45},
+    {"node_id": "FUNC", "concept_name": "Functions", "baseline_duration": 10, "exercises": ["ex_func1", "ex_func2"], "base_difficulty": 0.35},
+    {"node_id": "LINF", "concept_name": "Linear functions and graphs", "baseline_duration": 15, "exercises": ["ex_linf1", "ex_linf2"], "base_difficulty": 0.40},
+    {"node_id": "QUAD", "concept_name": "Quadratic equations", "baseline_duration": 20, "exercises": ["ex_quad1", "ex_quad2", "ex_quad3"], "base_difficulty": 0.50},
+    {"node_id": "POLY", "concept_name": "Polynomials", "baseline_duration": 15, "exercises": ["ex_poly1", "ex_poly2"], "base_difficulty": 0.50},
+    {"node_id": "EXPF", "concept_name": "Exponential functions", "baseline_duration": 15, "exercises": ["ex_expf1", "ex_expf2"], "base_difficulty": 0.55},
+    {"node_id": "LOG", "concept_name": "Logarithms", "baseline_duration": 15, "exercises": ["ex_log1", "ex_log2"], "base_difficulty": 0.60},
+    {"node_id": "TRIG", "concept_name": "Trigonometry", "baseline_duration": 20, "exercises": ["ex_trig1", "ex_trig2", "ex_trig3"], "base_difficulty": 0.55},
+    {"node_id": "LIM", "concept_name": "Limits", "baseline_duration": 20, "exercises": ["ex_lim1", "ex_lim2"], "base_difficulty": 0.70},
+    {"node_id": "DER", "concept_name": "Derivatives", "baseline_duration": 25, "exercises": ["ex_der1", "ex_der2", "ex_der3"], "base_difficulty": 0.75},
+    {"node_id": "INT", "concept_name": "Integrals", "baseline_duration": 25, "exercises": ["ex_int1", "ex_int2", "ex_int3"], "base_difficulty": 0.85}
+  ],
+  "edges": [
+    {"source": "ARITH", "target": "EXPO", "importance": 0.9},
+    {"source": "ARITH", "target": "VARS", "importance": 1.0},
+    {"source": "VARS", "target": "LIN", "importance": 1.0},
+    {"source": "LIN", "target": "INEQ", "importance": 0.8},
+    {"source": "LIN", "target": "SYS", "importance": 0.9},
+    {"source": "VARS", "target": "FUNC", "importance": 0.9},
+    {"source": "FUNC", "target": "LINF", "importance": 0.9},
+    {"source": "LIN", "target": "LINF", "importance": 0.8},
+    {"source": "LIN", "target": "QUAD", "importance": 1.0},
+    {"source": "EXPO", "target": "QUAD", "importance": 0.7},
+    {"source": "QUAD", "target": "POLY", "importance": 0.9},
+    {"source": "FUNC", "target": "EXPF", "importance": 0.8},
+    {"source": "EXPO", "target": "EXPF", "importance": 1.0},
+    {"source": "EXPF", "target": "LOG", "importance": 1.0},
+    {"source": "FUNC", "target": "TRIG", "importance": 0.8},
+    {"source": "POLY", "target": "LIM", "importance": 0.8},
+    {"source": "LINF", "target": "LIM", "importance": 0.9},
+    {"source": "LIM", "target": "DER", "importance": 1.0},
+    {"source": "EXPF", "target": "DER", "importance": 0.6},
+    {"source": "DER", "target": "INT", "importance": 1.0}
+  ]
+}

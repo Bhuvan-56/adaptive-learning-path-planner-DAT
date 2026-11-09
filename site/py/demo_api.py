@@ -38,7 +38,12 @@ from src.planning.service import plan_request
 from src.state.learner_state import ConceptState
 from src.state.policy import default_policy
 
-CURRICULUM_PATH = "data/curricula/demo_curriculum.json"
+CURRICULUM_PATH = "data/curricula/demo_curriculum.json"  # the 4-concept toy curriculum used by every evaluation
+# Demo B can plan on either curriculum; "maths" is the 16-concept website demo curriculum (Week 8).
+CURRICULA = {
+    "toy": CURRICULUM_PATH,
+    "maths": "data/curricula/maths_curriculum.json",
+}
 
 
 # --------------------------------------------------------------------------
@@ -167,13 +172,17 @@ def scheduler_compare(payload: Dict[str, Any]) -> Dict[str, Any]:
 # --------------------------------------------------------------------------
 # Demo B: plan builder (plan_request) and one replan event (replan)
 # --------------------------------------------------------------------------
-def _graph() -> nx.DiGraph:
-    return load_graph(CURRICULUM_PATH)
+def _graph(key: str = "toy") -> nx.DiGraph:
+    if key not in CURRICULA:
+        raise ValueError(f"Unknown curriculum {key!r}; expected one of {sorted(CURRICULA)}")
+    return load_graph(CURRICULA[key])
 
 
-def curriculum() -> Dict[str, Any]:
-    g = _graph()
+def curriculum(key: str = "toy") -> Dict[str, Any]:
+    g = _graph(key)
     return {
+        "key": key,
+        "path": CURRICULA[key],
         "nodes": [
             {"id": n, "name": a.get("concept_name"), "minutes": a.get("baseline_duration")}
             for n, a in g.nodes(data=True)
@@ -241,7 +250,7 @@ def _plan_view(raw: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def build_plan(payload: Dict[str, Any]) -> Dict[str, Any]:
-    g = _graph()
+    g = _graph(payload.get("curriculum", "toy"))
     answers = payload.get("answers", {})
     states = {n: _state_from_answers(answers.get(n, "")) for n in g.nodes}
     policy, _ = default_policy()
@@ -305,7 +314,7 @@ def call(name: str, payload_json: str) -> str:
         "scheduler_compare": scheduler_compare,
         "build_plan": build_plan,
         "concept_state": lambda p: concept_state(p.get("answers", "")),
-        "curriculum": lambda p: curriculum(),
+        "curriculum": lambda p: curriculum(p.get("curriculum", "toy")),
     }[name]
     try:
         return json.dumps(fn(payload))

@@ -30,6 +30,7 @@
     "src/planning/review.py",
     "src/planning/replan.py",
     "data/curricula/demo_curriculum.json",
+    "data/curricula/maths_curriculum.json",
     "config/adaptive.yaml",
     "experiments/m8_learner_eval.yaml",
   ];

@@ -322,29 +322,41 @@ def build_s1():
 
 # ---------------------------------------------------------------- demo fallbacks
 DEMO_A_PRESETS = {}
+# Demo B presets: (label, input). Toy presets keep their Week 7 ids; maths presets start with "m_".
+T = {"curriculum": "toy", "target": "D", "budget": 10, "deadline_days": 5}
+M = {"curriculum": "maths", "target": "INT", "budget": 30, "deadline_days": 10}
 DEMO_B_PRESETS = {
-    "cold_start": {"target": "D", "budget": 10, "deadline_days": 5, "answers": {}},
-    "a_mastered": {"target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1111"}},
-    "weak_prereq": {"target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1111", "B": "0000"}},
-    "replan_practice": {
-        "target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1", "B": "1"}, "studied": ["A", "B"],
-        "event": {"type": "assessment_result", "node": "B", "answers": "1"},
-    },
-    "block_too_big": {"target": "D", "budget": 8, "deadline_days": 5, "answers": {}},
-    "too_few_days": {"target": "D", "budget": 10, "deadline_days": 2, "answers": {}},
-    "replan_b_mastered": {
-        "target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1111"},
-        "event": {"type": "assessment_result", "node": "B", "answers": "1111"},
-    },
-    "replan_missed_day": {
-        "target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1111"},
-        "event": {"type": "missed_day"},
-    },
+    "cold_start": ("Cold start", {**T, "answers": {}}),
+    "a_mastered": ("A mastered", {**T, "answers": {"A": "1111"}}),
+    "weak_prereq": ("B weak", {**T, "answers": {"A": "1111", "B": "0000"}}),
+    "block_too_big": ("Budget 8 (infeasible)", {**T, "budget": 8, "answers": {}}),
+    "too_few_days": ("2 days (infeasible)", {**T, "deadline_days": 2, "answers": {}}),
+    "replan_practice": ("A, B studied once", {
+        **T, "answers": {"A": "1", "B": "1"}, "studied": ["A", "B"],
+        "event": {"type": "assessment_result", "node": "B", "answers": "1"}}),
+    "replan_b_mastered": ("B answered 1111", {
+        **T, "answers": {"A": "1111"}, "event": {"type": "assessment_result", "node": "B", "answers": "1111"}}),
+    "replan_missed_day": ("Missed day", {**T, "answers": {"A": "1111"}, "event": {"type": "missed_day"}}),
     # Week 8: 25 minutes of work, 20 of capacity -> INFEASIBLE_PROVED plus a best-effort plan.
-    "replan_deadline_cut": {
-        "target": "D", "budget": 10, "deadline_days": 5, "answers": {"A": "1111"},
-        "event": {"type": "changed_deadline", "value": 2},
-    },
+    "replan_deadline_cut": ("Deadline cut to 2 days", {
+        **T, "answers": {"A": "1111"}, "event": {"type": "changed_deadline", "value": 2}}),
+    # Mathematics curriculum (data/curricula/maths_curriculum.json), Week 8 website demo.
+    "m_cold_start": ("Cold start → Integrals", {**M, "answers": {}}),
+    "m_algebra_known": ("Algebra already mastered", {
+        **M, "answers": {k: "1111" for k in ("ARITH", "EXPO", "VARS", "LIN", "FUNC")}}),
+    "m_weak_lin": ("Linear equations weak", {**M, "answers": {"ARITH": "1111", "VARS": "1111", "LIN": "0000"}}),
+    "m_log_week": ("Logarithms in 5 days", {**M, "target": "LOG", "budget": 20, "deadline_days": 5, "answers": {}}),
+    "m_budget_20": ("Budget 20 (calculus won't fit)", {**M, "budget": 20, "answers": {}}),
+    "m_practice": ("Studied twice, still unproven", {
+        **M, "answers": {"ARITH": "1", "VARS": "1"}, "studied": ["ARITH", "VARS"],
+        "event": {"type": "assessment_result", "node": "VARS", "answers": "1"}}),
+    "m_remediation": ("Quadratics failed twice", {
+        **M, "target": "POLY", "answers": {"ARITH": "1", "VARS": "1", "LIN": "1"},
+        "studied": ["ARITH", "VARS", "LIN", "QUAD"],
+        "event": {"type": "assessment_result", "node": "QUAD", "answers": "00"}}),
+    "m_missed_day": ("Missed day (review comes due)", {**M, "answers": {"ARITH": "1111"}, "event": {"type": "missed_day"}}),
+    "m_deadline_cut": ("Deadline cut to 4 days", {
+        **M, "answers": {"ARITH": "1111", "VARS": "1111"}, "event": {"type": "changed_deadline", "value": 4}}),
 }
 
 
@@ -357,14 +369,29 @@ def build_fallback(sched):
     for c in sched["bad_cases"]:  # fixture scores must be reproduced
         o = out["a"][c["id"]]["output"]
         assert o["greedy"]["score"] == c["greedy_score"] and o["oracle"]["score"] == c["oracle_score"], c["id"]
-    for k, p in DEMO_B_PRESETS.items():
-        out["b"][k] = {"input": p, "output": json.loads(json.dumps(demo_api.build_plan(p)))}
-    be = out["b"]["replan_deadline_cut"]["output"]["replan"]  # tests/test_w8_best_effort.py case
+    for k, (label, p) in DEMO_B_PRESETS.items():
+        out["b"][k] = {"label": label, "input": p, "output": json.loads(json.dumps(demo_api.build_plan(p)))}
+    b = {k: v["output"] for k, v in out["b"].items()}
+    be = b["replan_deadline_cut"]["replan"]  # tests/test_w8_best_effort.py case
     assert be["status"] == "INFEASIBLE_PROVED", be["status"]
     assert [d["activities"] for d in be["best_effort_days"]] == [["B"], ["C"]], be["best_effort_days"]
+
+    # Maths presets must show what their labels say.
+    def reasons(plan):
+        return {t["reason_code"] for t in plan.get("trace", []) if t["decision"] == "SELECTED"}
+    assert b["m_cold_start"]["plan"]["status"] == "FEASIBLE"
+    assert b["m_log_week"]["plan"]["status"] == "FEASIBLE"
+    assert b["m_budget_20"]["plan"]["feasibility"]["reason_code"] == "BLOCK_EXCEEDS_DAILY_BUDGET"
+    assert "PRACTICE_FOR_EVIDENCE" in reasons(b["m_practice"]["replan"])
+    assert "REMEDIATION_TRIGGERED" in reasons(b["m_remediation"]["replan"])
+    assert "REVIEW_DUE" in reasons(b["m_missed_day"]["replan"])
+    mcut = b["m_deadline_cut"]["replan"]
+    assert mcut["status"] == "INFEASIBLE_PROVED" and any(d["activities"] for d in mcut["best_effort_days"])
+    assert len(sum((d["activities"] for d in b["m_algebra_known"]["plan"]["days"]), [])) < \
+        len(sum((d["activities"] for d in b["m_cold_start"]["plan"]["days"]), []))
     for ans in ["", "1111", "0000", "1010", "11", "0"]:
         out["states"][ans] = demo_api.concept_state(ans)
-    out["curriculum"] = demo_api.curriculum()
+    out["curricula"] = {k: demo_api.curriculum(k) for k in demo_api.CURRICULA}
     return out
 
 
