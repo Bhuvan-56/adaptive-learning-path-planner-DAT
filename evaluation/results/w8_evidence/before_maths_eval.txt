@@ -1,0 +1,5 @@
+# git 315d4f9 harness (before the change), tests from cf370f9, --runxfail
+E       assert 0 > 4
+E       TypeError: make_learner_generator() got an unexpected keyword argument 'theta'
+E           ValueError: Unknown scenario 'S3'. Expected one of: 'S0', 'S1', 'S2'.
+3 failed, 1 passed in 9.34s
