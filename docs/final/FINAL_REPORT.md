@@ -79,9 +79,22 @@ Paired difference: **+0.0077 [0.0018, 0.0159]**, so the best-singleton fallback 
 - best-singleton − greedy: −0.0040 [−0.0190, 0.0130], no difference shown.
 - Forgetting costs every arm about 0.45 concepts compared with the pre-fix S1 run, which had no forgetting during study.
 
-### 4.4 Hard constraints
+### 4.4 Robustness: larger curriculum and mismatched simulator (`docs/w8/results_maths.md`)
 
-0 prerequisite violations, 0 budget violations and 100% trace coverage in every arm of every final run.
+A pre-registered 2 × 2 check: toy (4 concepts) or maths (16 concepts, target Integrals, 10 days × 30 min), each with the matched BKT simulator (S0) or a mismatched PFA simulator (S3), where learning comes from practice counts. Paired adaptive_full − static_prerequisite_order, concepts mastered:
+
+| | S0 (matched) | S3 (mismatched) |
+|---|---|---|
+| Toy, 4 concepts | +0.1400 [0.1110, 0.1690] | +0.3540 [0.2990, 0.4100] |
+| Maths, 16 concepts | +0.2140 [0.1600, 0.2680] | +0.8110 [0.6980, 0.9170] |
+
+- **Adaptive is better than both baselines in every cell,** on mastery and on retained recall.
+- **Caveat:** S3 rewards practice attempts directly, which favours the adaptive arm's extra practice. "Survives a mismatched simulator" is supported; "larger with real learners" is not.
+- **Ablations:** they still cannot credit single components. One reason is new: the diagnostic gives priors with n = 0, which the classifier always labels Uncertain, so the CAT result can never change a plan (`LIMITATIONS.md` B10).
+
+### 4.5 Hard constraints
+
+0 prerequisite violations, 0 budget violations and 100% trace coverage in every arm of every final run, including the maths and S3 runs.
 
 ## 5. What changed over the project
 
@@ -97,9 +110,14 @@ Paired difference: **+0.0077 [0.0018, 0.0159]**, so the best-singleton fallback 
 ## 6. Limitations
 
 See [`LIMITATIONS.md`](LIMITATIONS.md). The most important:
-- synthetic learners from a generator that matches the planner's own model;
-- a 4-concept curriculum;
-- the replan ablations are identical to adaptive_full, so no single component can be credited. One cause is a harness bug: the remediation ablation never disables remediation.
+- **synthetic learners only.** The main results use a generator that matches the planner's own model; the mismatched check (§4.4) has its own bias.
+- **two hand-made curricula** (4 and 16 concepts), neither from real data.
+- **no single component can be credited:**
+  - the replan ablations are identical to adaptive_full;
+  - the diagnostic cannot change a plan by design (n = 0 priors are always Uncertain);
+  - the remediation ablation never disables remediation;
+  - remediation never fires in the closed loop.
+- **prerequisite importance,** named in the problem statement, is stored but not used.
 
 ## 7. Reproduce
 
