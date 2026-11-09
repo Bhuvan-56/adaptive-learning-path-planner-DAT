@@ -2,7 +2,7 @@
 
 Week 8 replaces `docs/beta/ownership_B.md` (Week 6). That pack names files and signatures that do not exist (`src/diagnostic/cat.py`, `bkt_update(...)`, `SimulatedLearner.generate_response`), and it predates the Week 7 and Week 8 fixes. Everything below matches the code on `main` after Week 8.
 
-**Owner:** _(fill in)_ · **Other track:** [ownership_track_A.md](ownership_track_A.md)
+**Owner:** Abdur Rehman (AI23BTECH11015), Track B since the start of the project · **Other track (Bhuvan Chandra):** [ownership_track_A.md](ownership_track_A.md)
 
 ---
 

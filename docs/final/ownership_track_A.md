@@ -2,7 +2,7 @@
 
 Week 8 replaces `docs/beta/ownership_A.md` (Week 6). That pack predates the Week 7 deadlock fix and the Week 8 best-effort plan, and lists one old signature (`ability_to_prior` now takes only `theta`). Everything below matches the code on `main` after Week 8.
 
-**Owner:** _(fill in)_ · **Other track:** [ownership_track_B.md](ownership_track_B.md)
+**Owner:** Bhuvan Chandra (AI23BTECH11013), Track A since the start of the project · **Other track (Abdur Rehman):** [ownership_track_B.md](ownership_track_B.md)
 
 ---
 

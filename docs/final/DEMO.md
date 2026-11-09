@@ -49,5 +49,5 @@ The second command prints the S1 before/after table from the committed per-learn
 ## Code explanation and change tasks
 
 Each member explains one track and makes one live change:
-- Track A (planning, state, diagnostic, traces): [`ownership_track_A.md`](ownership_track_A.md). Change task: cap practice blocks per day.
-- Track B (evaluation, simulator, retention): [`ownership_track_B.md`](ownership_track_B.md). Change task: make `ablation_no_remediation` real.
+- Track A, Bhuvan (planning, state, diagnostic, traces): [`ownership_track_A.md`](ownership_track_A.md). Change task: cap practice blocks per day.
+- Track B, Abdur (evaluation, simulator, retention): [`ownership_track_B.md`](ownership_track_B.md). Change task: make `ablation_no_remediation` real.
