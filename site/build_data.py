@@ -320,6 +320,42 @@ def build_s1():
     }
 
 
+# ---------------------------------------------------------------- robustness 2 x 2 (Week 8 addendum 2)
+ROBUST = {
+    ("toy", "S0"): ("evaluation/results/w8/final/integrated_s0", 4),
+    ("toy", "S3"): ("evaluation/results/w8/maths_eval/toy_s3", 4),
+    ("maths", "S0"): ("evaluation/results/w8/maths_eval/maths_s0", 16),
+    ("maths", "S3"): ("evaluation/results/w8/maths_eval/maths_s3", 16),
+}
+
+
+def build_robust():
+    cells = []
+    for (cur, scen), (d, n_concepts) in ROBUST.items():
+        df = _pooled(d)
+        assert len(df) == 9000, d
+        arm = {a: df[df.arm == a] for a in df.arm.unique()}
+        assert all(int(g.prereq_violations.sum()) == 0 and int(g.budget_violations.sum()) == 0 for g in arm.values()), d
+        cell = {"curriculum": cur, "scenario": scen, "dir": d, "concepts": n_concepts,
+                "mastered": {a: f4(arm[a].mastered_concepts.mean()) for a in
+                             ("adaptive_full", "static_prerequisite_order", "non_adaptive_greedy")}}
+        for b in ("static_prerequisite_order", "non_adaptive_greedy"):
+            cell["vs_" + b] = {"mastered": _paired(arm["adaptive_full"], arm[b], "mastered_concepts"),
+                               "retained": _paired(arm["adaptive_full"], arm[b], "retained_recall")}
+        cell["ablations_identical"] = [a for a in arm if a.startswith("ablation_") and a != "ablation_no_replan"
+                                       and _paired(arm[a], arm["adaptive_full"], "mastered_concepts")["claim"] == "no difference shown"]
+        cells.append(cell)
+    # Cross-check against docs/w8/results_maths.md section 2.
+    want = {("toy", "S0"): (0.1400, 0.1110, 0.1690), ("toy", "S3"): (0.3540, 0.2990, 0.4100),
+            ("maths", "S0"): (0.2140, 0.1600, 0.2680), ("maths", "S3"): (0.8110, 0.6980, 0.9170)}
+    for c in cells:
+        v = c["vs_static_prerequisite_order"]["mastered"]
+        assert (v["mean"], v["lo"], v["hi"]) == want[(c["curriculum"], c["scenario"])], (c["curriculum"], c["scenario"], v)
+        assert len(c["ablations_identical"]) == 4, c["ablations_identical"]
+    return {"sources": {"checked_against": "docs/w8/results_maths.md", "prereg": "docs/w8/preregistration_maths.md",
+                        "method": "scripts/w7_pooled_s0.py"}, "cells": cells}
+
+
 # ---------------------------------------------------------------- demo fallbacks
 DEMO_A_PRESETS = {}
 # Demo B presets: (label, input). Toy presets keep their Week 7 ids; maths presets start with "m_".
@@ -419,8 +455,9 @@ def main():
     sched = build_scheduling()
     s0 = build_s0()
     s1 = build_s1()
+    robust = build_robust()
     fb = build_fallback(sched)
-    for name, obj in (("scheduling.json", sched), ("s0_pooled.json", s0), ("s1_pooled.json", s1), ("fallback.json", fb)):
+    for name, obj in (("scheduling.json", sched), ("s0_pooled.json", s0), ("s1_pooled.json", s1), ("robust.json", robust), ("fallback.json", fb)):
         with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as f:
             json.dump(obj, f, indent=1)
             f.write("\n")

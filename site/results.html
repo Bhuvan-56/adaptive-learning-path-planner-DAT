@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Integrated Results</title>
-<link rel="stylesheet" href="assets/style.css?v=w8e">
-<script src="assets/common.js?v=w8e"></script>
+<link rel="stylesheet" href="assets/style.css?v=w8f">
+<script src="assets/common.js?v=w8f"></script>
 </head>
 <body>
 <main>
@@ -41,6 +41,12 @@
 
   <h2>How these numbers are computed</h2>
   <div class="card small" id="method"></div>
+
+  <h2 id="robust">Week 8: larger curriculum and a mismatched simulator</h2>
+  <p>A pre-registered 2 × 2 check: the 4-concept toy curriculum or the 16-concept maths curriculum (target Integrals,
+    10 days × 30 minutes), each with the matched simulator (S0) or a mismatched one (S3: learning comes from practice
+    counts, not the planner's BKT model). Every cell is 1,000 paired learners.</p>
+  <div class="card"><div class="table-wrap" id="robust-table"><p class="small">Loading…</p></div></div>
 
   <h2 id="s1">Week 8: S1, forgetting during study</h2>
   <p>Scenario S1 adds forgetting: each day, a mastered concept is lost with probability 0.05. Until Week 8 the study
@@ -132,6 +138,24 @@
     adaptive_full − static (+0.1400 [0.1110, 0.1690], 194 learners: 156 up, 38 down), adaptive_full after − before (+0.2420 [0.2110, 0.2740]) and 100% trace coverage
     against <a href="../${S.checked_against}"><code>${S.checked_against}</code></a> and <a href="../docs/w7/comparison.md"><code>docs/w7/comparison.md</code></a>, and stops if any differs.</p>
     <p>Sources: ${S.per_learner.map(p => `<a href="../${p}"><code>${p}</code></a>`).join(", ")}.</p>`;
+
+  // ---------------- Week 8: robustness 2 x 2
+  try {
+    const rb = await Site.getJSON("data/robust.json");
+    const ci4 = v => `${Site.signed4(v.mean)} [${Site.fmt4(v.lo)}, ${Site.fmt4(v.hi)}]`;
+    document.getElementById("robust-table").innerHTML = `<table><thead><tr><th>Curriculum</th><th>Simulator</th>
+      <th class="num">Mastered: adaptive / static / greedy</th><th class="num">Adaptive − static [95% CI]</th>
+      <th class="num">Adaptive − greedy [95% CI]</th><th class="num">Retained recall, adaptive − static</th></tr></thead>
+      <tbody>${rb.cells.map(c => `<tr><td>${c.curriculum === "maths" ? "Maths (16)" : "Toy (4)"}</td><td>${c.scenario === "S0" ? "S0 matched" : "S3 mismatched"}</td>
+        <td class="num">${["adaptive_full", "static_prerequisite_order", "non_adaptive_greedy"].map(a => Site.fmt4(c.mastered[a])).join(" / ")}</td>
+        <td class="num"><b>${ci4(c.vs_static_prerequisite_order.mastered)}</b></td><td class="num">${ci4(c.vs_non_adaptive_greedy.mastered)}</td>
+        <td class="num">${ci4(c.vs_static_prerequisite_order.retained)}</td></tr>`).join("")}</tbody></table>
+      <p class="small">Adaptive is better than both baselines in every cell. Under S3 learning comes from the number of practice attempts, which
+        favours the adaptive arm's extra practice, so the larger S3 gains are not evidence of larger gains with real learners. The diagnostic,
+        difficulty, review and remediation ablations show no difference in any cell; the diagnostic cannot change a plan by design (its priors
+        have no observations, so they are always classed Uncertain).</p>
+      ${Site.src(rb.cells.map(c => c.dir + "/per_learner_seed_*.csv"), `pre-registered in <a href="../${rb.sources.prereg}"><code>${rb.sources.prereg}</code></a>; write-up <a href="../${rb.sources.checked_against}"><code>${rb.sources.checked_against}</code></a>`)}`;
+  } catch (e) { Site.fail(document.getElementById("robust-table"), e); }
 
   // ---------------- Week 8: S1
   let s1;
