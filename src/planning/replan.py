@@ -333,6 +333,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     # Feasibility check for remaining future window
     status, feasibility_info = check_feasibility(g, required_nodes, budget, remaining_days)
 
+    no_plan_result: Optional[Dict[str, Any]] = None
     if status == FeasibilityStatus.INFEASIBLE_PROVED:
         reason_val = feasibility_info.get("reason_code")
         reason_str = reason_val.value if hasattr(reason_val, "value") else str(reason_val)
@@ -345,7 +346,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                 "deadline_days": deadline_days
             }
         }
-        return {
+        no_plan_result = {
             "status": FeasibilityStatus.INFEASIBLE_PROVED,
             "feasibility_explanation": feasibility_info,
             "days": past_days,
@@ -357,6 +358,12 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
             "policy": active_policy,
             "target_node": target_node
         }
+        # W8 (docs/w8/preregistration.md): when only the total capacity is short,
+        # the day-filling below still runs and its result is returned as a
+        # best-effort plan next to the unchanged infeasibility report. Any other
+        # infeasibility (an activity longer than the daily budget) has none.
+        if reason_val != InfeasibilityReason.CAPACITY_EXCEEDED or remaining_days <= 0:
+            return no_plan_result
 
     # Deterministic topological sort of remaining required nodes
     subgraph = g.subgraph(required_nodes)
@@ -745,6 +752,15 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
     # Combine past progress with future plan
     all_days = past_days + future_days
     all_trace = past_trace + future_trace
+
+    if no_plan_result is not None:
+        no_plan_result["best_effort_days"] = future_days
+        no_plan_result["best_effort_trace"] = all_trace
+        no_plan_result["assessment_candidates"] = sorted(list(assessment_candidates))
+        no_plan_result["current_day"] = current_day
+        no_plan_result["budget"] = budget
+        no_plan_result["deadline_days"] = deadline_days
+        return no_plan_result
 
     if remaining_nodes or remed_queue:
         final_status = FeasibilityStatus.HEURISTIC_NO_PLAN

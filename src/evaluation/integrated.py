@@ -50,7 +50,7 @@ from src.curriculum.graph import load_graph
 from src.state.learner_state import ConceptState
 from src.state.policy import PolicyConfig, default_policy, load_policy
 from src.planning.static_baseline import generate_static_plan
-from src.planning.replan import ReplanState, replan, assessment_result
+from src.planning.replan import ReplanState, replan, assessment_result, changed_deadline
 from src.planning.difficulty import DifficultyState, step_difficulty
 from src.planning.review import ReviewLog
 from src.planning.feasibility import FeasibilityStatus
@@ -135,6 +135,11 @@ def recount_plan_violations(
             completed_so_far.add(nid)
 
     return prereq_violations, budget_violations
+
+
+def _status_name(plan: Dict[str, Any]) -> str:
+    status = plan.get("status")
+    return status.value if hasattr(status, "value") else str(status)
 
 
 def resolve_scenario_name(config: Dict[str, Any]) -> str:
@@ -334,6 +339,18 @@ def _evaluate_single_seed(
                     policy=policy,
                 )
 
+                # W8 fix 2: replan is only called after an executed activity, so an
+                # infeasible first plan would idle the whole horizon. Ask replan once
+                # (same deadline, no state change) for its best-effort plan.
+                if _status_name(active_plan) == "INFEASIBLE_PROVED":
+                    t_b0 = time.perf_counter()
+                    active_plan = replan(cur_replan_state, changed_deadline(horizon_days))
+                    arm_runtime_ms += (time.perf_counter() - t_b0) * 1000.0
+                    cur_replan_state.learner_states = active_plan["learner_states"]
+                    cur_replan_state.difficulty_states = active_plan.get("difficulty_states", diff_states)
+                    if arm != "ablation_no_review":
+                        cur_replan_state.review_log = active_plan.get("review_log", review_log)
+
                 past_days: List[Dict[str, Any]] = []
                 past_trace: List[Dict[str, Any]] = []
 
@@ -345,11 +362,24 @@ def _evaluate_single_seed(
                     status_str = plan_status.value if hasattr(plan_status, "value") else str(plan_status)
                     trace_obj = active_plan.get("trace")
 
+                    # W8 fix 2: a capacity-infeasible plan carries a best-effort plan;
+                    # its days and list trace are used like a HEURISTIC_NO_PLAN plan's.
+                    best_effort = "best_effort_days" in active_plan
+                    if best_effort:
+                        work_days = active_plan["best_effort_days"]
+                        work_trace = active_plan.get("best_effort_trace")
+                    else:
+                        work_days = active_plan.get("days", [])
+                        work_trace = trace_obj
+
                     if status_str in ("INFEASIBLE_PROVED", "INVALID_INPUT", "HEURISTIC_NO_PLAN") or isinstance(trace_obj, dict):
                         try:
                             # A HEURISTIC_NO_PLAN plan keeps a full list trace (W7 deadlock fix:
                             # its listed work is executed), so validate it as a trace.
-                            if isinstance(trace_obj, list):
+                            if best_effort:
+                                ok = check_no_plan_trace(trace_obj) and check_trace(
+                                    candidate_universe, work_trace, num_days=horizon_days, budget=daily_budget)
+                            elif isinstance(trace_obj, list):
                                 ok = check_trace(candidate_universe, trace_obj, num_days=horizon_days, budget=daily_budget)
                             else:
                                 ok = check_no_plan_trace(trace_obj)
@@ -366,8 +396,8 @@ def _evaluate_single_seed(
                         # list work for today; execute it instead of idling. The day is
                         # still counted as a no-plan day above.
                         day_activities = []
-                        if isinstance(trace_obj, list):
-                            for d_entry in active_plan.get("days", []):
+                        if isinstance(work_trace, list):
+                            for d_entry in work_days:
                                 if d_entry.get("day") == day_idx and not d_entry.get("missed"):
                                     day_activities = d_entry.get("activities", [])
                                     break
@@ -390,8 +420,8 @@ def _evaluate_single_seed(
                     # W7 deadlock fix: replan returns past_trace + future trace, so carry the
                     # trace of each day as planned at its start; otherwise every mid-horizon
                     # plan's trace misses days 1..day_idx and fails check_trace.
-                    if isinstance(trace_obj, list):
-                        past_trace.extend(dict(t) for t in trace_obj if t.get("day") == day_idx)
+                    if isinstance(work_trace, list):
+                        past_trace.extend(dict(t) for t in work_trace if t.get("day") == day_idx)
                     cur_replan_state.past_trace = list(past_trace)
 
                     # Execute daily scheduled activities

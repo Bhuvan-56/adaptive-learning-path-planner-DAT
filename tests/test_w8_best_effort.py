@@ -40,7 +40,6 @@ def _infeasible_state(g, deadline_days=2):
                        review_log=ReviewLog(), policy=POLICY)
 
 
-@pytest.mark.xfail(strict=True, reason="W8: replan returns no work on deadline-infeasible days")
 def test_capacity_infeasible_replan_returns_best_effort_days():
     g = load_graph(CURRICULUM)
     plan = replan(_infeasible_state(g), assessment_result("A", [1]))
@@ -59,7 +58,6 @@ def test_capacity_infeasible_replan_returns_best_effort_days():
     assert check_trace(get_candidate_universe(g, "D"), plan["best_effort_trace"], num_days=2, budget=10)
 
 
-@pytest.mark.xfail(strict=True, reason="W8: replan returns no work on deadline-infeasible days")
 def test_best_effort_never_breaks_prerequisites():
     g = load_graph(CURRICULUM)
     plan = replan(_infeasible_state(g, deadline_days=1), changed_budget(10))
@@ -81,7 +79,6 @@ def test_block_exceeds_budget_has_no_best_effort_plan():
     assert not plan.get("best_effort_days")
 
 
-@pytest.mark.xfail(strict=True, reason="W8: adaptive loop idles when the first plan is infeasible")
 def test_integrated_adaptive_arm_works_on_infeasible_horizon(tmp_path, monkeypatch):
     with open(W8_FINAL, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
