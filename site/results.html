@@ -4,15 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Integrated Results</title>
-<link rel="stylesheet" href="assets/style.css">
-<script src="assets/common.js"></script>
+<link rel="stylesheet" href="assets/style.css?v=w8e">
+<script src="assets/common.js?v=w8e"></script>
 </head>
 <body>
 <main>
   <h1>Integrated results (S0 and S1)</h1>
   <p class="lede">The whole loop (diagnostic, learner state, planning, replanning) run for 5 days with a 10-minute daily
-    budget on 1,000 synthetic learners: 5 seeds × 200 learners, every arm on the same learners. Outcome: number of
-    concepts mastered at the end (out of 4). Numbers are from the run after the Week 7 adaptive deadlock fix.</p>
+    budget on 1,000 synthetic learners: 5 seeds × 200 learners, every arm on the same learners, on the 4-concept toy
+    curriculum. Outcome: number of concepts mastered at the end (out of 4). S0 numbers are from the run after the
+    Week 7 adaptive deadlock fix; <a href="#s1">S1 (Week 8)</a> is further down.</p>
   <div class="note">Results from a simulator with synthetic learners (<code>MatchedBKTGenerator</code>), scenarios S0 and S1.</div>
 
   <h2>Week 7 fix: the adaptive planner no longer stalls</h2>

@@ -8,11 +8,11 @@ Made by: Bhuvan and Abdur
 | Page | File | Data |
 |---|---|---|
 | Overview | `index.html` | headline numbers from `data/scheduling.json`, `data/s0_pooled.json` |
-| Curriculum | `curriculum.html` | `../data/curricula/demo_curriculum.json` (read directly) |
+| Curriculum | `curriculum.html` | `../data/curricula/maths_curriculum.json` (16-concept Mathematics demo curriculum, Week 8) and `../data/curricula/demo_curriculum.json` (4-concept toy curriculum used by every evaluation), read directly |
 | Scheduling benchmark | `scheduling.html` | `data/scheduling.json` ← `evaluation/results/w7/improvement/scheduling/`, `tests/fixtures/w7/bad_cases.json` |
 | Integrated S0 and S1 | `results.html` | `data/s0_pooled.json` ← the five `evaluation/results/w7/deadlock_fix/integrated_s0/per_learner_seed_*.csv` (after the adaptive deadlock fix), with `evaluation/results/w7/improvement/integrated_s0/` as the before run |
 |  |  | `data/s1_pooled.json` ← `evaluation/results/w8/final/integrated_s1/` (Week 8, forgetting during study), with `evaluation/results/w8/before/integrated_s1/` as the before run |
-| Live demos | `demos.html` | Pyodide + `py/demo_api.py` + the `src/` files listed in `assets/pyrunner.js`; fallback `data/fallback.json` |
+| Live demos | `demos.html` | Pyodide + `py/demo_api.py` + the `src/` files listed in `assets/pyrunner.js`; fallback `data/fallback.json`. Demo B plans on either curriculum (`curriculum` in the payload: `maths` or `toy`) |
 
 All results come from a simulator with synthetic learners.
 
@@ -89,3 +89,9 @@ Before the talk (at least 5 minutes early, on the presentation machine and netwo
 | 0:00–1:00 | Overview | The four steps: diagnostic → learner state → prerequisite-safe daily plan within a budget → replan. "Made by: Bhuvan and Abdur". Week 7 in two lines: (1) the adaptive planner used to stall after day 1 because a concept studied once stayed Uncertain and was never practised again; it now practises it, so no-plan days fell from 4,000 to 1,000 of 5,000 and adaptive now beats the static order (+0.1400 [0.1110, 0.1690]); (2) the scheduler got a best-single-item fallback. Say the numbers come from a simulator with synthetic learners. (Optional 10 s: Curriculum page, A → B, C → D.) |
 | 1:00–3:00 | Live demos, tab A | Preset **12/18 counterexample**: greedy takes item_1 (best score per minute) and scores 12; the oracle takes item_2 + item_3 for 18; best-singleton does not help here (still 12). Then preset **Seed 47, instance 215**: greedy 3, best-singleton and oracle 14. Change one score or the budget, press "Run the three policies" to show it is live. Mention: on 250 instances the paired gain is +0.0077 [0.0018, 0.0159] (Scheduling page). |
 | 3:00–5:00 | Live demos, tab B | Preset **Cold start**: day-by-day plan for D with trace reason codes (SELECTED, BUDGET_EXCEEDED, UNCERTAIN_NEEDS_ASSESSMENT). Type `1111` for A: A becomes Mastered and drops out (ALREADY_MASTERED). Preset **Budget 8**: INFEASIBLE_PROVED, BLOCK_EXCEEDS_DAILY_BUDGET, "raise daily budget to at least 10 minutes". Preset **2 days**: CAPACITY_EXCEEDED with the necessary fixes. Then the Week 7 fix: preset **Replan: A, B studied once**: A and B were studied once and are still Uncertain, so the replan gives them a *practice* session on day 1 (PRACTICE_FOR_EVIDENCE) and C and D follow on days 2 and 3, where the old planner returned no plan at all. If time is left: **Replan: B answered 1111**: B becomes Mastered and drops out, and A and B come back later as *review* sessions (recall below 0.85). |
+
+## Week 8 notes
+
+- `data/curricula/maths_curriculum.json` is for the website only. No evaluation result uses it. `tests/test_w8_maths_curriculum.py` keeps it valid and plannable, and `site/build_data.py` checks that each maths preset shows what its label says (remediation, practice, review, best effort, infeasible budget).
+- Asset links carry a version (`assets/common.js?v=...`) so browsers fetch the new scripts after a change. Bump it in every page whenever `assets/` changes.
+- The theme button switches light and dark; the choice is kept in `localStorage` when the browser allows it.

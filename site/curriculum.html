@@ -4,71 +4,114 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Curriculum Graph</title>
-<link rel="stylesheet" href="assets/style.css">
-<script src="assets/common.js"></script>
+<link rel="stylesheet" href="assets/style.css?v=w8e">
+<script src="assets/common.js?v=w8e"></script>
 </head>
 <body>
 <main>
   <h1>Curriculum graph</h1>
-  <p class="lede">The demo curriculum has four concepts. An arrow means "is a prerequisite of": the planner never places a
-    concept on a day before all of its prerequisites are mastered or already planned.</p>
-  <div class="card"><div id="graph"><p class="small">Loading…</p></div><div id="graph-src"></div></div>
+  <p class="lede">An arrow means "is a prerequisite of": the planner never places a concept on a day before all of its
+    prerequisites are mastered or already planned. Pick a concept to see everything it requires.</p>
+
+  <div class="row" style="margin:6px 0 12px">
+    <div class="seg" role="group" aria-label="Curriculum">
+      <button type="button" data-cur="maths" aria-pressed="true">Mathematics · 16 concepts</button>
+      <button type="button" data-cur="toy" aria-pressed="false">Toy · 4 concepts</button>
+    </div>
+  </div>
+  <div class="note" id="cur-note"></div>
+
+  <div class="card"><div class="dag-wrap" id="graph"><p class="small">Loading…</p></div><div id="graph-src"></div></div>
+  <div class="card side" id="side" style="margin-top:12px"></div>
+
   <h2>Concepts</h2>
   <div class="table-wrap card" id="nodes"></div>
   <h2>Prerequisite edges</h2>
   <div class="table-wrap card" id="edges"></div>
 </main>
 <script>
-const PATH = "data/curricula/demo_curriculum.json";
-(async () => {
-  const gEl = document.getElementById("graph");
-  let data;
-  try { data = await Site.getJSON("../" + PATH); } catch (e) { return Site.fail(gEl, e); }
-  const nodes = data.nodes, edges = data.edges;
-  // layer = longest path from a root
-  const depth = {};
-  nodes.forEach(n => depth[n.node_id] = 0);
-  for (let i = 0; i < nodes.length; i++)
-    edges.forEach(e => { depth[e.target] = Math.max(depth[e.target], depth[e.source] + 1); });
-  const layers = {};
-  nodes.forEach(n => (layers[depth[n.node_id]] ||= []).push(n));
-  const L = Math.max(...Object.values(depth)) + 1;
-  const W = 640, H = 120 + 120 * (L - 1), BW = 150, BH = 56;
-  const pos = {};
-  Object.entries(layers).forEach(([d, ns]) => ns.forEach((n, i) => {
-    pos[n.node_id] = { x: W * (i + 1) / (ns.length + 1), y: 50 + 120 * d };
-  }));
-  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Curriculum prerequisite graph">
-    <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-    <path d="M0,0 L10,5 L0,10 z" fill="var(--text-2)"/></marker></defs>`;
-  edges.forEach(e => {
-    const a = pos[e.source], b = pos[e.target];
-    const y1 = a.y + BH / 2, y2 = b.y - BH / 2 - 3;
-    const mx = (a.x + b.x) / 2, my = (y1 + y2) / 2;
-    svg += `<line x1="${a.x}" y1="${y1}" x2="${b.x}" y2="${y2}" stroke="var(--text-2)" stroke-width="1.5" marker-end="url(#arr)"/>
-      <text x="${mx + (mx >= W / 2 ? 18 : -18)}" y="${my}" text-anchor="${mx >= W / 2 ? "start" : "end"}">importance ${e.importance}</text>`;
-  });
-  nodes.forEach(n => {
-    const p = pos[n.node_id];
-    svg += `<g data-tip="<b>${Site.esc(n.node_id)}: ${Site.esc(n.concept_name)}</b><br>${n.baseline_duration} min, difficulty ${n.base_difficulty}<br>exercises: ${n.exercises.join(", ")}">
-      <rect x="${p.x - BW / 2}" y="${p.y - BH / 2}" width="${BW}" height="${BH}" rx="8" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.5"/>
-      <text x="${p.x}" y="${p.y - 4}" text-anchor="middle" style="font-size:14px;font-weight:700;fill:var(--text)">${Site.esc(n.node_id)} · ${Site.esc(n.concept_name)}</text>
-      <text x="${p.x}" y="${p.y + 15}" text-anchor="middle">${n.baseline_duration} min</text></g>`;
-  });
-  gEl.innerHTML = svg + "</svg>";
-  document.getElementById("graph-src").innerHTML = Site.src(PATH);
-  Site.bindTips(gEl);
+const CURRICULA = {
+  maths: { path: "data/curricula/maths_curriculum.json", target: "INT",
+    note: "The <b>Mathematics</b> curriculum (fractions to integrals) is the website demo curriculum, added in Week 8 so the live planner has something real to plan. Every evaluation result on this site uses the <b>Toy</b> curriculum." },
+  toy: { path: "data/curricula/demo_curriculum.json", target: "D",
+    note: "The <b>Toy</b> curriculum is the one every evaluation result on this site uses (integrated S0 and S1, 1,000 synthetic learners)." },
+};
+const esc = Site.esc;
+const cache = {};
+let cur = new URLSearchParams(location.search).get("c") === "toy" ? "toy" : "maths";
+let selected = null;
 
-  const pre = id => edges.filter(e => e.target === id).map(e => e.source).join(", ") || "none";
+async function load(key) {
+  if (!cache[key]) {
+    const d = await Site.getJSON("../" + CURRICULA[key].path);
+    cache[key] = {
+      nodes: d.nodes.map(n => ({ id: n.node_id, name: n.concept_name, minutes: n.baseline_duration, difficulty: n.base_difficulty, exercises: n.exercises })),
+      edges: d.edges.map(e => [e.source, e.target]), importance: Object.fromEntries(d.edges.map(e => [e.source + ">" + e.target, e.importance])),
+    };
+  }
+  return cache[key];
+}
+
+function draw() {
+  const c = cache[cur], P = CURRICULA[cur].path;
+  const req = selected ? Site.ancestors(selected, c.edges) : null;
+  const byId = Object.fromEntries(c.nodes.map(n => [n.id, n]));
+  const g = document.getElementById("graph");
+  g.innerHTML = Site.dagSVG(c.nodes, c.edges, {
+    label: "Curriculum prerequisite graph",
+    style: id => !selected ? {} : id === selected ? { strong: true, fill: "var(--accent)", opacity: 0.22 }
+      : req.has(id) ? { fill: "var(--accent)", opacity: 0.1 } : { dim: true },
+    tip: id => { const n = byId[id]; return `<b>${esc(id)}</b>: ${esc(n.name)}<br>${n.minutes} min · difficulty ${n.difficulty}<br>click to see what it requires`; },
+  });
+  document.getElementById("graph-src").innerHTML = Site.src(P, "rows = longest prerequisite chain from a starting concept");
+  g.querySelectorAll(".dag-node").forEach(el => {
+    const pick = () => { selected = selected === el.dataset.node ? null : el.dataset.node; draw(); };
+    el.addEventListener("click", pick);
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+  });
+  Site.bindTips(g);
+
+  const side = document.getElementById("side");
+  if (!selected) {
+    const total = c.nodes.reduce((t, n) => t + n.minutes, 0);
+    side.innerHTML = `<h3>Overview</h3><dl class="kv"><dt>Concepts</dt><dd>${c.nodes.length}</dd><dt>Prerequisite edges</dt><dd>${c.edges.length}</dd>
+      <dt>Total study time</dt><dd>${total} min</dd><dt>Longest topic</dt><dd>${Math.max(...c.nodes.map(n => n.minutes))} min</dd></dl>
+      <p class="small" style="margin-top:12px">Pick a concept in the graph to highlight its prerequisites.</p>`;
+  } else {
+    const n = byId[selected], list = c.nodes.filter(x => req.has(x.id));
+    const mins = list.reduce((t, x) => t + x.minutes, 0) + n.minutes;
+    const longest = Math.max(n.minutes, ...list.map(x => x.minutes));
+    side.innerHTML = `<h3>${esc(n.id)} · ${esc(n.name)}</h3>
+      <dl class="kv"><dt>Concepts to study</dt><dd>${list.length + 1} (itself + ${list.length} prerequisites)</dd>
+      <dt>Total time from scratch</dt><dd>${mins} min</dd><dt>At 30 min a day</dt><dd>at least ${Math.ceil(mins / 30)} days</dd>
+      <dt>Smallest daily budget</dt><dd>${longest} min (longest single topic)</dd></dl>
+      <p class="small" style="margin-top:10px">Requires: ${list.length ? list.map(x => `<code>${x.id}</code>`).join(" ") : "nothing"}</p>
+      <p class="small"><a href="demos.html?cur=${cur}&target=${encodeURIComponent(n.id)}#b">Plan ${esc(n.id)} in the live demo →</a></p>
+      <button type="button" id="clear">Clear selection</button>`;
+    document.getElementById("clear").addEventListener("click", () => { selected = null; draw(); });
+  }
+
+  const pre = id => c.edges.filter(e => e[1] === id).map(e => e[0]).join(", ") || "none";
   document.getElementById("nodes").innerHTML = `<table><thead><tr><th>Node</th><th>Concept</th><th class="num">Minutes</th>
     <th class="num">Base difficulty</th><th>Exercises</th><th>Prerequisites</th></tr></thead><tbody>${
-    nodes.map(n => `<tr><td><b>${n.node_id}</b></td><td>${Site.esc(n.concept_name)}</td><td class="num">${n.baseline_duration}</td>
-      <td class="num">${n.base_difficulty.toFixed(2)}</td><td><code>${n.exercises.join(", ")}</code></td><td>${pre(n.node_id)}</td></tr>`).join("")
-    }</tbody></table>${Site.src(PATH)}`;
+    c.nodes.map(n => `<tr${n.id === selected ? ' class="hl"' : ""}><td><b><code>${n.id}</code></b></td><td>${esc(n.name)}</td><td class="num">${n.minutes}</td>
+      <td class="num">${n.difficulty.toFixed(2)}</td><td><code>${n.exercises.join(", ")}</code></td><td>${pre(n.id)}</td></tr>`).join("")
+    }</tbody></table>${Site.src(P)}`;
   document.getElementById("edges").innerHTML = `<table><thead><tr><th>Prerequisite</th><th>Unlocks</th><th class="num">Importance</th></tr></thead><tbody>${
-    edges.map(e => `<tr><td>${e.source}</td><td>${e.target}</td><td class="num">${e.importance}</td></tr>`).join("")
-    }</tbody></table>${Site.src(PATH)}`;
-})();
+    c.edges.map(([a, b]) => `<tr><td><code>${a}</code></td><td><code>${b}</code></td><td class="num">${c.importance[a + ">" + b]}</td></tr>`).join("")
+    }</tbody></table>${Site.src(P)}`;
+}
+
+async function show(key) {
+  cur = key; selected = null;
+  document.querySelectorAll("[data-cur]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.cur === key)));
+  document.getElementById("cur-note").innerHTML = CURRICULA[key].note;
+  try { await load(key); } catch (e) { return Site.fail(document.getElementById("graph"), e); }
+  draw();
+  history.replaceState(null, "", location.pathname + (key === "toy" ? "?c=toy" : ""));
+}
+document.querySelectorAll("[data-cur]").forEach(b => b.addEventListener("click", () => show(b.dataset.cur)));
+show(cur);
 </script>
 </body>
 </html>

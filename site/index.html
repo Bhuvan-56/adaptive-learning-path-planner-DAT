@@ -4,23 +4,31 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adaptive Learning-Path Planner</title>
-<meta name="description" content="Adaptive learning-path planner: diagnostic, learner state, prerequisite-safe budgeted daily plans and replanning. Week 7 results and live demos.">
-<link rel="stylesheet" href="assets/style.css">
+<meta name="description" content="Adaptive learning-path planner: diagnostic, learner state, prerequisite-safe budgeted daily plans and replanning. Week 7 and Week 8 results and live demos.">
+<link rel="stylesheet" href="assets/style.css?v=w8e">
 <!-- Warm the browser cache for the live demos (same pinned Pyodide as assets/pyrunner.js). -->
 <link rel="prefetch" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js" crossorigin>
 <link rel="prefetch" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.asm.js" crossorigin>
 <link rel="prefetch" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.asm.wasm" crossorigin>
 <link rel="prefetch" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/python_stdlib.zip" crossorigin>
 <link rel="prefetch" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide-lock.json" crossorigin>
-<script src="assets/common.js"></script>
+<script src="assets/common.js?v=w8e"></script>
 </head>
 <body>
 <main>
-  <h1>Adaptive Learning-Path Planner</h1>
-  <p class="lede">Given a target concept, a daily time budget and a deadline, the engine finds out what the learner
-    already knows, keeps a per-concept learner state, and builds a day-by-day study plan that never schedules a concept
-    before its prerequisites and never goes over the daily budget. When something changes, it replans.</p>
-  <p class="made-by">Made by: Bhuvan and Abdur</p>
+  <section class="hero">
+    <p class="kicker">CS5903 · final project</p>
+    <h1>Adaptive Learning-Path Planner</h1>
+    <p class="lede">Given a target concept, a daily time budget and a deadline, the engine finds out what the learner
+      already knows, keeps a per-concept learner state, and builds a day-by-day study plan that never schedules a concept
+      before its prerequisites and never goes over the daily budget. When something changes, it replans.</p>
+    <p class="made-by">Made by Bhuvan Chandra and Abdur Rehman</p>
+    <div class="cta">
+      <a class="primary" href="demos.html#b">Plan a maths course live</a>
+      <a href="curriculum.html">Explore the curriculum</a>
+      <a href="results.html">See the results</a>
+    </div>
+  </section>
 
   <h2>What the engine does</h2>
   <div class="pipeline">
@@ -50,6 +58,13 @@
     </div>
   </div>
 
+  <h2>Week 8 changes</h2>
+  <p><b>Forgetting during study (S1).</b> The S1 scenario lets mastered concepts be forgotten between days, but until
+    Week 8 the study loop never applied it. Now it does, and the adaptive planner still beats the static order.
+    <b>Best-effort plans.</b> When a deadline can no longer be met, the planner still reports it as infeasible, and now
+    also plans the work that fits instead of leaving the learner idle.</p>
+  <div class="grid cols-2" id="headline-w8"><p class="small">Loading…</p></div>
+
   <h2>Week 7 changes</h2>
   <p><b>Adaptive deadlock fix.</b> A concept studied once stayed Uncertain and blocked everything after it, but was never
     practised again, so adaptive plans stopped after day 1. It now gets another practice session, and its dependents follow.</p>
@@ -62,10 +77,10 @@
 
   <h2>Pages</h2>
   <div class="grid cols-2">
-    <a class="card" href="curriculum.html"><b>Curriculum</b><br><span class="small">The 4-concept demo graph the planner uses.</span></a>
+    <a class="card" href="curriculum.html"><b>Curriculum</b><br><span class="small">A 16-concept maths curriculum (fractions to integrals) for the demos, and the 4-concept toy curriculum used by every evaluation.</span></a>
     <a class="card" href="scheduling.html"><b>Scheduling benchmark</b><br><span class="small">Greedy vs greedy + best-singleton against the exact optimum on 250 instances.</span></a>
-    <a class="card" href="results.html"><b>Integrated S0</b><br><span class="small">All nine arms, 1,000 synthetic learners, pooled over five seeds, before and after the deadlock fix.</span></a>
-    <a class="card" href="demos.html"><b>Live demos</b><br><span class="small">The real project code running in your browser.</span></a>
+    <a class="card" href="results.html"><b>Results</b><br><span class="small">All nine arms, 1,000 synthetic learners: S0 before and after the deadlock fix, and S1 with forgetting.</span></a>
+    <a class="card" href="demos.html"><b>Live demos</b><br><span class="small">The real project code running in your browser: the scheduler against the exact optimum, and the plan builder on either curriculum.</span></a>
   </div>
 </main>
 <script>
@@ -94,6 +109,21 @@
         <div class="v">${Site.signed4(bs.mean)}</div><div class="ci">95% CI [${Site.fmt4(bs.lo)}, ${Site.fmt4(bs.hi)}]</div>
         ${Site.src(runDir + "/per_learner_seed_*.csv", "pooled as in <code>scripts/w7_pooled_s0.py</code>")}</div>`;
   } catch (e) { Site.fail(el, e); Site.fail(document.getElementById("headline-fix"), e); }
+})();
+(async () => {
+  const el = document.getElementById("headline-w8");
+  try {
+    const s1 = await Site.getJSON("data/s1_pooled.json");
+    const d = s1.diffs.find(x => x.a === "adaptive_full" && x.b === "static_prerequisite_order");
+    const a = s1.arms.find(x => x.arm === "adaptive_full");
+    el.innerHTML = `
+      <div class="card stat"><div class="k">S1 with forgetting: concepts mastered, adaptive minus static (paired, 1,000 learners)</div>
+        <div class="v">${Site.signed4(d.mastered.mean)}</div><div class="ci">95% CI [${Site.fmt4(d.mastered.lo)}, ${Site.fmt4(d.mastered.hi)}]; retained recall ${Site.signed4(d.retained.mean)} [${Site.fmt4(d.retained.lo)}, ${Site.fmt4(d.retained.hi)}]</div>
+        ${Site.src(s1.sources.checked_against)}</div>
+      <div class="card stat"><div class="k">Cost of forgetting for the adaptive arm (same learners, S1 before → after the fix)</div>
+        <div class="v">${Site.fmt4(a.before_mastered)} → ${Site.fmt4(a.mastered)}</div><div class="ci">${Site.signed4(a.delta)} [${Site.fmt4(a.delta_lo)}, ${Site.fmt4(a.delta_hi)}] concepts</div>
+        ${Site.src(s1.sources.after + "/per_learner_seed_*.csv")}</div>`;
+  } catch (e) { Site.fail(el, e); }
 })();
 </script>
 </body>

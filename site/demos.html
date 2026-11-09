@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Live Demos</title>
-<link rel="stylesheet" href="assets/style.css">
-<script src="assets/common.js"></script>
-<script src="assets/pyrunner.js"></script>
+<link rel="stylesheet" href="assets/style.css?v=w8e">
+<script src="assets/common.js?v=w8e"></script>
+<script src="assets/pyrunner.js?v=w8e"></script>
 </head>
 <body>
 <main>
@@ -47,32 +47,30 @@
 
   <!-- ===================== Demo B ===================== -->
   <section id="panel-b" role="tabpanel" aria-labelledby="tab-b" hidden>
-    <p>Builds a day-by-day plan on the demo curriculum (A → B, A → C, B → D, C → D) with <code>plan_request</code>
-      (<code>src/planning/service.py</code> → <code>generate_static_plan</code>). Each concept's state comes from a
-      cold start plus the answers you type, fed one by one to <code>ConceptState.update</code>. Optionally apply one
-      event with <code>replan</code> (<code>src/planning/replan.py</code>).</p>
-    <div class="row" style="margin-bottom:10px">
-      <span class="small">Presets:</span>
-      <button data-preset-b="cold_start">Cold start</button>
-      <button data-preset-b="a_mastered">A mastered</button>
-      <button data-preset-b="weak_prereq">B weak</button>
-      <button data-preset-b="block_too_big">Budget 8 (infeasible)</button>
-      <button data-preset-b="too_few_days">2 days (infeasible)</button>
-      <button data-preset-b="replan_practice">Replan: A, B studied once</button>
-      <button data-preset-b="replan_b_mastered">Replan: B answered 1111</button>
-      <button data-preset-b="replan_missed_day">Replan: missed day</button>
-      <button data-preset-b="replan_deadline_cut">Replan: deadline cut to 2 days</button>
+    <p>Builds a day-by-day plan with <code>plan_request</code> (<code>src/planning/service.py</code> →
+      <code>generate_static_plan</code>). Each concept's state comes from a cold start plus the answers you type, fed one
+      by one to <code>ConceptState.update</code>. Optionally apply one event with <code>replan</code>
+      (<code>src/planning/replan.py</code>).</p>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Curriculum">
+        <button type="button" data-cur="maths" aria-pressed="true">Mathematics · 16 concepts</button>
+        <button type="button" data-cur="toy" aria-pressed="false">Toy · 4 concepts</button>
+      </div>
+      <a class="small" href="curriculum.html" id="cur-link">see the graph</a>
     </div>
+    <div class="presets" id="b-presets"></div>
     <div class="card">
       <div class="row">
         <label for="b-target">Target</label><select id="b-target"></select>
         <label for="b-budget">Daily budget (min)</label><input type="number" id="b-budget" value="10" step="1">
         <label for="b-days">Deadline (days)</label><input type="number" id="b-days" value="5" step="1">
       </div>
-      <h3>Learner state per concept</h3>
-      <p class="small">Answers so far: <code>1</code> = right, <code>0</code> = wrong, oldest first (empty = cold start).
-        “Studied already” marks a concept the learner has done once; only the replan event uses it.</p>
-      <div class="concepts" id="b-concepts"></div>
+      <details class="state-box" id="b-state-box">
+        <summary><b>Learner state per concept</b> <span class="small" id="b-state-sum"></span></summary>
+        <p class="small">Answers so far: <code>1</code> = right, <code>0</code> = wrong, oldest first (empty = cold start).
+          “Studied already” marks a concept the learner has done once; only the replan event uses it.</p>
+        <div class="concepts compact" id="b-concepts"></div>
+      </details>
       <h3>Replan event (optional)</h3>
       <div class="row">
         <select id="b-event">
@@ -207,20 +205,55 @@ async function runA() {
 }
 
 /* ================= Demo B ================= */
-let nodes = [];
+let nodes = [], edges = [], curKey = "maths";
 const stateCache = {};
+const CUR_DEFAULTS = { maths: { target: "INT", budget: 30, days: 10 }, toy: { target: "D", budget: 10, days: 5 } };
+
+function setCurriculum(key, keepInputs) {
+  curKey = key;
+  const c = Engine.fallback.curricula[key];
+  nodes = c.nodes; edges = c.edges;
+  document.querySelectorAll("[data-cur]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.cur === key)));
+  $("cur-link").href = "curriculum.html" + (key === "toy" ? "?c=toy" : "");
+  buildConcepts(); eventArgs(); buildPresets();
+  if (!keepInputs) {
+    const d = CUR_DEFAULTS[key];
+    $("b-target").value = d.target; $("b-budget").value = d.budget; $("b-days").value = d.days;
+  }
+}
+
+function buildPresets() {
+  const entries = Object.entries(Engine.fallback.b).filter(([, v]) => (v.input.curriculum || "toy") === curKey);
+  const plan = entries.filter(([, v]) => !v.input.event), re = entries.filter(([, v]) => v.input.event);
+  const btn = ([id, v]) => `<button type="button" data-preset-b="${id}">${esc(v.label || id)}</button>`;
+  $("b-presets").innerHTML = `<span class="group-label">Plans</span>${plan.map(btn).join("")}
+    <span class="group-label" style="margin-left:8px">Replan events</span>${re.map(btn).join("")}`;
+  $("b-presets").querySelectorAll("[data-preset-b]").forEach(b => b.addEventListener("click", () => loadPresetB(b.dataset.presetB)));
+}
+function stateSummary() {
+  const withAns = nodes.filter(n => $("ans-" + n.id).value).length;
+  const studied = nodes.filter(n => $("done-" + n.id).checked).length;
+  $("b-state-sum").textContent = `· ${nodes.length} concepts, ${withAns ? withAns + " with answers" : "all cold start"}${studied ? ", " + studied + " studied" : ""}`;
+}
+function markPreset(id) {
+  $("b-presets").querySelectorAll("[data-preset-b]").forEach(b => b.classList.toggle("active", b.dataset.presetB === id));
+}
 
 function buildConcepts() {
   $("b-target").innerHTML = nodes.map(n => `<option value="${n.id}">${n.id} · ${esc(n.name)}</option>`).join("");
   $("b-concepts").innerHTML = nodes.map(n => `<div class="card">
-      <label for="ans-${n.id}"><b>${n.id}</b> · ${esc(n.name)} <span class="small">(${n.minutes} min)</span></label>
+      <label for="ans-${n.id}"><b>${n.id}</b> <span class="small">${esc(n.name)} · ${n.minutes} min</span></label>
       <input id="ans-${n.id}" data-node="${n.id}" inputmode="numeric" pattern="[01]*" placeholder="e.g. 1111" maxlength="12">
       <div class="small" id="st-${n.id}" style="margin-top:4px"></div>
       <label class="small" style="display:block;margin-top:4px"><input type="checkbox" id="done-${n.id}"> studied already</label></div>`).join("");
   nodes.forEach(n => $("ans-" + n.id).addEventListener("input", e => {
-    e.target.value = e.target.value.replace(/[^01]/g, ""); refreshState(n.id);
+    e.target.value = e.target.value.replace(/[^01]/g, ""); refreshState(n.id); stateSummary();
   }));
+  nodes.forEach(n => $("done-" + n.id).addEventListener("change", stateSummary));
+  $("b-state-box").open = nodes.length <= 6;
+  stateSummary();
   $("b-target").value = nodes[nodes.length - 1].id;
+  nodes.forEach(n => refreshState(n.id));
 }
 
 async function refreshState(id) {
@@ -250,7 +283,7 @@ $("b-event").addEventListener("change", eventArgs);
 function payloadB() {
   const answers = {};
   nodes.forEach(n => { const v = $("ans-" + n.id).value; if (v) answers[n.id] = v; });
-  const p = { target: $("b-target").value, budget: Math.round(Number($("b-budget").value)), deadline_days: Math.round(Number($("b-days").value)), answers };
+  const p = { curriculum: curKey, target: $("b-target").value, budget: Math.round(Number($("b-budget").value)), deadline_days: Math.round(Number($("b-days").value)), answers };
   const studied = nodes.filter(n => $("done-" + n.id).checked).map(n => n.id);
   if (studied.length) p.studied = studied;
   const kind = $("b-event").value;
@@ -264,11 +297,14 @@ function loadPresetB(id) {
   const fb = Engine.fallback && Engine.fallback.b[id];
   if (!fb) return;
   const p = fb.input;
+  if ((p.curriculum || "toy") !== curKey) setCurriculum(p.curriculum || "toy", true);
+  markPreset(id);
   $("b-target").value = p.target; $("b-budget").value = p.budget; $("b-days").value = p.deadline_days;
   nodes.forEach(n => { $("ans-" + n.id).value = (p.answers || {})[n.id] || ""; $("done-" + n.id).checked = (p.studied || []).includes(n.id); refreshState(n.id); });
   $("b-event").value = p.event ? p.event.type : ""; eventArgs();
   if (p.event && p.event.type === "assessment_result") { $("ev-node").value = p.event.node; $("ev-ans").value = p.event.answers; }
   if (p.event && "value" in p.event) $("ev-val").value = p.event.value;
+  stateSummary();
   runB();
 }
 $("b-run").addEventListener("click", runB);
@@ -304,6 +340,7 @@ const KIND = { REVIEW_DUE: "review", REMEDIATION_TRIGGERED: "remediation", PRACT
 
 function daysBlock(days, trace) {
   if (!days.length) return `<p class="small">No days planned.</p>`;
+  const nm = Object.fromEntries(nodes.map(n => [n.id, n.name]));
   const why = selectedReasons(trace);
   let sawReview = false, sawCond = false, sawRem = false, sawPractice = false;
   const html = `<div class="days">${days.map(d => {
@@ -316,7 +353,7 @@ function daysBlock(days, trace) {
         kind === "practice" ? "more practice on a studied concept that is not proven yet (PRACTICE_FOR_EVIDENCE)" :
         kind === "remediation" ? "remediation of a prerequisite (REMEDIATION_TRIGGERED)" :
         cond ? "conditional: re-check prerequisites before doing it" : "new learning";
-      return `<span class="chip${kind ? " " + kind : ""}" title="${title}">${a}${cond ? "*" : ""}${kind ? ` · ${kind}` : ""}</span>`;
+      return `<span class="chip${kind ? " " + kind : ""}" title="${esc(nm[a] || a)}: ${title}">${a}${cond ? "*" : ""}${kind ? ` · ${kind}` : ""}</span>`;
     }).join("");
     return `<div class="card day"><b>Day ${d.day}</b>${d.missed ? ' <span class="pill bad">missed</span>' : ""}
       <div class="bar"><span style="width:${total ? 100 * d.minutes_used / total : 0}%"></span></div>
@@ -367,8 +404,35 @@ function traceBlock(trace, key) {
       <td><span class="pill ${rc(t.reason_code)}">${t.reason_code}</span></td><td class="num">${t.remaining_budget ?? ""}</td></tr>`).join("")}</tbody></table></div>`;
 }
 
-function planBlock(plan, key) {
-  let h = statusBlock(plan.status, plan.feasibility) + unplacedBlock(plan) + daysBlock(plan.days, plan.trace);
+// The plan drawn on the curriculum graph: each concept coloured by the day it is scheduled on.
+function planGraph(days, trace, target, states) {
+  if (!days || !days.length || !edges.length) return "";
+  const firstDay = {}, why = selectedReasons(trace);
+  days.forEach(d => (d.activities || []).forEach(a => { if (!(a in firstDay)) firstDay[a] = d.day; }));
+  const N = Math.max(1, ...days.filter(d => (d.activities || []).length).map(d => d.day));
+  const need = Site.ancestors(target, edges); need.add(target);
+  const shade = k => 0.12 + 0.5 * (N > 1 ? (k - 1) / (N - 1) : 0);
+  const svg = Site.dagSVG(nodes, edges, {
+    label: "Plan on the curriculum graph",
+    style: id => {
+      const k = firstDay[id], kind = k ? KIND[why[k + ":" + id]] : null;
+      if (k) return { fill: "var(--accent)", opacity: shade(k), strong: id === target, badge: "day " + k + (kind ? " · " + kind : "") };
+      if (!need.has(id)) return { dim: true, badge: "not needed" };
+      const cls = states && states[id] ? states[id].class : null;
+      return { dashed: true, strong: id === target, badge: cls === "Mastered" ? "mastered" : "not placed" };
+    },
+    tip: id => {
+      const n = nodes.find(x => x.id === id), k = firstDay[id];
+      return `<b>${esc(id)}</b>: ${esc(n.name)} (${n.minutes} min)<br>${k ? "first scheduled on day " + k : need.has(id) ? "not scheduled in this plan" : "not a prerequisite of " + esc(target)}`;
+    },
+  });
+  const ramp = Array.from({ length: Math.min(N, 8) }, (_, i) => `<span style="background:var(--accent);opacity:${shade(1 + i * (N - 1) / Math.max(1, Math.min(N, 8) - 1)) + 0.05}"></span>`).join("");
+  return `<div class="legend"><span>day 1<span class="ramp">${ramp}</span>day ${N}</span><span>dashed: needed but not scheduled</span><span>faded: not needed for ${esc(target)}</span><span>bold border: target</span></div>
+    <div class="dag-wrap">${svg}</div>`;
+}
+
+function planBlock(plan, key, target, states) {
+  let h = statusBlock(plan.status, plan.feasibility) + unplacedBlock(plan) + planGraph(plan.days, plan.trace, target, states) + daysBlock(plan.days, plan.trace);
   if (plan.assessment_candidates && plan.assessment_candidates.length)
     h += `<p class="small">Assessment candidates (Uncertain prerequisites worth testing): ${plan.assessment_candidates.join(", ")}</p>`;
   if (plan.trace) h += traceBlock(plan.trace, key);
@@ -377,7 +441,7 @@ function planBlock(plan, key) {
     h += `<h3>Best-effort plan (Week 8)</h3>
       <p class="small">The deadline cannot be met, but the learner does not idle: the same daily rules plan the work that still fits,
         with the same prerequisite gate and budget. The infeasibility report above is unchanged.</p>`;
-    h += daysBlock(plan.best_effort_days, plan.best_effort_trace) + traceBlock(plan.best_effort_trace, key + "-be");
+    h += planGraph(plan.best_effort_days, plan.best_effort_trace, target, states) + daysBlock(plan.best_effort_days, plan.best_effort_trace) + traceBlock(plan.best_effort_trace, key + "-be");
   }
   return h;
 }
@@ -399,11 +463,12 @@ async function runB() {
   }
   if (res.ok === false) { out.innerHTML = `<p class="err">${esc(res.error)}</p>`; return; }
   let h = saved ? `<div class="note">Saved output (Python engine not running): <code>site/data/fallback.json</code>, made by <code>site/build_data.py</code> with the same code.</div>` : "";
-  h += `<div class="card"><h3 style="margin-top:0">Plan for target ${esc(payload.target)}</h3>`;
+  const tname = (nodes.find(n => n.id === payload.target) || {}).name || "";
+  h += `<div class="card"><h3 style="margin-top:0">Plan for ${esc(payload.target)} · ${esc(tname)}</h3>`;
   if (!res.is_valid) {
     h += `<p><span class="pill bad">${esc(res.status)}</span> ${res.error_codes.map(c => `<code>${esc(c)}</code>`).join(" ")}</p><p class="small">${esc(res.message)}</p>`;
   } else {
-    h += planBlock(res.plan, "plan");
+    h += planBlock(res.plan, "plan", payload.target, res.states);
   }
   h += `<span class="src">Code: <code>src/planning/service.py · plan_request</code> → <code>src/planning/static_baseline.py · generate_static_plan</code>; reason codes from <code>src/trace/schema.py</code></span></div>`;
   if (res.replan) {
@@ -414,7 +479,7 @@ async function runB() {
     if (res.replan.error) h += `<p class="err">${esc(res.replan.error)}</p>`;
     else {
       if (ev.type === "assessment_result" && res.replan.states[ev.node]) h += `<p class="small">${ev.node} is now ${stateLine(res.replan.states[ev.node])}</p>`;
-      h += planBlock(res.replan, "replan");
+      h += planBlock(res.replan, "replan", payload.target, res.replan.states);
     }
     h += `<span class="src">Code: <code>src/planning/replan.py · replan</code></span></div>`;
   }
@@ -431,14 +496,19 @@ async function runB() {
   // fallback.json arrives first (fast, local); presets and the curriculum list come from it
   while (!Engine.fallback && Engine.mode === "loading") await new Promise(r => setTimeout(r, 100));
   if (!Engine.fallback) return;
-  nodes = Engine.fallback.curriculum.nodes;
-  buildConcepts(); eventArgs();
-  document.querySelectorAll("[data-preset-a]").forEach(b => b.addEventListener("click", () => loadPresetA(b.dataset.presetA)));
-  document.querySelectorAll("[data-preset-b]").forEach(b => b.addEventListener("click", () => loadPresetB(b.dataset.presetB)));
   const q = new URLSearchParams(location.search);
+  setCurriculum(q.get("cur") === "toy" ? "toy" : "maths");
+  document.querySelectorAll("[data-cur]").forEach(b => b.addEventListener("click", () => {
+    setCurriculum(b.dataset.cur);
+    loadPresetB(b.dataset.cur === "toy" ? "cold_start" : "m_cold_start");
+  }));
+  document.querySelectorAll("[data-preset-a]").forEach(b => b.addEventListener("click", () => loadPresetA(b.dataset.presetA)));
   showTab(location.hash === "#b" ? "b" : "a");
   loadPresetA(q.get("preset") && Engine.fallback.a[q.get("preset")] ? q.get("preset") : "counterexample_12_18");
-  loadPresetB(q.get("plan") && Engine.fallback.b[q.get("plan")] ? q.get("plan") : "cold_start");
+  if (q.get("plan") && Engine.fallback.b[q.get("plan")]) loadPresetB(q.get("plan"));
+  else if (q.get("target") && nodes.some(n => n.id === q.get("target"))) {
+    markPreset(null); $("b-target").value = q.get("target"); runB();
+  } else loadPresetB(curKey === "toy" ? "cold_start" : "m_cold_start");
   // re-run the current inputs live once the engine is ready
   let wasReady = Engine.mode === "ready";
   Engine.onChange(e => {

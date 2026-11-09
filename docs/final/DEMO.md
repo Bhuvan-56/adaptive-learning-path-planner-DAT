@@ -7,17 +7,23 @@ Before the demo: open the site once with internet so Pyodide (about 10 MB) is ca
 ## 1. Problem and system (2 min): `index.html`, `curriculum.html`
 
 - The task: target concept, deadline, daily budget → a day-by-day plan that respects prerequisites, adapts to answers and explains itself.
-- The curriculum page shows the 4-concept graph: A → B, A → C, B → D, C → D, with durations of 5, 5, 10 and 10 minutes.
+- The curriculum page opens on the 16-concept **Mathematics** curriculum (fractions to integrals, 10–25 minute topics). Click **QUAD** to show everything it requires (4 prerequisites, 65 minutes from scratch), then **Plan QUAD in the live demo**.
+- Switch to **Toy** to show the 4-concept curriculum (A → B, A → C, B → D, C → D) that every evaluation result uses.
 - The modules M1–M8 are summarised in `docs/final/FINAL_REPORT.md` §2.
 
-## 2. Planning live (4 min): `demos.html`, demo B
+## 2. Planning live (4 min): `demos.html`, demo B, Mathematics curriculum
 
-1. **Cold start**: the plan for D with every concept Uncertain. Point at a conditional item (`*`) and open the trace: every concept on every day has a reason code.
-2. **B weak**: B is planned on day 1, and its dependent D only on a later day (conditional).
-3. **Replan: A, B studied once**: `PRACTICE_FOR_EVIDENCE`, the Week 7 deadlock fix. A concept studied once but still Uncertain gets more practice instead of blocking everything.
-4. **2 days (infeasible)**: `INFEASIBLE_PROVED / CAPACITY_EXCEEDED`, with the necessary fixes (extend by N days or add N minutes).
-5. **Replan: deadline cut to 2 days** (Week 8): the same infeasibility report, plus a **best-effort plan**: B on day 1, C on day 2. The learner keeps working instead of idling.
-6. **Budget 8 (infeasible)**: a single block (10 min) is longer than the budget. This is proved infeasible and there is no best-effort plan, because that block can never run.
+Each plan is drawn on the curriculum graph, with each concept shaded by the day it is first scheduled.
+
+1. **Cold start → Integrals** (30 min/day, 10 days): 12 concepts over 8 days. Concepts not needed for Integrals (logarithms, trigonometry, inequalities, systems) are faded. Point at a conditional item (`*`) and open the trace: every concept on every day has a reason code.
+2. **Algebra already mastered**: the same target with 5 algebra concepts mastered; the plan skips them and finishes 2 days sooner.
+3. **Budget 20 (calculus won't fit)**: Derivatives and Integrals are 25-minute topics, so a 20-minute budget is proved infeasible (`BLOCK_EXCEEDS_DAILY_BUDGET`) with the minimum fix.
+4. **Studied twice, still unproven** (replan): `PRACTICE_FOR_EVIDENCE`, the Week 7 deadlock fix. A concept studied but still Uncertain gets more practice instead of blocking everything.
+5. **Quadratics failed twice** (replan): two wrong answers on QUAD trigger **remediation** of its unmastered prerequisite (Exponents) before anything else (`REMEDIATION_TRIGGERED`).
+6. **Missed day (review comes due)** (replan): the day is recorded as missed, the rest is replanned, and a mastered concept comes back as a **spaced review** (`REVIEW_DUE`).
+7. **Deadline cut to 4 days** (replan, Week 8): `INFEASIBLE_PROVED / CAPACITY_EXCEEDED` with the necessary fixes, plus a **best-effort plan** of the work that still fits. The learner keeps working instead of idling.
+
+The **Toy** presets show the same behaviours on 4 concepts. The 4-concept curriculum is the one behind every number in section 4.
 
 ## 3. Scheduling (1 min): `demos.html` demo A, `scheduling.html`
 
