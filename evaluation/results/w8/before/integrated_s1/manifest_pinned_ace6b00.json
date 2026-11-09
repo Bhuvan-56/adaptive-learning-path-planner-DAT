@@ -1,0 +1,58 @@
+{
+  "benchmark_name": "w5_integrated_multiseed",
+  "config_hash": "835cb3e443e32ef413ef8213338580b9b3406a19f9401a6e31c9b5000509a089",
+  "git": {
+    "commit_sha": "ace6b00d6a575277866ab0b821fd2214def98637",
+    "dirty": false
+  },
+  "input_files": {
+    "config": {
+      "path": "experiments/w8_final_s1.yaml",
+      "sha256": "afea6f64bd93255bcc8b1aaf0b9a907307c4d3c22ddeb1dce6a1ae1433806507"
+    },
+    "curriculum": {
+      "path": "<pinned checkout at ace6b00>/data/curricula/demo_curriculum.json",
+      "sha256": "36c8fcca4c0adfe00aa53a3664b7a501c179b6eeb6c502811699bd9765e817d4"
+    },
+    "item_bank": {
+      "path": "<pinned checkout at ace6b00>/data/processed/item_bank_synthetic.csv",
+      "sha256": "e40ffdebe931d155cc5d9b6c9451f3aaf270231f2c50a81f6cdd54851af2f9e5"
+    },
+    "profiles": {
+      "path": "<pinned checkout at ace6b00>/config/profiles.yaml",
+      "sha256": "5e001c16c68f105b30fde6cf7eb7e3116c5ce0496773d341aa55e2b35a9d312f"
+    },
+    "q_matrix": {
+      "path": "<pinned checkout at ace6b00>/data/processed/q_matrix_synthetic.csv",
+      "sha256": "1ed05f59ac73f8c4ecd3f937c8ed5ed414f12324b8760ede234266cf0decc39e"
+    }
+  },
+  "output_files": {
+    "per_learner.csv": "624bbec550d5cc5ad85f3cb5945da565f3a8ddc76f0d02e161e1ee8b76583d21",
+    "per_learner_seed_101.csv": "2976c22304be759e2fcec83d99315ed92fc436b6cebf03648abf313069c57b61",
+    "per_learner_seed_2024.csv": "71d9d250bb6235c991e454c11cf365c697d0137f9357d5f18b2427ad5ae1f512",
+    "per_learner_seed_42.csv": "624bbec550d5cc5ad85f3cb5945da565f3a8ddc76f0d02e161e1ee8b76583d21",
+    "per_learner_seed_777.csv": "15b324ec53a3ca435634aec1d695ea9774002724acfd601ec1a6620f10b8c08f",
+    "per_learner_seed_999.csv": "f4aa4379b766871041e570a351badefc53ce4bdb3eaf23daefee02ea049e9097",
+    "summary.md": "2d6e6d7eeef57872e70acb6b738a6d9f69514fd8728364d4dbca6f5673217c76",
+    "summary_seed_101.md": "f61105c0db5862f42010ac9cc8b7550fd393c5a722d445a91132e072cb6ebe93",
+    "summary_seed_2024.md": "7cfa5a9015434a02f8678a1ee54a4939a51cd1dd68c50d19d405d33fa75823c0",
+    "summary_seed_42.md": "06dfff23de3448f083747395550c0bd1544ea1f039e51753da2414cda3a52af7",
+    "summary_seed_777.md": "2fff832e92db333fbe2abaaf150a6a15b6c54c160929627565e196c4730d9c6e",
+    "summary_seed_999.md": "ceced770fa2124f3ecc9b8baf39a3ecd14603ca6883885f113afa03fafae37bd"
+  },
+  "package_versions": {
+    "networkx": "3.1",
+    "numpy": "1.26.4",
+    "pytest": "7.3.1",
+    "yaml": "6.0.1"
+  },
+  "seeds": [
+    42,
+    101,
+    2024,
+    777,
+    999
+  ],
+  "timestamp": "2026-11-09T16:29:14Z"
+}
