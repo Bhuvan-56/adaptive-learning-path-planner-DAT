@@ -1,0 +1,4 @@
+# git ace6b00 (pre-fix), --runxfail
+E       AssertionError: advance_day calls from integrated.py: {'daily_loop': 0, 'other': 40}
+E       assert 0 > 0
+1 failed in 7.77s

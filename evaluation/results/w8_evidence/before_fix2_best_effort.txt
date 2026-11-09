@@ -1,0 +1,7 @@
+# git ace6b00 (pre-fix), --runxfail
+E       KeyError: 'best_effort_days'
+E       KeyError: 'best_effort_days'
+E       AssertionError: [[[], []], [[], []], [[], []], [[], []], [[], []], [[], []]]
+E       assert False
+E        +  where False = any(<generator object test_integrated_adaptive_arm_works_on_infeasible_horizon.<locals>.<genexpr> at 0x00000217AB7160A0>)
+3 failed, 1 passed in 2.92s

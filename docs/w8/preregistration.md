@@ -79,3 +79,16 @@ Expected before running
 - Fix 2 may show no effect in the 4-concept S0/S1 runs; its effect is shown by
   the scripted-learner tests. This is reported as is.
 - All claims are about simulator behaviour on synthetic learners only.
+
+Addendum (before any code change; found while writing the tests)
+- The adaptive loop only calls replan after an executed activity. If the
+  first plan of the horizon (generate_static_plan) is already
+  INFEASIBLE_PROVED, nothing is ever executed, so replan is never called and
+  fix 2 could never apply. Change 3 is extended: when the first plan is
+  INFEASIBLE_PROVED, the adaptive arms call replan once with
+  changed_deadline(horizon_days) (same deadline, so no state change) to get
+  the best-effort plan. generate_static_plan itself stays unchanged, so the
+  static arms still do nothing on an infeasible request.
+- Test for change 3: an integrated run with a 2-day horizon (30 minutes of
+  work for a cold learner, 20 minutes of capacity), where adaptive_full
+  currently executes nothing.
