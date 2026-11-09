@@ -1,0 +1,235 @@
+==========================================================
+CLEAN RUN AUDIT SCRIPT
+Repo URL: C:/Users/bhuva/Downloads/DAT11
+Target SHA: 74b6c02f4c1f70a7bf132a0b74fa8e44ea8d41aa
+Clone Dir: C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081
+==========================================================
+[1/6] Cloning repository...
+Cloning into 'C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081'...
+done.
+[2/6] Checking out SHA 74b6c02f4c1f70a7bf132a0b74fa8e44ea8d41aa...
+Note: switching to '74b6c02f4c1f70a7bf132a0b74fa8e44ea8d41aa'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 74b6c02 docs(w8): demo script, README final deliverables, site notes
+[3/6] Creating clean virtual environment...
+Using base Python: C:\Users\bhuva\anaconda3\python.exe
+[4/6] Installing dependencies from requirements.txt...
+
+[notice] A new release of pip available: 22.3.1 -> 26.3
+[notice] To update, run: C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081\.venv_clean\Scripts\python.exe -m pip install --upgrade pip
+[5/6] Running pytest test suite...
+........................................................................ [ 26%]
+........................................................................ [ 53%]
+........................................................................ [ 79%]
+.......................................................                  [100%]
+271 passed in 157.32s (0:02:37)
+[6/8] Running end-to-end demo command...
+======================================================================
+ADAPTIVE LEARNING ENGINE: END-TO-END DEMONSTRATION SUMMARY
+======================================================================
+Curriculum: data/curricula/demo_curriculum.json (Target: D, Horizon: 3 days, Daily Budget: 10 min)
+Policy: using declared default (C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081\src\..\config\bkt_params.yaml)
+Seed: 20261012 | Config Hash: ed5b25a89f00bc44... | Git SHA: 74b6c02 (dirty)
+
+[1] Learner Profiles & Day 1 Plan Divergence:
+  * Novice Learner (Budget 10m):
+    - Scheduled Activities Day 1: ['A', 'B']
+    - Conditional Activities Day 1: ['B']
+    - Gating Rationale: Foundational concept 'A' is unprobed (Uncertain).
+      Dependent concept 'D' is FILTERED with reason UNCERTAIN_NEEDS_ASSESSMENT.
+  * Intermediate Learner (Budget 10m):
+    - Scheduled Activities Day 1: ['C']
+    - Gating Rationale: Prerequisites 'A' and 'B' are ALREADY_MASTERED and filtered.
+      Unlocked downstream concept 'C' (10 min) is SELECTED for Day 1.
+
+[2] Dynamic Assessment & Replanning Scenarios (Concept 'A'):
+  * Scenario A (Assessment Passed - Unblocked):
+    - Response Sequence: [1, 1, 1, 1] -> p: 0.50 -> 0.9962 (Mastered)
+    - Outcome: Prerequisite 'A' becomes evidence-Mastered.
+      Dependent concept 'B' becomes unconditionally admissible and is SELECTED on Day 1.
+  * Scenario B (Assessment Failed - Stays Blocked):
+    - Response Sequence: [0, 0, 0, 0] -> p: 0.50 -> 0.1157 (Weak)
+    - Outcome: Concept 'A' classifies as Weak.
+      Dependent concepts 'B' and 'D' remain FILTERED with reason PREREQUISITE_UNMET.
+      Planner status resolves to HEURISTIC_NO_PLAN (target unreachable within horizon).
+
+[3] Missed Day & Budget Infeasibility Handling:
+  * Missed Day: Day 1 recorded as missed (minutes_used=0). Completed nodes {'A', 'B'} preserved.
+  * Budget Reduction: Reduced from 10m to 5m/day.
+    - Planner Status: INFEASIBLE_PROVED
+    - Reason Code: InfeasibilityReason.BLOCK_EXCEEDS_DAILY_BUDGET
+    - Proved Infeasibility: Adding extra days will not resolve an indivisible activity duration constraint.
+    - Actionable Minimum Fix: raise daily budget to at least 10 minutes
+
+[4] Latent Cognitive State Invariant Verification (EvaluatorView):
+  * True Latent Mastery (Novice):       {'A': False, 'B': False, 'C': False, 'D': False}
+  * True Latent Mastery (Intermediate): {'A': True, 'B': True, 'C': False, 'D': False}
+  * Invariant: Latent states remained strictly inaccessible to planning & state code.
+======================================================================
+SUCCESS: All 12 plan and trace artifacts successfully written to 'C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081\evaluation\results\w3\demo'.
+[7/8] Running W4 slice command...
+
+
+======================================================================
+ADAPTIVE LEARNING ENGINE: WEEK 4 SLICE DEMONSTRATION SUMMARY
+======================================================================
+Curriculum: data/curricula/demo_curriculum.json (Target: D, Daily Budget: 10 min)
+Policy: using declared default (C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081\src\..\config\bkt_params.yaml)
+Seed: 20261024 | Config Hash: bcf05f5f321a6a6a... | Git SHA: 74b6c02 (dirty)
+
+[1] Adaptive CAT Diagnostic Outcomes (Fitted to synthetic data):
+  * Learner 1 (profile_1): theta_hat = 0.1864, items asked = 10, variance = 0.2182
+  * Learner 2 (profile_2): theta_hat = 0.9329, items asked = 10, variance = 0.2555
+
+[2] Day 1 Plans & Gating from Diagnostic Priors:
+  * Learner 1 Day 1 scheduled: ['A', 'B'] (status: FEASIBLE)
+  * Learner 2 Day 1 scheduled: ['A', 'B'] (status: FEASIBLE)
+
+[3] Assessment Response Updates & Difficulty Stepping:
+  * Scenario Passed (Learner 2): responses = [1, 1, 1, 1]
+    - Concept A p: 0.7177 -> 0.9985 (Mastered)
+    - Difficulty A: 0.20 -> 0.40
+    - Dependent B gating: flipped to admissible (selected on Day 1)
+  * Scenario Failed (Learner 1): responses = [0, 1, 0, 0]
+    - Concept A p: 0.5465 -> 0.1345 (Weak)
+    - Difficulty A: 0.20 -> 0.05
+    - Dependent B gating: remains blocked (PREREQUISITE_UNMET)
+
+[4] Spaced Review Scheduling (Leftover Budget):
+  * Day 5 activities: ['B', 'A'] (minutes used: 10/10)
+  * Concept A review status: scheduled in leftover budget with reason REVIEW_DUE
+
+[5] Prerequisite Remediation:
+  * Repeated failure on D triggered remediation: scheduled ['B'] first inside daily budget
+
+[6] Dynamic Replanning (Progress Preservation):
+  * Missed Day: recorded missed day, completed progress {'A'} preserved
+  * Reduced Budget (10m -> 5m): completed progress {'A'} preserved
+  * Shortened Deadline (deadline=2d): completed progress {'A'} preserved
+======================================================================
+SUCCESS: All 20 slice artifacts successfully written to 'C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081\evaluation\results\w4\slice'.
+[8/8] Running evaluate command...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 42 completed in 1.14s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 101 completed in 0.79s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 2024 completed in 0.89s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 777 completed in 0.93s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seed 999 completed in 1.01s
+======================================================================
+ADAPTIVE LEARNING ENGINE: INTEGRATED EVALUATION SUMMARY
+======================================================================
+Config: experiments/w5_integrated.yaml | Output Dir: C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081\evaluation\results\w5\eval_clean
+Benchmark: w5_integrated_multiseed
+Commit SHA: 74b6c02 | Dirty: True
+Config Hash: 9a996a6b410f1194...
+
+Arm Results:
+  * adaptive_full: Mastered=1.5000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * static_prerequisite_order: Mastered=2.0000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * non_adaptive_greedy: Mastered=2.0000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * ablation_no_diagnostic: Mastered=1.5000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * ablation_no_replan: Mastered=2.0000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * ablation_no_difficulty_step: Mastered=1.5000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * ablation_no_review: Mastered=1.5000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * ablation_no_remediation: Mastered=1.5000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+======================================================================
+Artifacts written: C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081\evaluation\results\w5\eval_clean\per_learner.csv, C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081\evaluation\results\w5\eval_clean\summary.md, C:\Users\bhuva\AppData\Local\Temp\dat11_clean_48978081\evaluation\results\w5\eval_clean\manifest.json
+SUCCESS: All hard-correctness counts are zero and trace coverage is 1.0.
+==========================================================
+PASS: Clean run verified successfully on SHA 74b6c02f4c1f70a7bf132a0b74fa8e44ea8d41aa.
+All tests passed and all artifacts (14 demo, 21 slice, 3 evaluate) verified.
+==========================================================
