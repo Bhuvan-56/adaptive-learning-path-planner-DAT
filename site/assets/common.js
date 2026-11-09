@@ -28,7 +28,7 @@
       `<a href="${href}"${href === here ? ' class="active" aria-current="page"' : ""}>${label}</a>`).join("");
     const h = document.createElement("header");
     h.className = "site";
-    h.innerHTML = `<div class="inner"><a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span>Adaptive Learning-Path Planner</a>
+    h.innerHTML = `<div class="inner"><a class="brand" href="index.html"><svg class="logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="8.5" y="3" width="13.5" height="11" rx="1.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16.5 14v2.6M14 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><g stroke="var(--surface)" stroke-width="1.6" paint-order="stroke"><circle cx="6.6" cy="10.6" r="3.1" fill="currentColor"/><path d="M1.2 22v-1.2a5 5 0 0 1 5-5h.8a5 5 0 0 1 5 5V22z" fill="currentColor"/></g></svg>Adaptive Learning-Path Planner</a>
       <nav>${nav}</nav><button class="theme-toggle" type="button" aria-label="Switch light or dark theme" title="Switch theme"></button></div>`;
     document.body.prepend(h);
     const btn = h.querySelector(".theme-toggle");
