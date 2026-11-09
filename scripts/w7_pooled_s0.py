@@ -6,7 +6,8 @@ in seed order, with compute_paired_bootstrap_ci (B = 1000, seed 42).
 Paired differences use rows sorted by the per-learner seed column.
 
 Usage:
-  python scripts/w7_pooled_s0.py <results_dir> [arm_a:arm_b ...]
+  python scripts/w7_pooled_s0.py <results_dir> [arm_a:arm_b ...] [--horizon=N]
+  (--horizon: days per learner for the no-plan count; default 5. Week 8 maths runs use 10.)
 """
 import os
 import sys
@@ -19,7 +20,7 @@ from src.evaluation.compare import compute_paired_bootstrap_ci  # noqa: E402
 SEEDS = [42, 101, 2024, 777, 999]
 
 
-def main(results_dir, pairs):
+def main(results_dir, pairs, horizon=5):
     df = pd.concat(
         [pd.read_csv(os.path.join(results_dir, f"per_learner_seed_{s}.csv")) for s in SEEDS],
         ignore_index=True,
@@ -29,7 +30,7 @@ def main(results_dir, pairs):
         m, lo, hi = compute_paired_bootstrap_ci(g.mastered_concepts.values, 1000, 0.95, 42)
         print(
             f"{arm}: n={len(g)} mastered {m:.4f} [{lo:.4f}, {hi:.4f}] "
-            f"no_plan {g.no_plan_days.sum()}/{len(g) * 5} prereq {g.prereq_violations.sum()} "
+            f"no_plan {g.no_plan_days.sum()}/{len(g) * horizon} prereq {g.prereq_violations.sum()} "
             f"budget {g.budget_violations.sum()} runtime_p50 {g.runtime_ms.median():.4f} "
             f"runtime_p95 {g.runtime_ms.quantile(0.95):.4f}"
         )
@@ -53,4 +54,6 @@ def main(results_dir, pairs):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2:])
+    args = sys.argv[2:]
+    horizon = next((int(a.split("=", 1)[1]) for a in args if a.startswith("--horizon=")), 5)
+    main(sys.argv[1], [a for a in args if not a.startswith("--horizon=")], horizon)

@@ -22,7 +22,6 @@ def _cfg(name, tmp_path, **override):
     return str(p)
 
 
-@pytest.mark.xfail(strict=True, reason="W8: the harness only knows the toy curriculum")
 def test_maths_s0_run_uses_the_maths_curriculum(tmp_path):
     res = integrated.run_integrated_evaluation(config_path=_cfg("w8_maths_s0.yaml", tmp_path),
                                                output_dir=str(tmp_path / "out"), override_learners=3,
@@ -35,7 +34,6 @@ def test_maths_s0_run_uses_the_maths_curriculum(tmp_path):
         assert r.trace_coverage == 100.0
 
 
-@pytest.mark.xfail(strict=True, reason="W8: S3 is not a scenario of the harness yet")
 def test_s3_generator_uses_per_learner_intercepts():
     diffs = {"A": -0.2, "B": 0.5}
     gen, _ = integrated.make_learner_generator("S3", theta=0.3, concept_difficulties=diffs)
@@ -50,7 +48,6 @@ def test_s3_generator_uses_per_learner_intercepts():
     assert (gen.gamma, gen.rho, gen.difficulty_weight, gen.p_F) == (0.40, 0.10, 1.0, 0.0)
 
 
-@pytest.mark.xfail(strict=True, reason="W8: S3 is not a scenario of the harness yet")
 def test_toy_s3_run_completes_with_hard_constraints(tmp_path):
     res = integrated.run_integrated_evaluation(config_path=_cfg("w8_toy_s3.yaml", tmp_path),
                                                output_dir=str(tmp_path / "out"), override_learners=4,

@@ -64,7 +64,7 @@ from src.diagnostic.diagnostic import (
     DEFAULT_QMATRIX_PATH,
     DEFAULT_CURRICULUM_PATH,
 )
-from src.simulation.simulator import SimulatedLearner, MatchedBKTGenerator
+from src.simulation.simulator import SimulatedLearner, MatchedBKTGenerator, MismatchedPFAOrLogisticGenerator
 from src.evaluation.retention import administer_retention_quiz
 from src.planning.greedy_fallback import best_singleton_fallback
 from src.provenance import (
@@ -153,14 +153,42 @@ def resolve_scenario_name(config: Dict[str, Any]) -> str:
     return "S0"
 
 
-def make_learner_generator(scenario_name: str) -> Tuple[MatchedBKTGenerator, bool]:
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+
+def _repo_path(path: Optional[str], default: str) -> str:
+    """Config paths are relative to the repository root; absent means the toy default."""
+    if not path:
+        return default
+    return path if os.path.isabs(path) else os.path.join(REPO_ROOT, path)
+
+
+def make_learner_generator(
+    scenario_name: str,
+    theta: Optional[float] = None,
+    concept_difficulties: Optional[Dict[str, float]] = None,
+) -> Tuple[Any, bool]:
     """
-    Constructs the MatchedBKTGenerator family and retention quiz flag for the given scenario.
+    Constructs the generator family and retention quiz flag for the given scenario.
     S0: default matched BKT (p_F=0.0, k=0.0)
     S1: forgetting variant (p_F=0.05, k=0.0) with delayed retention quiz
     S2: difficulty-sensitive variant (p_F=0.0, k=0.50)
+    S3: mismatched PFA/logistic generator (W8, docs/w8/preregistration_maths.md):
+        gamma 0.40, rho 0.10, difficulty_weight 1.0, mastered_p 0.75, p_F 0, with a
+        per-learner intercept beta_c = (theta* - b_c) + logit(0.75), so ability matters
+        and the initial mastered set equals the S0 truth rule theta* >= b_c.
+        Called without theta (config validation), it returns an unconfigured instance.
     """
     s = str(scenario_name).strip()
+    if s == "S3":
+        gen = MismatchedPFAOrLogisticGenerator()
+        if theta is not None and concept_difficulties is not None:
+            logit_mp = math.log(0.75 / 0.25)
+            gen.configure(
+                concept_intercepts={c: (float(theta) - float(b)) + logit_mp for c, b in concept_difficulties.items()},
+                gamma=0.40, rho=0.10, difficulty_weight=1.0, mastered_p=0.75, p_F=0.0,
+            )
+        return gen, False
     if s == "S0":
         return MatchedBKTGenerator(p_S=0.10, p_G=0.25, p_T=0.10, p_F=0.00, k=0.00), False
     elif s == "S1":
@@ -168,7 +196,7 @@ def make_learner_generator(scenario_name: str) -> Tuple[MatchedBKTGenerator, boo
     elif s == "S2":
         return MatchedBKTGenerator(p_S=0.10, p_G=0.25, p_T=0.10, p_F=0.00, k=0.50), False
     else:
-        raise ValueError(f"Unknown scenario '{s}'. Expected one of: 'S0', 'S1', 'S2'.")
+        raise ValueError(f"Unknown scenario '{s}'. Expected one of: 'S0', 'S1', 'S2', 'S3'.")
 
 
 @dataclass
@@ -208,13 +236,13 @@ def _evaluate_single_seed(
     """Evaluates a single seed cohort across all configured arms."""
     out_dir = output_dir
     os.makedirs(out_dir, exist_ok=True)
-    curriculum_path = DEFAULT_CURRICULUM_PATH
+    curriculum_path = _repo_path(config.get("curriculum_path"), DEFAULT_CURRICULUM_PATH)
     g = load_graph(curriculum_path)
     curriculum_nodes = list(g.nodes())
     candidate_universe = get_candidate_universe(g, target_node)
 
     item_bank_path = DEFAULT_ITEM_BANK_PATH
-    qmatrix_path = DEFAULT_QMATRIX_PATH
+    qmatrix_path = _repo_path(config.get("qmatrix_path"), DEFAULT_QMATRIX_PATH)
     item_ids, catsim_matrix, qmatrix_dict, _ = load_item_bank_and_qmatrix(
         item_bank_path, qmatrix_path, curriculum_path
     )
@@ -260,7 +288,8 @@ def _evaluate_single_seed(
 
             # Instantiate simulation learner (held strictly by evaluation harness)
             scenario_name = resolve_scenario_name(config)
-            learner_gen, eval_retention = make_learner_generator(scenario_name)
+            learner_gen, eval_retention = make_learner_generator(
+                scenario_name, theta=gt.theta_true, concept_difficulties=concept_diffs)
             sim_learner = SimulatedLearner(
                 profile_id="profile_1",
                 initial_mastery=gt.latent_mastery,
@@ -890,9 +919,9 @@ def run_integrated_evaluation(
     # Multi-seed manifest listing all output files directly in out_dir
     combined_manifest_path = os.path.join(out_dir, "manifest.json")
     git_sha, dirty = get_git_info()
-    curriculum_path = DEFAULT_CURRICULUM_PATH
+    curriculum_path = _repo_path(config.get("curriculum_path"), DEFAULT_CURRICULUM_PATH)
     item_bank_path = DEFAULT_ITEM_BANK_PATH
-    qmatrix_path = DEFAULT_QMATRIX_PATH
+    qmatrix_path = _repo_path(config.get("qmatrix_path"), DEFAULT_QMATRIX_PATH)
     profiles_path = DEFAULT_PROFILES_PATH if os.path.exists(DEFAULT_PROFILES_PATH) else cfg_file
 
     output_checksums = {}
