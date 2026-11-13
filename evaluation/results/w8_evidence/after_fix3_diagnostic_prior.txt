@@ -1,0 +1,35 @@
+W8 fix 3 (B10 diagnostic prior) - AFTER the fix
+Base: c83a5dc (branch w8/final-fixes), fix uncommitted at time of run
+
+== New tests: .venv\Scripts\python -m pytest tests/test_w8_diagnostic_prior.py -q -p no:cacheprovider
+........                                                                 [100%]
+8 passed in 11.15s
+
+== Full suite: .venv\Scripts\python -m pytest -q -> 286 passed in 121.03s (baseline before the fix: 278 passed)
+
+== 20-learner run: experiments/w8_final.yaml (S0), seeds=[42], override_learners=20, override_resamples=1000
+   BEFORE = pinned checkout of c83a5dc; AFTER = this fix. Means over the 20 learners:
+arm                                  rows changed  mastered before  after  recall before   after  no-plan days before  after
+adaptive_full                                  19             2.30   2.25         0.7467  0.6175                 1.00   0.30
+static_prerequisite_order                       0             2.25   2.25         0.6525  0.6525                 0.00   0.00
+non_adaptive_greedy                             0             2.25   2.25         0.6525  0.6525                 0.00   0.00
+non_adaptive_greedy_best_singleton              0             2.25   2.25         0.6525  0.6525                 0.00   0.00
+ablation_no_diagnostic                          0             2.30   2.30         0.7467  0.7467                 1.00   1.00
+ablation_no_replan                              1             2.25   2.25         0.6525  0.6517                 0.00   0.00
+ablation_no_difficulty_step                    19             2.30   2.25         0.7467  0.6175                 1.00   0.30
+ablation_no_review                             19             2.30   2.25         0.7467  0.6225                 1.00   0.30
+ablation_no_remediation                        19             2.30   2.25         0.7467  0.6175                 1.00   0.30
+
+adaptive_full - static_prerequisite_order, mean mastered: before +0.05, after +0.00
+prerequisite violations after: 0, budget violations after: 0
+
+adaptive_full learners whose mastered count changed:
+ learner  theta_hat  before  after
+       0     0.4033       3      4
+       4    -1.3009       1      0
+       5    -0.9698       1      0
+      14     0.0623       3      4
+      19    -0.2547       3      2
+
+== Diagnostic ceiling: all-correct responder -> theta_hat 1.1279 (p 0.7555); all-incorrect -> theta_hat -1.3009 (p 0.2140).
+   In the harness, theta_hat reached 2.335 (p 0.912) for one learner, whose C was diagnosed Mastered.

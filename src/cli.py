@@ -12,6 +12,7 @@ import networkx as nx
 
 from src.curriculum.graph import load_graph, validate_graph
 from src.diagnostic.diagnostic import (
+    describe_concept_priors,
     load_item_bank_and_qmatrix,
     run_adaptive_diagnostic,
     DEFAULT_ITEM_BANK_PATH,
@@ -928,15 +929,7 @@ def run_slice(
             "variance": diag_1.variance,
             "items_asked": diag_1.items_asked,
             "num_items_asked": len(diag_1.items_asked),
-            "initial_priors": {
-                c: {
-                    "p": cs.p,
-                    "kappa": cs.kappa,
-                    "n": cs.n,
-                    "class": cs.classify(policy)
-                }
-                for c, cs in sorted(diag_1.concept_states.items())
-            }
+            "initial_priors": describe_concept_priors(diag_1, policy)
         },
         "learner_2": {
             "profile_id": profile_2,
@@ -944,15 +937,7 @@ def run_slice(
             "variance": diag_2.variance,
             "items_asked": diag_2.items_asked,
             "num_items_asked": len(diag_2.items_asked),
-            "initial_priors": {
-                c: {
-                    "p": cs.p,
-                    "kappa": cs.kappa,
-                    "n": cs.n,
-                    "class": cs.classify(policy)
-                }
-                for c, cs in sorted(diag_2.concept_states.items())
-            }
+            "initial_priors": describe_concept_priors(diag_2, policy)
         }
     }
 

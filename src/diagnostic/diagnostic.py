@@ -12,16 +12,18 @@ ARCHITECTURE & CONTRACT:
 2. Injected Responder: The diagnostic engine accepts an injected callable `respond(item_id)`
    returning 0 or 1. It never imports or interacts directly with the simulation engine.
 
-3. ADR-009 Cold-Start Mapping:
+3. ADR-009 Cold-Start Mapping (with the Week 8 amendment):
    - Probed concepts (having direct items in the Q-matrix) are initialized with:
        p = 1 / (1 + exp(-theta_hat)), clamped to [0.01, 0.99]
-       ConceptState.init_from_ability(p)  -> kappa=2.0, n=0, history=[]
+       ConceptState.init_from_diagnostic(p, answers) -> n=k, kappa=2+k, history=last answers,
+       where k is the number of administered items loading on the concept (k=0: n=0, kappa=2).
    - Unprobed concepts (having no items in the Q-matrix) are initialized with:
        ConceptState.cold_start()         -> p=0.5, kappa=2.0, n=0, history=[]
-   - All concept states classify as 'Uncertain' because n == 0 < min_obs.
+   - A concept with k >= 3 answered items is no longer forced to 'Uncertain'.
+   - DiagnosticResult.prior_only_states keeps the pre-W8 states (n=0) for the baseline arms.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 import math
 import os
@@ -248,6 +250,9 @@ class DiagnosticResult:
     variance: float
     items_asked: List[str]
     concept_states: Dict[str, ConceptState]
+    # W8 fix 3: answered items per concept, and the pre-W8 n = 0 states (baseline arms)
+    concept_item_counts: Dict[str, int] = field(default_factory=dict)
+    prior_only_states: Dict[str, ConceptState] = field(default_factory=dict)
 
     def __getitem__(self, item: str) -> Any:
         return getattr(self, item)
@@ -364,25 +369,51 @@ class AdaptiveDiagnostic:
         else:
             final_variance = float("inf")
 
-        # Build concept states according to ADR-009:
-        # - Concepts with items in bank: initialized from ability (p = sigmoid(theta_hat), kappa=2.0, n=0)
+        # Build concept states according to ADR-009 (Week 8 amendment):
+        # - Concepts with items in bank: p = sigmoid(theta_hat); the k items answered on the
+        #   concept count as evidence: n = k, kappa = 2 + k, history = its answers (k = 0: n = 0).
         # - Concepts without items in bank: cold start (p=0.5, kappa=2.0, n=0)
+        # prior_only_states keeps the pre-W8 states (n = 0) for the baseline arms.
         probed_concepts: Set[str] = set(self.item_to_concept.values())
         concept_states: Dict[str, ConceptState] = {}
+        prior_only_states: Dict[str, ConceptState] = {}
         prior_p = ability_to_prior(current_theta)
+
+        answers: Dict[str, List[int]] = {}
+        for iid, resp in zip(administered_item_ids, response_vector):
+            answers.setdefault(self.item_to_concept[iid], []).append(1 if resp else 0)
+        item_counts = {c: len(answers.get(c, [])) for c in self.curriculum_concepts}
 
         for concept in self.curriculum_concepts:
             if concept in probed_concepts:
-                concept_states[concept] = ConceptState.init_from_ability(prior_p)
+                concept_states[concept] = ConceptState.init_from_diagnostic(prior_p, answers.get(concept, []))
+                prior_only_states[concept] = ConceptState.init_from_ability(prior_p)
             else:
                 concept_states[concept] = ConceptState.cold_start()
+                prior_only_states[concept] = ConceptState.cold_start()
 
         return DiagnosticResult(
             theta_hat=current_theta,
             variance=final_variance,
             items_asked=administered_item_ids,
             concept_states=concept_states,
+            concept_item_counts=item_counts,
+            prior_only_states=prior_only_states,
         )
+
+
+def describe_concept_priors(result: DiagnosticResult, policy: Any) -> Dict[str, Dict[str, Any]]:
+    """Per-concept diagnostic prior for records and traces: p, kappa, n, items answered, class."""
+    return {
+        c: {
+            "p": cs.p,
+            "kappa": cs.kappa,
+            "n": cs.n,
+            "items_answered": int(result.concept_item_counts.get(c, 0)),
+            "class": cs.classify(policy),
+        }
+        for c, cs in sorted(result.concept_states.items())
+    }
 
 
 def run_adaptive_diagnostic(

@@ -92,9 +92,9 @@ def test_integrated_adaptive_arm_works_on_infeasible_horizon(tmp_path, monkeypat
     seen = []
     original = integrated.recount_plan_violations
 
-    def spy(executed_days, g, daily_budget):
+    def spy(executed_days, g, daily_budget, **kw):
         seen.append([list(d["activities"]) for d in executed_days])
-        return original(executed_days, g, daily_budget)
+        return original(executed_days, g, daily_budget, **kw)
 
     monkeypatch.setattr(integrated, "recount_plan_violations", spy)
     n = 6

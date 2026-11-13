@@ -58,11 +58,21 @@ def test_toy_s3_run_completes_with_hard_constraints(tmp_path):
 
 
 def test_toy_s0_unchanged_against_committed_run(tmp_path):
-    """Guard: the first 8 learners of seed 42 equal the committed W8 S0 run."""
+    """Guard: the first 8 learners of seed 42 equal the committed W8 S0 run.
+
+    W8 fix 3 (diagnostic evidence, LIMITATIONS B10) changes the arms that use the
+    diagnostic's states by design, so the guard covers the arms that must stay
+    identical: the three baselines (pre-fix n = 0 priors) and ablation_no_diagnostic
+    (cold start)."""
     res = integrated.run_integrated_evaluation(config_path=_cfg("w8_final.yaml", tmp_path),
                                                output_dir=str(tmp_path / "out"), override_learners=8,
                                                override_resamples=20)
+    unchanged = ["static_prerequisite_order", "non_adaptive_greedy",
+                 "non_adaptive_greedy_best_singleton", "ablation_no_diagnostic"]
     new = pd.read_csv(res["csv_path"]).drop(columns="runtime_ms")
     old = pd.read_csv(os.path.join(ROOT, "evaluation/results/w8/final/integrated_s0/per_learner_seed_42.csv"))
     old = old[old.learner_id.isin(new.learner_id.unique())].drop(columns="runtime_ms")
-    pd.testing.assert_frame_equal(new.reset_index(drop=True), old.reset_index(drop=True), check_dtype=False)
+    new = new[new.arm.isin(unchanged)].reset_index(drop=True)
+    old = old[old.arm.isin(unchanged)].reset_index(drop=True)
+    assert len(new) == 8 * len(unchanged)
+    pd.testing.assert_frame_equal(new, old, check_dtype=False)

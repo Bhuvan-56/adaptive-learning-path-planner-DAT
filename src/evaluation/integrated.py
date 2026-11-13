@@ -110,17 +110,21 @@ def recount_plan_violations(
     executed_days: List[Dict[str, Any]],
     g: nx.DiGraph,
     daily_budget: int,
+    initially_mastered: Optional[Set[str]] = None,
 ) -> Tuple[int, int]:
     """
     Independently recomputes prerequisite violations and budget violations from
     executed daily activity lists without calling the planner's internal checker.
+
+    initially_mastered (W8 fix 3): concepts classified evidence-Mastered in the arm's
+    initial states, before day 1. They count as met prerequisites without being studied.
 
     Returns:
         (prereq_violations, budget_violations)
     """
     prereq_violations = 0
     budget_violations = 0
-    completed_so_far: Set[str] = set()
+    completed_so_far: Set[str] = set(initially_mastered or ())
 
     for d_entry in executed_days:
         activities = d_entry.get("activities", [])
@@ -197,6 +201,10 @@ def make_learner_generator(
         return MatchedBKTGenerator(p_S=0.10, p_G=0.25, p_T=0.10, p_F=0.00, k=0.50), False
     else:
         raise ValueError(f"Unknown scenario '{s}'. Expected one of: 'S0', 'S1', 'S2', 'S3'.")
+
+
+# Baseline arms start from the pre-W8 diagnostic priors (n = 0) so their behaviour is unchanged.
+BASELINE_ARMS = ("static_prerequisite_order", "non_adaptive_greedy", "non_adaptive_greedy_best_singleton")
 
 
 @dataclass
@@ -327,8 +335,13 @@ def _evaluate_single_seed(
             # Build initial concept states based on arm definition
             if arm == "ablation_no_diagnostic":
                 initial_states = {c: ConceptState.cold_start() for c in curriculum_nodes}
+            elif arm in BASELINE_ARMS:
+                # W8 fix 3: baselines keep the pre-fix diagnostic priors (n = 0), unchanged.
+                initial_states = dict(diag_res.prior_only_states)
             else:
                 initial_states = dict(diag_res.concept_states)
+            # W8 fix 3: classified now, before the loop updates the states in place.
+            initially_mastered = {c for c, st in initial_states.items() if st.classify(policy) == "Mastered"}
 
             # Execution setup
             completed_so_far: Set[str] = set()
@@ -587,7 +600,8 @@ def _evaluate_single_seed(
                 raise ValueError(f"Unknown evaluation arm: {arm}")
 
             # Independent invariant re-verification
-            prereq_v, budget_v = recount_plan_violations(executed_days, g, daily_budget)
+            prereq_v, budget_v = recount_plan_violations(
+                executed_days, g, daily_budget, initially_mastered=initially_mastered)
             total_prereqs += prereq_v
             total_budgets += budget_v
 

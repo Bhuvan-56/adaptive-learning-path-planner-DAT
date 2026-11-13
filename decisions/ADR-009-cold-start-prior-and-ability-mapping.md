@@ -46,3 +46,20 @@ Initial learner profiles were manually parameterized with ad-hoc initial states 
 - **M1 (Curriculum Graph & Learner State Models):** Formalizes initial state parameters for `ConceptState` and preserves strict precedence classification.
 - **M2 (Adaptive Diagnostic Policy):** Defines the mathematical contract between CAT stopping outputs and downstream BKT concept initialization.
 - **M7 (Explainability Framework):** Explains why diagnostic and unprobed nodes route to initial assessment rather than prerequisite bypass.
+
+## Week 8 Amendment (2026-11-13): diagnostic answers count as evidence
+
+**Problem (LIMITATIONS B10).** Rule 2 gave every probed concept $n = 0$, and rule 1 makes $n < 3$ `Uncertain`. So the CAT result set $p$ but never the class the planner reads, and `ablation_no_diagnostic` equalled `adaptive_full` on every curriculum.
+
+**Change.** A concept with $k$ administered items that load on it (Q-matrix) is initialised by `ConceptState.init_from_diagnostic`:
+- $p_{c,0}$ is the same logistic mapping of $\hat{\theta}$ as above, clamped to $[0.01, 0.99]$.
+- $n = k$ and $\kappa = 2 + k$: the cold-start pseudo-count plus one per observation, the same increment `ConceptState.update` applies. $\sigma^2 = p(1-p)/(\kappa+1)$ is unchanged, and $k \ge 3$ gives $\kappa \ge 5$, so $\sigma^2 \le 0.05$ (ADR-005).
+- `history` holds the concept's last $W$ answers, so the conflict gate (ADR-007) applies to diagnostic evidence as it does to practice.
+- A concept with $k = 0$, and every concept without items, stays exactly as in rules 1 and 3 ($n = 0$, `Uncertain`). Rule 3 ("no invented observations") still holds: only answered items are counted.
+
+**Scope.**
+- The baseline arms (`static_prerequisite_order`, `non_adaptive_greedy`, `non_adaptive_greedy_best_singleton`) keep the pre-amendment states (`DiagnosticResult.prior_only_states`), so their behaviour is unchanged.
+- The harness's independent prerequisite recount accepts a prerequisite that was evidence-`Mastered` in the arm's initial states, the same rule the planner and the greedy baseline use.
+- The diagnostic record (`diagnostic_record.json`, `initial_priors`) now shows `n` and `items_answered` per concept.
+
+**Observed consequence.** Because one $\hat{\theta}$ sets $p$ for all probed concepts, `Mastered` needs $\hat{\theta} \ge 1.73$, and an all-correct 10-item diagnostic on the synthetic bank stops at $\hat{\theta} \approx 1.13$. In practice the diagnostic mostly yields `Developing` or `Weak`. On 20 learners (seed 42, `experiments/w8_final.yaml`), 19 adaptive_full rows changed and mean mastered went from 2.30 to 2.25, so there is no gain on that sample (`evaluation/results/w8_evidence/after_fix3_diagnostic_prior.txt`). Tests: `tests/test_w8_diagnostic_prior.py`.

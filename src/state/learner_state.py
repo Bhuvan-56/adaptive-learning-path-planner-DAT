@@ -90,6 +90,20 @@ class ConceptState:
         B = (1.0 - p0) * 2.0
         return cls(A=A, B=B, n=0, history=[])
 
+    @classmethod
+    def init_from_diagnostic(cls, p0: float, responses: List[int], window_size: int = WINDOW_SIZE) -> "ConceptState":
+        """
+        W8 fix 3 (ADR-009 Week 8 amendment): a concept probed by k answered diagnostic items.
+        p keeps the ADR-009 ability mapping p0; the k answers are real observations, so
+        n = k and kappa = 2 + k (the cold-start kappa plus one per observation, as in
+        update()); history holds the last window_size answers. k = 0 equals init_from_ability.
+        """
+        p0 = max(0.001, min(0.999, p0))
+        k = len(responses)
+        kappa = 2.0 + k
+        hist = [1 if int(r) == 1 else 0 for r in responses][-window_size:] if k else []
+        return cls(A=p0 * kappa, B=(1.0 - p0) * kappa, n=k, history=hist)
+
     def update(
         self,
         correct: Union[bool, int],

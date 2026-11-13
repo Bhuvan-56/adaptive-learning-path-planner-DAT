@@ -236,9 +236,12 @@ def test_diagnostic_validation_errors():
 def test_diagnostic_concept_states_unprobed_uncertain():
     """
     Verifies ADR-009 initialization rules:
-    - Concepts with items (A, B, C) receive ConceptState from init_from_ability(sigmoid(theta_hat))
+    - Concepts with items (A, B, C) receive p = sigmoid(theta_hat)
     - Concept without items (D) receives ConceptState from cold_start() (p=0.5, kappa=2.0, n=0)
-    - All concept states classify as 'Uncertain' because n == 0 < min_obs.
+    Updated in W8 fix 3 (ADR-009 Week 8 amendment, LIMITATIONS B10): a probed concept with
+    k answered items now has n = k, kappa = 2 + k and its answers as history, so it is no
+    longer forced to 'Uncertain' when k >= 3. The pre-W8 contract (kappa = 2, n = 0,
+    Uncertain) still holds for result.prior_only_states, which the baseline arms use.
     """
     def all_ones(item_id: str) -> int:
         return 1
@@ -258,13 +261,29 @@ def test_diagnostic_concept_states_unprobed_uncertain():
     expected_p = ability_to_prior(result.theta_hat)
 
     # Probed concepts A, B, C
+    k_by_concept = {c: 0 for c in ["A", "B", "C"]}
+    q = pd.read_csv(DEFAULT_QMATRIX_PATH)
+    item_concept = dict(zip(q["item_id"], q["concept_id"]))
+    for iid in result.items_asked:
+        k_by_concept[item_concept[iid]] += 1
     for c in ["A", "B", "C"]:
+        k = k_by_concept[c]
         cs = states[c]
         assert math.isclose(cs.p, expected_p, abs_tol=1e-6)
-        assert cs.kappa == 2.0
-        assert cs.n == 0
-        assert cs.history == []
-        assert cs.classify() == "Uncertain"
+        assert cs.kappa == 2.0 + k
+        assert cs.n == k
+        assert cs.history == [1] * min(k, 4)
+        if k < 3:
+            assert cs.classify() == "Uncertain"
+        else:
+            assert cs.classify() != "Uncertain"
+
+        old = result.prior_only_states[c]
+        assert math.isclose(old.p, expected_p, abs_tol=1e-6)
+        assert old.kappa == 2.0
+        assert old.n == 0
+        assert old.history == []
+        assert old.classify() == "Uncertain"
 
     # Unprobed concept D
     cs_d = states["D"]
