@@ -187,7 +187,7 @@ This executes:
 Run the closed-loop integrated evaluation pipeline:
 
 ```bash
-python -m src.cli evaluate --config experiments/w5_integrated.yaml --out evaluation/results/w5/eval_run --learners 10
+python -m src.cli evaluate --config experiments/w8_final.yaml --out evaluation/results/w5/eval_run --learners 10
 ```
 
 Options:

@@ -50,8 +50,9 @@
 
   <h2 id="s1">Week 8: S1, forgetting during study</h2>
   <p>Scenario S1 adds forgetting: each day, a mastered concept is lost with probability 0.05. Until Week 8 the study
-    loop never applied it, so S1 gave the same numbers as S0. Now it does. Same 1,000 learners, before and after
-    the fix; retained recall is a quiz 7 days after the horizon.</p>
+    loop never applied it, so S1 gave the same numbers as S0. Now it does. Same 1,000 learners; "before" is the run
+    before that fix, "after" is the final run with all Week 8 fixes (<code>evaluation/results/w8/final_v2/</code>), so
+    the adaptive arms' change also includes the diagnostic-evidence fix (B10). Retained recall is a quiz 7 days after the horizon.</p>
   <div class="card"><div class="table-wrap" id="s1-arms"><p class="small">Loading…</p></div></div>
   <div class="card" style="margin-top:12px"><div class="table-wrap" id="s1-diffs"></div></div>
 </main>
@@ -150,10 +151,11 @@
         <td class="num">${["adaptive_full", "static_prerequisite_order", "non_adaptive_greedy"].map(a => Site.fmt4(c.mastered[a])).join(" / ")}</td>
         <td class="num"><b>${ci4(c.vs_static_prerequisite_order.mastered)}</b></td><td class="num">${ci4(c.vs_non_adaptive_greedy.mastered)}</td>
         <td class="num">${ci4(c.vs_static_prerequisite_order.retained)}</td></tr>`).join("")}</tbody></table>
-      <p class="small">Adaptive is better than both baselines in every cell. Under S3 learning comes from the number of practice attempts, which
-        favours the adaptive arm's extra practice, so the larger S3 gains are not evidence of larger gains with real learners. The diagnostic,
-        difficulty, review and remediation ablations show no difference in any cell; the diagnostic cannot change a plan by design (its priors
-        have no observations, so they are always classed Uncertain).</p>
+      <p class="small">Adaptive is better than static in every cell, and better than greedy in every cell except maths S0 (no difference shown).
+        Under S3 learning comes from the number of practice attempts, which favours the adaptive arm's extra practice, so the larger S3 gains
+        are not evidence of larger gains with real learners. Since the Week 8 diagnostic fix (B10) the diagnostic changes plans, and
+        <code>ablation_no_diagnostic</code> (cold start) is better than adaptive_full on mastery in every cell; the difficulty, review and
+        remediation ablations show no difference.</p>
       ${Site.src(rb.cells.map(c => c.dir + "/per_learner_seed_*.csv"), `pre-registered in <a href="../${rb.sources.prereg}"><code>${rb.sources.prereg}</code></a>; write-up <a href="../${rb.sources.checked_against}"><code>${rb.sources.checked_against}</code></a>`)}`;
   } catch (e) { Site.fail(document.getElementById("robust-table"), e); }
 
@@ -177,7 +179,8 @@
       const claim = m.claim === "A better" ? `${d.a} better` : m.claim === "B better" ? `${d.b} better` : "no difference shown";
       return `<tr><td><code>${d.a}</code> − <code>${d.b}</code></td><td class="num">${ci(m.mean, m.lo, m.hi, true)}</td>
       <td class="num">${ci(r.mean, r.lo, r.hi, true)}</td><td><span class="pill ${claim === "no difference shown" ? "" : "warn"}">${Site.esc(claim)}</span></td></tr>`; }).join("")}</tbody></table>
-    <p class="small">The adaptive advantage holds under forgetting, on mastery and on retained recall. The small best-singleton gain seen under S0 is not seen under S1.</p>`;
+    <p class="small">Under forgetting, adaptive_full is better than static on mastery and retained recall. Against greedy it is better on
+      retained recall, but on mastery the interval touches zero (no difference shown). The small best-singleton gain seen under S0 is not seen under S1.</p>`;
 })();
 </script>
 </body>

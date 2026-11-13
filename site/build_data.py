@@ -2,8 +2,9 @@
 
 Integrated S0 numbers are from the run after the Week 7 adaptive deadlock fix
 (docs/w7/deadlock_fix_results.md), with the run before it for comparison; the
-Week 8 S0 run is identical (checked below). Integrated S1 is the Week 8 run
-(docs/w8/results.md), with the pre-fix S1 run for comparison.
+Week 8 S0 run is identical (checked below). Integrated S1 and the robustness
+2 x 2 use the Week 8 final_v2 runs (evaluation/results/w8/final_v2/, after the
+B10 and B11 fixes), with the pre-fix S1 run for comparison.
 
 Run from the repository root with the project venv:
     .venv_w2/Scripts/python.exe site/build_data.py
@@ -256,7 +257,8 @@ def build_s0():
 
 
 # ---------------------------------------------------------------- integrated S1 (Week 8)
-S1_DIR = "evaluation/results/w8/final/integrated_s1"
+# Week 8 final_v2: S1 after all Week 8 fixes (S1 forgetting, best effort, B10, B11).
+S1_DIR = "evaluation/results/w8/final_v2/integrated_s1"
 S1_BEFORE_DIR = "evaluation/results/w8/before/integrated_s1"
 S0_W8_DIR = "evaluation/results/w8/final/integrated_s0"
 
@@ -279,7 +281,7 @@ def build_s1():
     df, before = _pooled(S1_DIR), _pooled(S1_BEFORE_DIR)
     assert len(df) == len(before) == 9000
     # The Week 8 S0 run must equal the Week 7 S0 run the page shows (all columns but runtime_ms).
-    cols = [c for c in df.columns if c != "runtime_ms"]
+    cols = [c for c in before.columns if c != "runtime_ms"]  # final_v2 adds calibration columns after these
     assert _pooled(S0_W8_DIR)[cols].equals(_pooled(S0_DIR)[cols]), "W8 S0 differs from W7 S0"
 
     arms = []
@@ -302,19 +304,21 @@ def build_s1():
                       "mastered": _paired(df[df.arm == a], df[df.arm == b], "mastered_concepts"),
                       "retained": _paired(df[df.arm == a], df[df.arm == b], "retained_recall")})
 
-    # Cross-check against docs/w8/results.md.
+    # Cross-check against evaluation/results/w8/final_v2/before_after.txt and pooled_integrated_s1.txt
+    # (docs/final/FINAL_REPORT.md section 4.3).
     by = {a["arm"]: a for a in arms}
-    assert (by["adaptive_full"]["mastered"], by["adaptive_full"]["lo"], by["adaptive_full"]["hi"]) == (1.7300, 1.6490, 1.8190)
+    assert (by["adaptive_full"]["mastered"], by["adaptive_full"]["lo"], by["adaptive_full"]["hi"]) == (1.6320, 1.5460, 1.7150)
     assert (by["static_prerequisite_order"]["mastered"], by["static_prerequisite_order"]["lo"]) == (1.5870, 1.5010)
-    assert (by["adaptive_full"]["delta"], by["adaptive_full"]["delta_lo"], by["adaptive_full"]["delta_hi"]) == (-0.4460, -0.4940, -0.4000)
-    assert (diffs[0]["mastered"]["mean"], diffs[0]["mastered"]["lo"], diffs[0]["mastered"]["hi"]) == (0.1430, 0.1000, 0.1830)
-    assert (diffs[0]["retained"]["mean"], diffs[0]["retained"]["lo"], diffs[0]["retained"]["hi"]) == (0.0383, 0.0279, 0.0481)
+    assert (by["adaptive_full"]["delta"], by["adaptive_full"]["delta_lo"], by["adaptive_full"]["delta_hi"]) == (-0.5440, -0.5890, -0.4990)
+    assert (diffs[0]["mastered"]["mean"], diffs[0]["mastered"]["lo"], diffs[0]["mastered"]["hi"]) == (0.0450, 0.0220, 0.0640)
+    assert (diffs[0]["retained"]["mean"], diffs[0]["retained"]["lo"], diffs[0]["retained"]["hi"]) == (0.0150, 0.0072, 0.0236)
+    assert (diffs[1]["mastered"]["mean"], diffs[1]["mastered"]["lo"], diffs[1]["mastered"]["hi"]) == (0.0380, 0.0000, 0.0750)
     assert (diffs[2]["mastered"]["mean"], diffs[2]["mastered"]["lo"], diffs[2]["mastered"]["hi"]) == (-0.0040, -0.0190, 0.0130)
     assert all(a["prereq_violations"] == 0 and a["budget_violations"] == 0 for a in arms)
 
     return {
         "sources": {"after": S1_DIR, "before": S1_BEFORE_DIR, "method": "scripts/w8_s1_compare.py",
-                    "checked_against": "docs/w8/results.md", "prereg": "docs/w8/preregistration.md"},
+                    "checked_against": "docs/final/FINAL_REPORT.md", "prereg": "docs/w8/preregistration.md"},
         "arms": arms,
         "diffs": diffs,
     }
@@ -322,10 +326,11 @@ def build_s1():
 
 # ---------------------------------------------------------------- robustness 2 x 2 (Week 8 addendum 2)
 ROBUST = {
-    ("toy", "S0"): ("evaluation/results/w8/final/integrated_s0", 4),
-    ("toy", "S3"): ("evaluation/results/w8/maths_eval/toy_s3", 4),
-    ("maths", "S0"): ("evaluation/results/w8/maths_eval/maths_s0", 16),
-    ("maths", "S3"): ("evaluation/results/w8/maths_eval/maths_s3", 16),
+    # Week 8 final_v2 runs (after B10, B11 and the calibration columns).
+    ("toy", "S0"): ("evaluation/results/w8/final_v2/integrated_s0", 4),
+    ("toy", "S3"): ("evaluation/results/w8/final_v2/toy_s3", 4),
+    ("maths", "S0"): ("evaluation/results/w8/final_v2/maths_s0", 16),
+    ("maths", "S3"): ("evaluation/results/w8/final_v2/maths_s3", 16),
 }
 
 
@@ -345,14 +350,16 @@ def build_robust():
         cell["ablations_identical"] = [a for a in arm if a.startswith("ablation_") and a != "ablation_no_replan"
                                        and _paired(arm[a], arm["adaptive_full"], "mastered_concepts")["claim"] == "no difference shown"]
         cells.append(cell)
-    # Cross-check against docs/w8/results_maths.md section 2.
-    want = {("toy", "S0"): (0.1400, 0.1110, 0.1690), ("toy", "S3"): (0.3540, 0.2990, 0.4100),
-            ("maths", "S0"): (0.2140, 0.1600, 0.2680), ("maths", "S3"): (0.8110, 0.6980, 0.9170)}
+    # Cross-check against evaluation/results/w8/final_v2/before_after.txt (docs/final/FINAL_REPORT.md section 4.4).
+    want = {("toy", "S0"): (0.0560, 0.0400, 0.0740), ("toy", "S3"): (0.1170, 0.0960, 0.1390),
+            ("maths", "S0"): (0.0940, 0.0470, 0.1400), ("maths", "S3"): (0.7270, 0.6310, 0.8240)}
     for c in cells:
         v = c["vs_static_prerequisite_order"]["mastered"]
         assert (v["mean"], v["lo"], v["hi"]) == want[(c["curriculum"], c["scenario"])], (c["curriculum"], c["scenario"], v)
-        assert len(c["ablations_identical"]) == 4, c["ablations_identical"]
-    return {"sources": {"checked_against": "docs/w8/results_maths.md", "prereg": "docs/w8/preregistration_maths.md",
+        # After B10 the diagnostic ablation differs (it beats adaptive_full); the other three show no difference.
+        assert sorted(c["ablations_identical"]) == ["ablation_no_difficulty_step", "ablation_no_remediation",
+                                                    "ablation_no_review"], c["ablations_identical"]
+    return {"sources": {"checked_against": "docs/final/FINAL_REPORT.md", "prereg": "docs/w8/preregistration_maths.md",
                         "method": "scripts/w7_pooled_s0.py"}, "cells": cells}
 
 

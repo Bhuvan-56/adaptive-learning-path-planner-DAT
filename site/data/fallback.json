@@ -15096,7 +15096,7 @@
        "day": 4,
        "activities": [
         "QUAD",
-        "ARITH"
+        "VARS"
        ],
        "conditional_activities": [
         "QUAD"
@@ -15397,10 +15397,10 @@
       {
        "day": 4,
        "node_id": "ARITH",
-       "decision": "SELECTED",
-       "reason_code": "REVIEW_DUE",
+       "decision": "FILTERED",
+       "reason_code": "BUDGET_EXCEEDED",
        "class": "Mastered",
-       "remaining_budget": 10
+       "remaining_budget": 0
       },
       {
        "day": 4,
@@ -15485,10 +15485,10 @@
       {
        "day": 4,
        "node_id": "VARS",
-       "decision": "FILTERED",
-       "reason_code": "BUDGET_EXCEEDED",
+       "decision": "SELECTED",
+       "reason_code": "REVIEW_DUE",
        "class": "Mastered",
-       "remaining_budget": 0
+       "remaining_budget": 10
       }
      ],
      "event": {

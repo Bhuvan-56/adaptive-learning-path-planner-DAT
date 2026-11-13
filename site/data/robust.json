@@ -1,6 +1,6 @@
 {
  "sources": {
-  "checked_against": "docs/w8/results_maths.md",
+  "checked_against": "docs/final/FINAL_REPORT.md",
   "prereg": "docs/w8/preregistration_maths.md",
   "method": "scripts/w7_pooled_s0.py"
  },
@@ -8,43 +8,42 @@
   {
    "curriculum": "toy",
    "scenario": "S0",
-   "dir": "evaluation/results/w8/final/integrated_s0",
+   "dir": "evaluation/results/w8/final_v2/integrated_s0",
    "concepts": 4,
    "mastered": {
-    "adaptive_full": 2.176,
+    "adaptive_full": 2.092,
     "static_prerequisite_order": 2.036,
     "non_adaptive_greedy": 2.036
    },
    "vs_static_prerequisite_order": {
     "mastered": {
-     "mean": 0.14,
-     "lo": 0.111,
-     "hi": 0.169,
+     "mean": 0.056,
+     "lo": 0.04,
+     "hi": 0.074,
      "claim": "A better"
     },
     "retained": {
-     "mean": 0.0623,
-     "lo": 0.0538,
-     "hi": 0.0697,
+     "mean": 0.0242,
+     "lo": 0.0168,
+     "hi": 0.0316,
      "claim": "A better"
     }
    },
    "vs_non_adaptive_greedy": {
     "mastered": {
-     "mean": 0.14,
-     "lo": 0.111,
-     "hi": 0.169,
+     "mean": 0.056,
+     "lo": 0.04,
+     "hi": 0.074,
      "claim": "A better"
     },
     "retained": {
-     "mean": 0.0623,
-     "lo": 0.0538,
-     "hi": 0.0697,
+     "mean": 0.0242,
+     "lo": 0.0168,
+     "hi": 0.0316,
      "claim": "A better"
     }
    },
    "ablations_identical": [
-    "ablation_no_diagnostic",
     "ablation_no_difficulty_step",
     "ablation_no_review",
     "ablation_no_remediation"
@@ -53,43 +52,42 @@
   {
    "curriculum": "toy",
    "scenario": "S3",
-   "dir": "evaluation/results/w8/maths_eval/toy_s3",
+   "dir": "evaluation/results/w8/final_v2/toy_s3",
    "concepts": 4,
    "mastered": {
-    "adaptive_full": 2.688,
+    "adaptive_full": 2.451,
     "static_prerequisite_order": 2.334,
     "non_adaptive_greedy": 2.334
    },
    "vs_static_prerequisite_order": {
     "mastered": {
-     "mean": 0.354,
-     "lo": 0.299,
-     "hi": 0.41,
+     "mean": 0.117,
+     "lo": 0.096,
+     "hi": 0.139,
      "claim": "A better"
     },
     "retained": {
-     "mean": 0.0748,
-     "lo": 0.0695,
-     "hi": 0.0805,
+     "mean": 0.0219,
+     "lo": 0.0169,
+     "hi": 0.027,
      "claim": "A better"
     }
    },
    "vs_non_adaptive_greedy": {
     "mastered": {
-     "mean": 0.354,
-     "lo": 0.299,
-     "hi": 0.41,
+     "mean": 0.117,
+     "lo": 0.096,
+     "hi": 0.139,
      "claim": "A better"
     },
     "retained": {
-     "mean": 0.0748,
-     "lo": 0.0695,
-     "hi": 0.0805,
+     "mean": 0.0219,
+     "lo": 0.0169,
+     "hi": 0.027,
      "claim": "A better"
     }
    },
    "ablations_identical": [
-    "ablation_no_diagnostic",
     "ablation_no_difficulty_step",
     "ablation_no_review",
     "ablation_no_remediation"
@@ -98,43 +96,42 @@
   {
    "curriculum": "maths",
    "scenario": "S0",
-   "dir": "evaluation/results/w8/maths_eval/maths_s0",
+   "dir": "evaluation/results/w8/final_v2/maths_s0",
    "concepts": 16,
    "mastered": {
-    "adaptive_full": 6.468,
+    "adaptive_full": 6.348,
     "static_prerequisite_order": 6.254,
     "non_adaptive_greedy": 6.337
    },
    "vs_static_prerequisite_order": {
     "mastered": {
-     "mean": 0.214,
-     "lo": 0.16,
-     "hi": 0.268,
+     "mean": 0.094,
+     "lo": 0.047,
+     "hi": 0.14,
      "claim": "A better"
     },
     "retained": {
-     "mean": 0.0876,
-     "lo": 0.0819,
-     "hi": 0.0931,
+     "mean": 0.0947,
+     "lo": 0.0873,
+     "hi": 0.1025,
      "claim": "A better"
     }
    },
    "vs_non_adaptive_greedy": {
     "mastered": {
-     "mean": 0.131,
-     "lo": 0.084,
-     "hi": 0.181,
-     "claim": "A better"
+     "mean": 0.011,
+     "lo": -0.031,
+     "hi": 0.059,
+     "claim": "no difference shown"
     },
     "retained": {
-     "mean": 0.0739,
-     "lo": 0.0679,
-     "hi": 0.0797,
+     "mean": 0.0811,
+     "lo": 0.0741,
+     "hi": 0.0889,
      "claim": "A better"
     }
    },
    "ablations_identical": [
-    "ablation_no_diagnostic",
     "ablation_no_difficulty_step",
     "ablation_no_review",
     "ablation_no_remediation"
@@ -143,43 +140,42 @@
   {
    "curriculum": "maths",
    "scenario": "S3",
-   "dir": "evaluation/results/w8/maths_eval/maths_s3",
+   "dir": "evaluation/results/w8/final_v2/maths_s3",
    "concepts": 16,
    "mastered": {
-    "adaptive_full": 7.587,
+    "adaptive_full": 7.503,
     "static_prerequisite_order": 6.776,
     "non_adaptive_greedy": 7.098
    },
    "vs_static_prerequisite_order": {
     "mastered": {
-     "mean": 0.811,
-     "lo": 0.698,
-     "hi": 0.917,
+     "mean": 0.727,
+     "lo": 0.631,
+     "hi": 0.824,
      "claim": "A better"
     },
     "retained": {
-     "mean": 0.1046,
-     "lo": 0.0999,
-     "hi": 0.1089,
+     "mean": 0.1042,
+     "lo": 0.0996,
+     "hi": 0.109,
      "claim": "A better"
     }
    },
    "vs_non_adaptive_greedy": {
     "mastered": {
-     "mean": 0.489,
-     "lo": 0.373,
-     "hi": 0.599,
+     "mean": 0.405,
+     "lo": 0.31,
+     "hi": 0.5,
      "claim": "A better"
     },
     "retained": {
-     "mean": 0.081,
-     "lo": 0.0767,
-     "hi": 0.085,
+     "mean": 0.0807,
+     "lo": 0.0765,
+     "hi": 0.0849,
      "claim": "A better"
     }
    },
    "ablations_identical": [
-    "ablation_no_diagnostic",
     "ablation_no_difficulty_step",
     "ablation_no_review",
     "ablation_no_remediation"
