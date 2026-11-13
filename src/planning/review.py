@@ -11,6 +11,8 @@ This module implements:
    Regression (HLR) and H is NOT learned or fitted on data. No HLR model was fitted or integrated.
 3. Review eligibility: A concept is review-eligible when its state is evidence Mastered
    and its estimated recall R(dt) is strictly below review_eligibility_recall_threshold (0.85).
+   Due reviews are packed into the leftover budget by priority (1 - R) * w, where w is the
+   largest edge importance to a not-yet-Mastered dependent, 1.0 if none (W8 fix 4).
 4. Prerequisite remediation: When a concept has k consecutive failed assessments (k loaded from
    config/adaptive.yaml under remediation block), returns its not-Mastered ancestors in
    topological order to be scheduled first inside the same daily budget.
@@ -179,6 +181,47 @@ def is_review_eligible(
     r = calculate_recall_decay(dt, half_life_days=half_life_days)
     is_eligible = (r < threshold)
     return is_eligible, r
+
+
+def review_importance_weight(g: nx.DiGraph, concept_id: str, mastered: Set[str]) -> float:
+    """
+    W8 fix 4 (prerequisite importance): the largest edge `importance` from concept_id to a
+    dependent concept that is not yet evidence Mastered; 1.0 when there is no such edge.
+    """
+    if g is None or concept_id not in g:
+        return 1.0
+    weights = [
+        float(attrs.get("importance", 1.0))
+        for _, succ, attrs in g.out_edges(concept_id, data=True)
+        if succ not in mastered
+    ]
+    return max(weights) if weights else 1.0
+
+
+def rank_due_reviews(
+    g: nx.DiGraph,
+    due: List[Tuple[float, str]],
+    mastered: Set[str],
+) -> List[Dict[str, Any]]:
+    """
+    W8 fix 4: orders due reviews (recall, concept_id) for packing into the leftover budget by
+        priority = (1 - recall) * importance_weight, highest first,
+    ties broken by lowest recall, then concept_id. With every weight 1.0 this is the
+    pre-W8 order (lowest recall first, then concept_id).
+
+    Returns dicts with node_id, recall, importance_weight and review_priority.
+    """
+    ranked = []
+    for recall_val, nid in due:
+        w = review_importance_weight(g, nid, mastered)
+        ranked.append({
+            "node_id": nid,
+            "recall": float(recall_val),
+            "importance_weight": w,
+            "review_priority": (1.0 - float(recall_val)) * w,
+        })
+    ranked.sort(key=lambda d: (-d["review_priority"], d["recall"], d["node_id"]))
+    return ranked
 
 
 def get_remediation_ancestors(

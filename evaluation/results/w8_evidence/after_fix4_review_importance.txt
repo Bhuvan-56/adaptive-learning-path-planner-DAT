@@ -1,0 +1,22 @@
+W8 fix 4 (B11 review importance) - AFTER the fix
+Base: 70183b7 (branch w8/final-fixes), fix uncommitted at time of run
+
+== New tests: .venv\Scripts\python -m pytest tests/test_w8_review_importance.py -q -p no:cacheprovider
+.....                                                                    [100%]
+5 passed in 0.43s
+
+== Full suite: .venv\Scripts\python -m pytest -q -> 291 passed in 122.82s (before this fix: 286 passed)
+
+20-learner run (experiments/w8_final.yaml S0, seed 42): fix 3 (70183b7) vs fix 4, rows compared on all columns except runtime_ms
+adaptive_full                        rows changed  0  mastered 2.25  recall 0.6175
+static_prerequisite_order            rows changed  0  mastered 2.25  recall 0.6525
+non_adaptive_greedy                  rows changed  0  mastered 2.25  recall 0.6525
+non_adaptive_greedy_best_singleton   rows changed  0  mastered 2.25  recall 0.6525
+ablation_no_diagnostic               rows changed  0  mastered 2.30  recall 0.7467
+ablation_no_replan                   rows changed  0  mastered 2.25  recall 0.6517
+ablation_no_difficulty_step          rows changed  0  mastered 2.25  recall 0.6175
+ablation_no_review                   rows changed  0  mastered 2.25  recall 0.6225
+ablation_no_remediation              rows changed  0  mastered 2.25  recall 0.6175
+
+No integrated row changes: the order only matters when two or more due reviews compete for leftover
+budget, which does not happen on the 4-concept toy curriculum over 5 days (recall < 0.85 needs dt > 3.28 days).

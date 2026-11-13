@@ -14,6 +14,7 @@ from src.planning.review import (
     is_review_eligible,
     calculate_recall_decay,
     get_remediation_ancestors,
+    rank_due_reviews,
     load_review_eval_config,
     load_remediation_config,
     DECAY_BASELINE,
@@ -635,7 +636,8 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
             ).to_dict()
 
         # -------------------------------------------------------------
-        # Part 3: Due reviews fill leftover budget, lowest recall first
+        # Part 3: Due reviews fill leftover budget, highest priority first
+        # (W8 fix 4: priority = (1 - recall) * prerequisite importance weight)
         # -------------------------------------------------------------
         due_candidates: List[Tuple[float, str]] = []
         for nid in candidate_universe:
@@ -653,10 +655,16 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
             if is_elig:
                 due_candidates.append((recall_val, nid))
 
-        # Lowest recall first, tie-break by node_id alphabetically
-        due_candidates.sort(key=lambda x: (x[0], x[1]))
+        # Highest (1 - recall) * importance first; ties: lowest recall, then node_id.
+        # With all importances 1.0 this is the pre-W8 order (lowest recall first).
+        mastered_now = {
+            n for n in g.nodes()
+            if learner_states.get(n, ConceptState.cold_start()).classify(active_policy) == "Mastered"
+        }
+        ranked_reviews = rank_due_reviews(g, due_candidates, mastered_now)
 
-        for recall_val, r_nid in due_candidates:
+        for rv in ranked_reviews:
+            r_nid = rv["node_id"]
             st = learner_states.get(r_nid, ConceptState.cold_start())
             dur = g.nodes[r_nid].get("baseline_duration", 0)
             prereqs = set(g.predecessors(r_nid)).intersection(candidate_universe)
@@ -688,9 +696,15 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                 constraints={
                     "budget": budget,
                     "remaining_budget": cur_rem,
-                    "prerequisites": prereq_status
+                    "prerequisites": prereq_status,
+                    "review_due": True
                 },
-                score_terms={"exercise_difficulty": difficulty_states[r_nid].difficulty} if r_nid in difficulty_states else {},
+                score_terms={
+                    **({"exercise_difficulty": difficulty_states[r_nid].difficulty} if r_nid in difficulty_states else {}),
+                    "recall": rv["recall"],
+                    "importance_weight": rv["importance_weight"],
+                    "review_priority": rv["review_priority"],
+                },
                 decision=decision,
                 reason_code=reason,
                 policy_version=policy_version

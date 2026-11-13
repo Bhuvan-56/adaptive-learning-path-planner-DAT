@@ -1,0 +1,71 @@
+W8 fix 4 (B11 review importance) - tests run BEFORE the fix
+HEAD: 70183b7 (branch w8/final-fixes), tests/test_w8_review_importance.py uncommitted
+Command: .venv\Scripts\python -m pytest tests/test_w8_review_importance.py -q -p no:cacheprovider
+
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+_______________ test_equal_recall_higher_importance_is_reviewed _______________
+
+    def test_equal_recall_higher_importance_is_reviewed():
+        # Equal recall; budget 8 fits T (4) and one review (4). X sorts first by name.
+        g, res, day, e = _plan({"X": (9.0, 0.3), "Y": (9.0, 0.9)}, budget=8)
+>       assert day["activities"] == ["T", "Y"]
+E       AssertionError: assert ['T', 'X'] == ['T', 'Y']
+E         At index 1 diff: 'X' != 'Y'
+E         Use -v to get more diff
+
+tests\test_w8_review_importance.py:46: AssertionError
+___________ test_higher_forgetting_risk_outweighs_lower_importance ____________
+
+    def test_higher_forgetting_risk_outweighs_lower_importance():
+        # X: dt 40 -> recall 0.138, priority 0.862 * 0.3 = 0.259
+        # Y: dt 4  -> recall 0.820, priority 0.180 * 0.9 = 0.162
+        _, _, day, e = _plan({"X": (40.0, 0.3), "Y": (4.0, 0.9)}, budget=8)
+>       assert e["X"]["score_terms"]["review_priority"] > e["Y"]["score_terms"]["review_priority"]
+E       KeyError: 'review_priority'
+
+tests\test_w8_review_importance.py:59: KeyError
+_____________ test_unit_importances_keep_old_lowest_recall_order ______________
+
+    def test_unit_importances_keep_old_lowest_recall_order():
+        reviews = {"P": (8.0, 1.0), "Q": (20.0, 1.0), "R": (8.0, 1.0), "S": (12.0, 1.0)}
+        _, _, day, _ = _plan(reviews, budget=4 + 4 * len(reviews))
+        old = sorted(reviews, key=lambda c: (calculate_recall_decay(reviews[c][0]), c))
+        assert day["activities"] == ["T"] + old  # Q, S, P, R
+    
+        g = nx.DiGraph()
+        g.add_edge("P", "T", importance=1.0)
+        g.add_edge("Q", "T", importance=1.0)
+        due = [(0.7, "Q"), (0.6, "P"), (0.7, "A")]
+>       ranked = review.rank_due_reviews(g, due, mastered=set())
+E       AttributeError: module 'src.planning.review' has no attribute 'rank_due_reviews'
+
+tests\test_w8_review_importance.py:76: AttributeError
+______________ test_weight_uses_only_not_yet_mastered_dependents ______________
+
+    def test_weight_uses_only_not_yet_mastered_dependents():
+        g = nx.DiGraph()
+        g.add_edge("A", "B", importance=0.9)
+        g.add_edge("A", "C", importance=0.4)
+>       assert review.review_importance_weight(g, "A", mastered=set()) == pytest.approx(0.9)
+E       AttributeError: module 'src.planning.review' has no attribute 'review_importance_weight'
+
+tests\test_w8_review_importance.py:84: AttributeError
+______________ test_trace_records_recall_importance_and_priority ______________
+
+    def test_trace_records_recall_importance_and_priority():
+        g, res, _, e = _plan({"X": (9.0, 0.3), "Y": (9.0, 0.9)}, budget=8)
+        r = calculate_recall_decay(9.0)
+        for c, w in (("X", 0.3), ("Y", 0.9)):
+            terms = e[c]["score_terms"]
+>           assert terms["recall"] == pytest.approx(r)
+E           KeyError: 'recall'
+
+tests\test_w8_review_importance.py:95: KeyError
+=========================== short test summary info ===========================
+FAILED tests/test_w8_review_importance.py::test_equal_recall_higher_importance_is_reviewed
+FAILED tests/test_w8_review_importance.py::test_higher_forgetting_risk_outweighs_lower_importance
+FAILED tests/test_w8_review_importance.py::test_unit_importances_keep_old_lowest_recall_order
+FAILED tests/test_w8_review_importance.py::test_weight_uses_only_not_yet_mastered_dependents
+FAILED tests/test_w8_review_importance.py::test_trace_records_recall_importance_and_priority
+5 failed in 0.85s
