@@ -66,6 +66,7 @@ from src.diagnostic.diagnostic import (
 )
 from src.simulation.simulator import SimulatedLearner, MatchedBKTGenerator, MismatchedPFAOrLogisticGenerator
 from src.evaluation.retention import administer_retention_quiz
+from src.evaluation.calibration import NOT_APPLICABLE, brier_score, calibration_markdown, encode_pairs
 from src.planning.greedy_fallback import best_singleton_fallback
 from src.provenance import (
     compute_file_sha256,
@@ -205,6 +206,9 @@ def make_learner_generator(
 
 # Baseline arms start from the pre-W8 diagnostic priors (n = 0) so their behaviour is unchanged.
 BASELINE_ARMS = ("static_prerequisite_order", "non_adaptive_greedy", "non_adaptive_greedy_best_singleton")
+# Arms run through the closed replan loop; only these update the engine's p (W8 task 4).
+ADAPTIVE_LOOP_ARMS = ("adaptive_full", "ablation_no_diagnostic", "ablation_no_difficulty_step",
+                      "ablation_no_review", "ablation_no_remediation")
 
 
 @dataclass
@@ -223,6 +227,9 @@ class ArmEvaluationResult:
     learner_mastered: List[float] = field(default_factory=list)
     records: List[Dict[str, Any]] = field(default_factory=list)
     learner_retained_recall: List[float] = field(default_factory=list)
+    # W8 task 4: end-of-horizon calibration; None for arms that do not maintain p
+    learner_mastery_brier: Optional[List[float]] = None
+    calibration_pairs: Optional[List[Tuple[str, float, int]]] = None
     mean_retained_recall: float = 0.0
     retained_recall_ci: Tuple[float, float] = (0.0, 0.0)
 
@@ -290,6 +297,8 @@ def _evaluate_single_seed(
         total_days_valid_trace = 0
         total_no_plan = 0
         no_plan_reasons_counter: Dict[str, int] = {}
+        arm_brier_list: List[float] = []
+        arm_pairs: List[Tuple[str, float, int]] = []
 
         for l_idx, gt in enumerate(learners_ground_truth):
             learner_seed = gt.seed
@@ -356,7 +365,8 @@ def _evaluate_single_seed(
             review_log = ReviewLog()
 
             # Execute arm-specific policy loop
-            if arm in ("adaptive_full", "ablation_no_diagnostic", "ablation_no_difficulty_step", "ablation_no_review", "ablation_no_remediation"):
+            engine_states = None  # W8 task 4: final engine states, adaptive arms only
+            if arm in ADAPTIVE_LOOP_ARMS:
                 # Adaptive Replanning Arms
                 t0 = time.perf_counter()
                 active_plan = generate_static_plan(
@@ -504,6 +514,8 @@ def _evaluate_single_seed(
                     # W8 S1 fix: forgetting between study days (no-op, 0 draws, when p_F = 0).
                     sim_learner.advance_day(1)
 
+                engine_states = cur_replan_state.learner_states
+
             elif arm in ("static_prerequisite_order", "ablation_no_replan"):
                 # Static Baseline Arm
                 t0 = time.perf_counter()
@@ -607,6 +619,18 @@ def _evaluate_single_seed(
 
             # Latent cognitive mastery read exclusively by evaluator view at horizon end
             final_mastered = sum(1 for c in curriculum_nodes if evaluator.get_latent_mastery(c))
+            # W8 task 4: engine p vs latent mastery, read here in the evaluation step only.
+            if engine_states is not None:
+                learner_pairs = [
+                    (c, float(engine_states.get(c, ConceptState.cold_start()).p),
+                     int(evaluator.get_latent_mastery(c)))
+                    for c in curriculum_nodes
+                ]
+                learner_brier = brier_score([q for _, q, _ in learner_pairs], [y for _, _, y in learner_pairs])
+                arm_brier_list.append(learner_brier)
+                arm_pairs.extend(learner_pairs)
+            else:
+                learner_pairs, learner_brier = None, None
             mastered_list.append(float(final_mastered))
             runtimes_ms_list.append(arm_runtime_ms)
 
@@ -631,6 +655,13 @@ def _evaluate_single_seed(
             ret_share = round(float(ret_res["retention_share"]), 4)
             learner_rec["retained_recall"] = ret_share
             learner_rec["retention_share"] = ret_share
+            # W8 task 4: appended last so the existing column order is kept
+            if learner_pairs is not None:
+                learner_rec["mastery_brier"] = learner_brier
+                learner_rec["mastery_pairs"] = encode_pairs(learner_pairs)
+            else:  # arm does not maintain p: no value is invented
+                learner_rec["mastery_brier"] = NOT_APPLICABLE
+                learner_rec["mastery_pairs"] = NOT_APPLICABLE
             retention_list.append(ret_share)
 
             records.append(learner_rec)
@@ -659,6 +690,8 @@ def _evaluate_single_seed(
             learner_retained_recall=retention_list,
             mean_retained_recall=r_mean,
             retained_recall_ci=(r_low, r_high),
+            learner_mastery_brier=arm_brier_list if arm in ADAPTIVE_LOOP_ARMS else None,
+            calibration_pairs=arm_pairs if arm in ADAPTIVE_LOOP_ARMS else None,
         )
 
     # ---------------------------------------------------------
@@ -826,6 +859,10 @@ def _build_multi_seed_summary_markdown(
         bootstrap_resamples=bootstrap_resamples,
         seed=primary_s,
     )
+    lines.extend(_calibration_lines(
+        [seed_results[s]["arm_results"] for s in seeds], primary_arms + ablation_arms,
+        bootstrap_resamples, primary_s,
+        heading=f"## Mastery calibration, pooled over seeds {seeds} (end of horizon)"))
     lines.append(primary_summary)
     return "\n".join(lines)
 
@@ -1109,7 +1146,32 @@ def _build_summary_markdown(
     lines.append("2. **Synthetic Learner Invariant:** All reported figures represent simulator behavior on synthetic learners fitted to synthetic data. Never calibrated, validated or real-world.")
     lines.append("3. **Safety Invariants:** Zero prerequisite violations and zero budget violations were observed across all primary and ablation runs.")
     lines.append("")
+    lines.extend(_calibration_lines([arm_results], primary_arms + ablation_arms, bootstrap_resamples, seed))
     return "\n".join(lines)
+
+
+def _calibration_lines(
+    arm_results_list: List[Dict[str, ArmEvaluationResult]],
+    arms: List[str],
+    bootstrap_resamples: int,
+    seed: int,
+    heading: str = "## 6. Mastery calibration (end of horizon)",
+) -> List[str]:
+    """W8 task 4: per-arm Brier [95% CI], ECE and reliability tables, pooled over the given results."""
+    arm_pairs: Dict[str, Optional[List[Tuple[str, float, int]]]] = {}
+    arm_briers: Dict[str, Optional[List[float]]] = {}
+    for arm in arms:
+        rs = [ar[arm] for ar in arm_results_list if arm in ar]
+        if not rs or any(r.calibration_pairs is None for r in rs):
+            arm_pairs[arm], arm_briers[arm] = None, None
+        else:
+            arm_pairs[arm] = [pr for r in rs for pr in r.calibration_pairs]
+            arm_briers[arm] = [b for r in rs for b in r.learner_mastery_brier]
+    return calibration_markdown(
+        arm_pairs, arm_briers,
+        ci_fn=lambda v: compute_paired_bootstrap_ci(v, b_resamples=bootstrap_resamples, seed=seed),
+        heading=heading,
+    )
 
 
 def main():

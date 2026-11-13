@@ -146,6 +146,7 @@ def test_baseline_arms_unchanged_against_committed_run(tmp_path, monkeypatch):
     old = pd.read_csv(os.path.join(ROOT, "evaluation/results/w8/final/integrated_s0/per_learner_seed_42.csv"))
     old = old[old.learner_id.isin(new.learner_id.unique())].drop(columns="runtime_ms")
     base = ["static_prerequisite_order", "non_adaptive_greedy", "non_adaptive_greedy_best_singleton"]
+    new = new[list(old.columns)]  # W8 task 4 appends calibration columns after these
     new = new[new.arm.isin(base)].reset_index(drop=True)
     old = old[old.arm.isin(base)].reset_index(drop=True)
     assert len(new) == 60

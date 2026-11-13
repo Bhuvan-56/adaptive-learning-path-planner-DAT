@@ -4,6 +4,9 @@ per_learner.csv and the "Arm" table in summary.md hold seed 42 only, so the
 five-seed figures are computed here from the five per-seed CSVs, concatenated
 in seed order, with compute_paired_bootstrap_ci (B = 1000, seed 42).
 Paired differences use rows sorted by the per-learner seed column.
+Week 8: when the CSVs have mastery_brier / mastery_pairs, each arm also gets its pooled
+mastery Brier [95% CI] and ECE (10 bins over all learner x concept pairs), or
+"not applicable" for arms that do not maintain p.
 
 Usage:
   python scripts/w7_pooled_s0.py <results_dir> [arm_a:arm_b ...] [--horizon=N]
@@ -16,6 +19,7 @@ import pandas as pd
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from src.evaluation.compare import compute_paired_bootstrap_ci  # noqa: E402
+from src.evaluation.calibration import NOT_APPLICABLE, decode_pairs, expected_calibration_error  # noqa: E402
 
 SEEDS = [42, 101, 2024, 777, 999]
 
@@ -34,6 +38,15 @@ def main(results_dir, pairs, horizon=5):
             f"budget {g.budget_violations.sum()} runtime_p50 {g.runtime_ms.median():.4f} "
             f"runtime_p95 {g.runtime_ms.quantile(0.95):.4f}"
         )
+        # W8 task 4: mastery calibration (runs made before W8 have no such columns)
+        if "mastery_brier" in g.columns:
+            if (g.mastery_brier.astype(str) == NOT_APPLICABLE).all():
+                print(f"{arm}: mastery_brier not applicable, ECE not applicable")
+            else:
+                bm, blo, bhi = compute_paired_bootstrap_ci(g.mastery_brier.astype(float).values, 1000, 0.95, 42)
+                cal = [pr for s in g.mastery_pairs for pr in decode_pairs(s)]
+                ece = expected_calibration_error([q for _, q, _ in cal], [y for _, _, y in cal])
+                print(f"{arm}: mastery_brier {bm:.4f} [{blo:.4f}, {bhi:.4f}] ECE {ece:.4f} pairs {len(cal)}")
     for pair in pairs:
         a, b = pair.split(":")
         # Rows sorted by the per-learner seed (unique), as in BASELINE.md; the

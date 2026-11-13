@@ -63,7 +63,8 @@ def test_toy_s0_unchanged_against_committed_run(tmp_path):
     W8 fix 3 (diagnostic evidence, LIMITATIONS B10) changes the arms that use the
     diagnostic's states by design, so the guard covers the arms that must stay
     identical: the three baselines (pre-fix n = 0 priors) and ablation_no_diagnostic
-    (cold start)."""
+    (cold start). W8 task 4 appends calibration columns; the committed run's columns
+    are compared."""
     res = integrated.run_integrated_evaluation(config_path=_cfg("w8_final.yaml", tmp_path),
                                                output_dir=str(tmp_path / "out"), override_learners=8,
                                                override_resamples=20)
@@ -72,6 +73,8 @@ def test_toy_s0_unchanged_against_committed_run(tmp_path):
     new = pd.read_csv(res["csv_path"]).drop(columns="runtime_ms")
     old = pd.read_csv(os.path.join(ROOT, "evaluation/results/w8/final/integrated_s0/per_learner_seed_42.csv"))
     old = old[old.learner_id.isin(new.learner_id.unique())].drop(columns="runtime_ms")
+    assert list(new.columns[:len(old.columns)]) == list(old.columns)  # existing order kept
+    new = new[list(old.columns)]
     new = new[new.arm.isin(unchanged)].reset_index(drop=True)
     old = old[old.arm.isin(unchanged)].reset_index(drop=True)
     assert len(new) == 8 * len(unchanged)

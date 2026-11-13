@@ -1,0 +1,88 @@
+W8 task 4 (M8 calibration) - tests run BEFORE the change
+HEAD: 6a2e47e (branch w8/final-fixes), tests/test_w8_calibration.py uncommitted
+Command: .venv\Scripts\python -m pytest tests/test_w8_calibration.py -q -p no:cacheprovider
+
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+___________________________ test_brier_hand_example ___________________________
+
+    def test_brier_hand_example():
+>       cal = _cal()
+
+tests\test_w8_calibration.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _cal():
+>       from src.evaluation import calibration
+E       ImportError: cannot import name 'calibration' from 'src.evaluation' (C:\Users\bhuva\Downloads\DAT11\src\evaluation\__init__.py)
+
+tests\test_w8_calibration.py:18: ImportError
+____________________ test_reliability_and_ece_hand_example ____________________
+
+    def test_reliability_and_ece_hand_example():
+>       cal = _cal()
+
+tests\test_w8_calibration.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _cal():
+>       from src.evaluation import calibration
+E       ImportError: cannot import name 'calibration' from 'src.evaluation' (C:\Users\bhuva\Downloads\DAT11\src\evaluation\__init__.py)
+
+tests\test_w8_calibration.py:18: ImportError
+____________________________ test_pairs_round_trip ____________________________
+
+    def test_pairs_round_trip():
+>       cal = _cal()
+
+tests\test_w8_calibration.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _cal():
+>       from src.evaluation import calibration
+E       ImportError: cannot import name 'calibration' from 'src.evaluation' (C:\Users\bhuva\Downloads\DAT11\src\evaluation\__init__.py)
+
+tests\test_w8_calibration.py:18: ImportError
+____________ test_latent_state_stays_behind_the_evaluator_boundary ____________
+
+    def test_latent_state_stays_behind_the_evaluator_boundary():
+        """The existing boundary tests still hold, and the new calibration code is not
+        reachable from the planner, state or diagnostic packages."""
+        from tests.test_simulation import test_planner_and_state_modules_contain_no_import_of_evaluator_view
+        from tests.test_w5_b1_integrated import test_w5_b1_latent_state_invisibility_boundary
+        test_planner_and_state_modules_contain_no_import_of_evaluator_view()
+        test_w5_b1_latent_state_invisibility_boundary()
+        for pkg in ("planning", "state", "diagnostic"):
+            for py in glob.glob(os.path.join(ROOT, "src", pkg, "**", "*.py"), recursive=True):
+                tree = ast.parse(open(py, encoding="utf-8").read())
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.ImportFrom):
+                        assert "calibration" not in (node.module or ""), py
+                        assert all("calibration" not in a.name for a in node.names), py
+        # calibration.py itself takes plain numbers; it does not import the simulator
+>       src = open(os.path.join(ROOT, "src", "evaluation", "calibration.py"), encoding="utf-8").read()
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\bhuva\\Downloads\\DAT11\\src\\evaluation\\calibration.py'
+
+tests\test_w8_calibration.py:72: FileNotFoundError
+_____________ test_small_run_has_calibration_columns_and_summary ______________
+
+tmp_path = WindowsPath('C:/Users/bhuva/AppData/Local/Temp/pytest-of-bhuva/pytest-16/test_small_run_has_calibration0')
+
+    def test_small_run_has_calibration_columns_and_summary(tmp_path):
+>       cal = _cal()
+
+tests\test_w8_calibration.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _cal():
+>       from src.evaluation import calibration
+E       ImportError: cannot import name 'calibration' from 'src.evaluation' (C:\Users\bhuva\Downloads\DAT11\src\evaluation\__init__.py)
+
+tests\test_w8_calibration.py:18: ImportError
+=========================== short test summary info ===========================
+FAILED tests/test_w8_calibration.py::test_brier_hand_example - ImportError: c...
+FAILED tests/test_w8_calibration.py::test_reliability_and_ece_hand_example - ...
+FAILED tests/test_w8_calibration.py::test_pairs_round_trip - ImportError: can...
+FAILED tests/test_w8_calibration.py::test_latent_state_stays_behind_the_evaluator_boundary
+FAILED tests/test_w8_calibration.py::test_small_run_has_calibration_columns_and_summary
+5 failed in 1.81s
