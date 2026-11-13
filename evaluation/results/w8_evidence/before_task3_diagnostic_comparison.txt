@@ -1,0 +1,52 @@
+W8 task 3 (M2 diagnostic comparison) - tests run BEFORE the change
+HEAD: edde468 (branch w8/final-fixes), tests/test_w8_diagnostic_comparison.py uncommitted
+Command: .venv\Scripts\python -m pytest tests/test_w8_diagnostic_comparison.py -q -p no:cacheprovider
+
+FFF                                                                      [100%]
+================================== FAILURES ===================================
+_____________________ test_paired_difference_hand_example _____________________
+
+    def test_paired_difference_hand_example():
+>       dc = _mod()
+
+tests\test_w8_diagnostic_comparison.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _mod():
+>       from src.evaluation import diagnostic_comparison
+E       ImportError: cannot import name 'diagnostic_comparison' from 'src.evaluation' (C:\Users\bhuva\Downloads\DAT11\src\evaluation\__init__.py)
+
+tests\test_w8_diagnostic_comparison.py:16: ImportError
+_______________________ test_claim_rule_lower_is_better _______________________
+
+    def test_claim_rule_lower_is_better():
+>       dc = _mod()
+
+tests\test_w8_diagnostic_comparison.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _mod():
+>       from src.evaluation import diagnostic_comparison
+E       ImportError: cannot import name 'diagnostic_comparison' from 'src.evaluation' (C:\Users\bhuva\Downloads\DAT11\src\evaluation\__init__.py)
+
+tests\test_w8_diagnostic_comparison.py:16: ImportError
+___________ test_small_run_writes_outputs_with_all_six_comparisons ____________
+
+tmp_path = WindowsPath('C:/Users/bhuva/AppData/Local/Temp/pytest-of-bhuva/pytest-10/test_small_run_writes_outputs_0')
+
+    def test_small_run_writes_outputs_with_all_six_comparisons(tmp_path):
+>       dc = _mod()
+
+tests\test_w8_diagnostic_comparison.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _mod():
+>       from src.evaluation import diagnostic_comparison
+E       ImportError: cannot import name 'diagnostic_comparison' from 'src.evaluation' (C:\Users\bhuva\Downloads\DAT11\src\evaluation\__init__.py)
+
+tests\test_w8_diagnostic_comparison.py:16: ImportError
+=========================== short test summary info ===========================
+FAILED tests/test_w8_diagnostic_comparison.py::test_paired_difference_hand_example
+FAILED tests/test_w8_diagnostic_comparison.py::test_claim_rule_lower_is_better
+FAILED tests/test_w8_diagnostic_comparison.py::test_small_run_writes_outputs_with_all_six_comparisons
+3 failed in 2.50s
