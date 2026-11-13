@@ -1,0 +1,22 @@
+rows 9000
+adaptive_full: n=1000 mastered 7.5030 [7.1829, 7.8110] no_plan 5565/10000 prereq 0 budget 0 runtime_p50 73.2675 runtime_p95 99.0756
+adaptive_full: mastery_brier 0.1881 [0.1846, 0.1918] ECE 0.1550 pairs 16000
+static_prerequisite_order: n=1000 mastered 6.7760 [6.4216, 7.1351] no_plan 0/10000 prereq 0 budget 0 runtime_p50 2.7839 runtime_p95 4.8551
+static_prerequisite_order: mastery_brier not applicable, ECE not applicable
+non_adaptive_greedy: n=1000 mastered 7.0980 [6.7180, 7.4560] no_plan 0/10000 prereq 0 budget 0 runtime_p50 0.0615 runtime_p95 0.1106
+non_adaptive_greedy: mastery_brier not applicable, ECE not applicable
+non_adaptive_greedy_best_singleton: n=1000 mastered 7.1740 [6.7870, 7.5440] no_plan 0/10000 prereq 0 budget 0 runtime_p50 0.1045 runtime_p95 0.2230
+non_adaptive_greedy_best_singleton: mastery_brier not applicable, ECE not applicable
+ablation_no_diagnostic: n=1000 mastered 7.5870 [7.2818, 7.8801] no_plan 6000/10000 prereq 0 budget 0 runtime_p50 79.5669 runtime_p95 115.7682
+ablation_no_diagnostic: mastery_brier 0.1914 [0.1877, 0.1950] ECE 0.1563 pairs 16000
+ablation_no_replan: n=1000 mastered 6.7800 [6.4266, 7.1400] no_plan 0/10000 prereq 0 budget 0 runtime_p50 2.8386 runtime_p95 4.4693
+ablation_no_replan: mastery_brier not applicable, ECE not applicable
+ablation_no_difficulty_step: n=1000 mastered 7.5020 [7.1810, 7.8070] no_plan 5566/10000 prereq 0 budget 0 runtime_p50 75.6465 runtime_p95 105.0223
+ablation_no_difficulty_step: mastery_brier 0.1870 [0.1837, 0.1907] ECE 0.1565 pairs 16000
+ablation_no_review: n=1000 mastered 7.5050 [7.1820, 7.8130] no_plan 5565/10000 prereq 0 budget 0 runtime_p50 76.1748 runtime_p95 121.0558
+ablation_no_review: mastery_brier 0.1881 [0.1846, 0.1918] ECE 0.1556 pairs 16000
+ablation_no_remediation: n=1000 mastered 7.5030 [7.1829, 7.8110] no_plan 5565/10000 prereq 0 budget 0 runtime_p50 73.6126 runtime_p95 107.1678
+ablation_no_remediation: mastery_brier 0.1881 [0.1846, 0.1918] ECE 0.1550 pairs 16000
+adaptive_full - static_prerequisite_order: 0.7270 [0.6310, 0.8240] changed 665 (+456 / -209)
+adaptive_full - non_adaptive_greedy: 0.4050 [0.3100, 0.5000] changed 661 (+401 / -260)
+adaptive_full - ablation_no_diagnostic: -0.0840 [-0.1380, -0.0300] changed 357 (+168 / -189)
