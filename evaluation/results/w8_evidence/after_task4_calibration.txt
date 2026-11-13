@@ -1,0 +1,24 @@
+W8 task 4 (M8 calibration) - AFTER the change
+Code: 2357507
+
+== New tests: .venv\Scripts\python -m pytest tests/test_w8_calibration.py -q -p no:cacheprovider
+5 passed in 3.01s
+
+== Full suite: .venv\Scripts\python -m pytest -q -> 299 passed in 132.55s (before this task: 294 passed)
+
+== Run: .venv\Scripts\python -m src.evaluation.integrated --config experiments/w8_calibration_s0.yaml --out evaluation/results/w8/calibration_s0
+   (S0, seed 42, 200 learners, B = 1000; git 2357507, tracked tree clean)
+| Arm | Mastery Brier [95% CI] | ECE | Pairs |
+|---|---|---|---|
+| adaptive_full | 0.1364 [0.1208, 0.1529] | 0.0904 | 800 |
+| static_prerequisite_order | not applicable | not applicable | – |
+| non_adaptive_greedy | not applicable | not applicable | – |
+| non_adaptive_greedy_best_singleton | not applicable | not applicable | – |
+| ablation_no_diagnostic | 0.1446 [0.1314, 0.1596] | 0.0763 | 800 |
+| ablation_no_replan | not applicable | not applicable | – |
+| ablation_no_difficulty_step | 0.1364 [0.1208, 0.1529] | 0.0904 | 800 |
+| ablation_no_review | 0.1349 [0.1190, 0.1517] | 0.0834 | 800 |
+| ablation_no_remediation | 0.1364 [0.1208, 0.1529] | 0.0904 | 800 |
+
+Note: 59 of the 73 adaptive_full pairs in the 0.5-0.6 bin are concept D at p = 0.5 exactly
+(cold start, never practised in the horizon); only 4.1% of that bin is latently mastered.
