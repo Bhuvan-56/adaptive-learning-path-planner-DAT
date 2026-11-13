@@ -1,0 +1,105 @@
+{
+  "benchmark_name": "w8_diagnostic_comparison_pooled",
+  "config_hash": "30d40b3f5b269b258146e5091b404f43e6e27609051ce3e214344e873f13f2af",
+  "git": {
+    "commit_sha": "528dc10009f38dc08f83f790f34da4322f2c7546",
+    "dirty": false
+  },
+  "input_files": {
+    "config": {
+      "path": "experiments/w4_comparison.yaml",
+      "sha256": "4507efa596ab91389a0ae991de8657243afd74a79be905fb9d9b6b0f1aaf537e"
+    },
+    "curriculum": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\data\\curricula\\demo_curriculum.json",
+      "sha256": "36c8fcca4c0adfe00aa53a3664b7a501c179b6eeb6c502811699bd9765e817d4"
+    },
+    "item_bank": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\data\\processed\\item_bank_synthetic.csv",
+      "sha256": "e40ffdebe931d155cc5d9b6c9451f3aaf270231f2c50a81f6cdd54851af2f9e5"
+    },
+    "q_matrix": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\data\\processed\\q_matrix_synthetic.csv",
+      "sha256": "1ed05f59ac73f8c4ecd3f937c8ed5ed414f12324b8760ede234266cf0decc39e"
+    }
+  },
+  "output_files": {
+    "per_learner.csv": "533437132a1e61ceb413b57257b295d3dea5e3dbb6a1a296ce10eafea597bb3d",
+    "summary.md": "14483a373ffb18e78a0e6dcef05bcf0d862c3624f175abc1c1ce726f36b21158"
+  },
+  "package_versions": {
+    "networkx": "3.1",
+    "numpy": "1.24.3",
+    "pytest": "7.3.1",
+    "yaml": "6.0.1"
+  },
+  "parameters": {
+    "bootstrap_resamples": 1000,
+    "ci_resampling_seed": 42,
+    "compared_arms": [
+      "fixed",
+      "random"
+    ],
+    "confidence_level": 0.95,
+    "num_learners_per_seed": 200,
+    "reference_arm": "adaptive"
+  },
+  "results_summary": {
+    "adaptive-fixed:abs_theta_error": {
+      "ci": [
+        -0.09206417994613732,
+        -0.03748595353411309
+      ],
+      "claim": "adaptive improves on fixed [0.0375, 0.0921]",
+      "mean": -0.0642566770853411
+    },
+    "adaptive-fixed:brier": {
+      "ci": [
+        -0.00668659698738318,
+        0.0007572018086950215
+      ],
+      "claim": "no difference shown",
+      "mean": -0.0030152297470495124
+    },
+    "adaptive-fixed:log_loss": {
+      "ci": [
+        -0.015825965952755025,
+        -0.002619127008528398
+      ],
+      "claim": "adaptive improves on fixed [0.0026, 0.0158]",
+      "mean": -0.009033168440820806
+    },
+    "adaptive-random:abs_theta_error": {
+      "ci": [
+        -0.11027972016155581,
+        -0.0559985549711529
+      ],
+      "claim": "adaptive improves on random [0.0560, 0.1103]",
+      "mean": -0.08233334070738892
+    },
+    "adaptive-random:brier": {
+      "ci": [
+        -0.009620498141063494,
+        -0.0017340770827490532
+      ],
+      "claim": "adaptive improves on random [0.0017, 0.0096]",
+      "mean": -0.005692590188799419
+    },
+    "adaptive-random:log_loss": {
+      "ci": [
+        -0.02372276298120248,
+        -0.008212272252350826
+      ],
+      "claim": "adaptive improves on random [0.0082, 0.0237]",
+      "mean": -0.015525648509807713
+    }
+  },
+  "seeds": [
+    42,
+    101,
+    2024,
+    777,
+    999
+  ],
+  "timestamp": "2026-11-13T12:43:07Z"
+}

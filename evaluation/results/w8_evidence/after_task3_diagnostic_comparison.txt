@@ -1,0 +1,21 @@
+W8 task 3 (M2 diagnostic comparison) - AFTER the change
+Code: b2994f6 (module + tests), 528dc10 (pipe escaping, git state read before outputs)
+
+== New tests: .venv\Scripts\python -m pytest tests/test_w8_diagnostic_comparison.py -q -p no:cacheprovider
+...                                                                      [100%]
+3 passed in 1.96s
+
+== Full suite: .venv\Scripts\python -m pytest -q -> 294 passed in 118.96s (0:01:58) (before this task: 291 passed)
+
+== Run: .venv\Scripts\python -m src.evaluation.diagnostic_comparison --config experiments/w4_comparison.yaml --out evaluation/results/w8/diagnostic_comparison
+   (git 528dc10, clean tree; a second run into a scratch directory gave a byte-identical per_learner.csv and summary.md)
+## Paired differences (adaptive − X)
+
+| Comparison | Metric | Mean difference | 95% CI | Learners lower (adaptive / X / tie) | Claim |
+|---|---|---|---|---|---|
+| adaptive − fixed | \|θ̂ − θ*\| error | -0.0643 | [-0.0921, -0.0375] | 549 / 440 / 11 | adaptive improves on fixed [0.0375, 0.0921] |
+| adaptive − fixed | concept Brier score | -0.0030 | [-0.0067, +0.0008] | 501 / 488 / 11 | no difference shown |
+| adaptive − fixed | held-out log loss | -0.0090 | [-0.0158, -0.0026] | 518 / 471 / 11 | adaptive improves on fixed [0.0026, 0.0158] |
+| adaptive − random | \|θ̂ − θ*\| error | -0.0823 | [-0.1103, -0.0560] | 562 / 420 / 18 | adaptive improves on random [0.0560, 0.1103] |
+| adaptive − random | concept Brier score | -0.0057 | [-0.0096, -0.0017] | 518 / 464 / 18 | adaptive improves on random [0.0017, 0.0096] |
+| adaptive − random | held-out log loss | -0.0155 | [-0.0237, -0.0082] | 543 / 439 / 18 | adaptive improves on random [0.0082, 0.0237] |
