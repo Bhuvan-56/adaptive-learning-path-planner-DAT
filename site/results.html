@@ -12,20 +12,16 @@
   <h1>Integrated results (S0 and S1)</h1>
   <p class="lede">The whole loop (diagnostic, learner state, planning, replanning) run for 5 days with a 10-minute daily
     budget on 1,000 synthetic learners: 5 seeds × 200 learners, every arm on the same learners, on the 4-concept toy
-    curriculum. Outcome: number of concepts mastered at the end (out of 4). S0 numbers are from the run after the
-    Week 7 adaptive deadlock fix; <a href="#s1">S1 (Week 8)</a> is further down.</p>
+    curriculum. Outcome: number of concepts mastered at the end (out of 4). S0 is the final Week 8 run
+    (<code>evaluation/results/w8/final_v2/integrated_s0</code>, after every Week 8 fix), the run the final report uses;
+    <a href="#s1">S1 (Week 8)</a> is further down.</p>
   <div class="note">Results from a simulator with synthetic learners (<code>MatchedBKTGenerator</code>), scenarios S0 and S1.</div>
-
-  <h2>Week 7 fix: the adaptive planner no longer stalls</h2>
-  <p>Before the fix, a concept studied once stayed Uncertain and blocked everything after it, but was never practised
-    again, so adaptive plans stopped after day 1. Now such a concept gets another practice session
-    (<code>PRACTICE_FOR_EVIDENCE</code>) and its dependents follow. Same 1,000 learners before and after.</p>
-  <div class="card"><div class="table-wrap" id="fix"></div></div>
 
   <h2>Arms</h2>
   <div class="card">
     <div class="table-wrap" id="arms"><p class="small">Loading…</p></div>
   </div>
+  <div class="note" id="diag-caveat"></div>
   <div class="card" style="margin-top:12px">
     <h3 style="margin-top:0">Concepts mastered, mean with 95% CI</h3>
     <div id="forest"></div>
@@ -38,6 +34,12 @@
     <div class="table-wrap" id="diffs"></div>
   </div>
   <div class="card" style="margin-top:12px"><div id="diff-forest"></div></div>
+
+  <h2>Week 8 final fixes: before and after</h2>
+  <p>The final Week 8 fixes let the diagnostic's answers count as evidence (B10) and order reviews by forgetting risk
+    and prerequisite importance (B11). Same 1,000 learners, the earlier Week 8 run against the final one.</p>
+  <div class="card"><div class="table-wrap" id="fix"></div></div>
+  <p class="small" id="history"></p>
 
   <h2>How these numbers are computed</h2>
   <div class="card small" id="method"></div>
@@ -75,14 +77,26 @@
       <td class="num">${Site.signed4(f.mean)} [${Site.fmt4(f.lo)}, ${Site.fmt4(f.hi)}]</td>
       <td class="num">${f.changed} (+${f.up} / −${f.down})</td>
       <td class="num">${n(f.before_no_plan)} → ${n(f.after_no_plan)} / 5,000</td></tr>`; }).join("")}</tbody></table>
-    <p class="small">The other four arms do not use the replanner and are identical before and after (checked column by column by the build).
-      The remaining no-plan day is the last day for every learner, when the remaining concepts no longer fit; that day's planned work is still done.</p>
-    ${Site.src([beforeDir + "/per_learner_seed_*.csv", csvs], `method of <code>${S.fix_method}</code>; pre-registered in <a href="../${S.fix_prereg}"><code>${S.fix_prereg}</code></a>; write-up <a href="../${S.checked_against}"><code>${S.checked_against}</code></a>`)}`;
+    <p class="small">The three baselines and <code>ablation_no_diagnostic</code> are identical before and after on every column both runs have
+      (checked by the build): the baselines keep the earlier diagnostic priors by design, and the ablation starts cold. No-plan days count days on which the
+      plan could not reach the target by the deadline; the listed work is still done.</p>
+    ${Site.src([beforeDir + "/per_learner_seed_*.csv", csvs], `method of <code>${S.fix_method}</code>; write-up <a href="../${S.writeup}"><code>${S.writeup}</code></a> §4.2`)}`;
+
+  const H = r.history, ci4h = h => `${Site.signed4(h.mean)} [${Site.fmt4(h.lo)}, ${Site.fmt4(h.hi)}]`;
+  document.getElementById("history").innerHTML = `History: the Week 7 deadlock fix took adaptive_full − static from
+    ${ci4h(H.w7_before)} to ${ci4h(H.w7_after)} (<a href="../${S.history_writeup}"><code>${S.history_writeup}</code></a>; recomputed by the build from
+    <code>${H.w7_before.dir}</code> and <code>${H.w7_after.dir}</code>).`;
+
+  const nd = r.diffs.find(d => d.a === "ablation_no_diagnostic");
+  document.getElementById("diag-caveat").innerHTML = `<b>The diagnostic now lowers mastery.</b> Since the B10 fix the diagnostic's answers reach the plan,
+    and <code>ablation_no_diagnostic</code> (cold start, no diagnostic) masters more concepts than <code>adaptive_full</code>:
+    ${Site.signed4(nd.mean)} [${Site.fmt4(nd.lo)}, ${Site.fmt4(nd.hi)}] (ablation − adaptive). Why was not tested
+    (<a href="../${S.limitations}"><code>${S.limitations}</code></a> B12).`;
 
   document.getElementById("arms").innerHTML = `<table><thead><tr><th>Arm</th><th class="num">Learners</th><th class="num">Mastered [95% CI]</th>
-    <th class="num">No-plan days</th><th class="num">Prereq viol.</th><th class="num">Budget viol.</th><th class="num">Trace coverage</th></tr></thead>
-    <tbody>${r.arms.map(a => `<tr><td><code>${a.arm}</code></td><td class="num">${n(a.n)}</td>
-      <td class="num">${Site.fmt4(a.mastered)} [${Site.fmt4(a.lo)}, ${Site.fmt4(a.hi)}]</td>
+    <th class="num">Retained recall</th><th class="num">No-plan days</th><th class="num">Prereq viol.</th><th class="num">Budget viol.</th><th class="num">Trace coverage</th></tr></thead>
+    <tbody>${r.arms.map(a => `<tr${a.arm === "adaptive_full" || a.arm === "ablation_no_diagnostic" ? ' class="hl"' : ""}><td><code>${a.arm}</code></td><td class="num">${n(a.n)}</td>
+      <td class="num">${Site.fmt4(a.mastered)} [${Site.fmt4(a.lo)}, ${Site.fmt4(a.hi)}]</td><td class="num">${Site.fmt4(a.retained)}</td>
       <td class="num">${n(a.no_plan_days)} / ${n(a.learner_days)}</td><td class="num">${a.prereq_violations}</td><td class="num">${a.budget_violations}</td>
       <td class="num">${a.trace_coverage ?? '<span class="small">not reported</span>'}</td></tr>`).join("")}</tbody></table>
     ${Site.src(csvs, "arms in file order")}
@@ -135,9 +149,9 @@
     <p><code>per_learner.csv</code> and the arm table in <code>summary.md</code> hold seed 42 only, so the five per-seed files are pooled.
     <code>site/build_data.py</code> follows <a href="../${S.method}"><code>${S.method}</code></a>: the five files are concatenated in the order 42, 101, 2024, 777, 999;
     each arm's mean and CI use <code>compute_paired_bootstrap_ci</code> (B = 1000, seed 42); paired differences use rows sorted by the per-learner seed.</p>
-    <p>The build checks its arm means, CIs and no-plan days for the four primary arms, the best-singleton − greedy difference (+0.0130 [0.0040, 0.0230], 23 learners: 18 up, 5 down),
-    adaptive_full − static (+0.1400 [0.1110, 0.1690], 194 learners: 156 up, 38 down), adaptive_full after − before (+0.2420 [0.2110, 0.2740]) and 100% trace coverage
-    against <a href="../${S.checked_against}"><code>${S.checked_against}</code></a> and <a href="../docs/w7/comparison.md"><code>docs/w7/comparison.md</code></a>, and stops if any differs.</p>
+    <p>The build checks every arm's mean, CI, no-plan days and violation counts, and the adaptive_full − static, − greedy and − ablation_no_diagnostic differences,
+    against the committed output of the pooling script and the before/after table
+    (${S.checked_against.map(p => `<a href="../${p}"><code>${p}</code></a>`).join(", ")}), checks 0 violations and 100% trace coverage, and stops if anything differs.</p>
     <p>Sources: ${S.per_learner.map(p => `<a href="../${p}"><code>${p}</code></a>`).join(", ")}.</p>`;
 
   // ---------------- Week 8: robustness 2 x 2

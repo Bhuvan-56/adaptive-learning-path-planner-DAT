@@ -1,8 +1,8 @@
 """Build the data files the website reads (site/data/*.json).
 
-Integrated S0 numbers are from the run after the Week 7 adaptive deadlock fix
-(docs/w7/deadlock_fix_results.md), with the run before it for comparison; the
-Week 8 S0 run is identical (checked below). Integrated S1 and the robustness
+Integrated S0 is the final Week 8 run (evaluation/results/w8/final_v2/integrated_s0),
+with the earlier Week 8 run (before the B10 diagnostic fix) for comparison, and the
+Week 7 deadlock-fix effect recomputed as history. Integrated S1 and the robustness
 2 x 2 use the Week 8 final_v2 runs (evaluation/results/w8/final_v2/, after the
 B10 and B11 fixes), with the pre-fix S1 run for comparison.
 
@@ -39,10 +39,15 @@ import demo_api  # noqa: E402
 
 OUT = os.path.join(ROOT, "site", "data")
 SCHED_DIR = "evaluation/results/w7/improvement/scheduling"
-# Integrated S0 after the Week 7 adaptive deadlock fix (docs/w7/deadlock_fix_results.md);
-# the run before the fix is kept for the before/after comparison.
-S0_DIR = "evaluation/results/w7/deadlock_fix/integrated_s0"
-S0_BEFORE_DIR = "evaluation/results/w7/improvement/integrated_s0"
+# Integrated S0: the final Week 8 run (after B10, B11 and calibration; docs/final/FINAL_REPORT.md 4.2).
+# "Before" is the earlier Week 8 S0 run (before the B10 diagnostic fix).
+S0_DIR = "evaluation/results/w8/final_v2/integrated_s0"
+S0_BEFORE_DIR = "evaluation/results/w8/final/integrated_s0"
+S0_POOLED_TXT = "evaluation/results/w8/final_v2/pooled_integrated_s0.txt"
+BEFORE_AFTER_TXT = "evaluation/results/w8/final_v2/before_after.txt"
+# History only: the Week 7 adaptive deadlock fix (docs/w7/deadlock_fix_results.md).
+W7_BEFORE_DIR = "evaluation/results/w7/improvement/integrated_s0"
+W7_AFTER_DIR = "evaluation/results/w7/deadlock_fix/integrated_s0"
 BAD_CASES = "tests/fixtures/w7/bad_cases.json"
 SEEDS = [42, 101, 2024, 777, 999]  # order used by scripts/w7_pooled_s0.py
 
@@ -143,6 +148,39 @@ def trace_coverage():
     return cov
 
 
+def _pooled_txt():
+    """Arm lines and pair lines printed by scripts/w7_pooled_s0.py (committed output)."""
+    arms, pairs = {}, {}
+    for line in open(S0_POOLED_TXT, encoding="utf-8"):
+        m = re.match(r"^(\w+): n=(\d+) mastered ([\d.]+) \[([\d.]+), ([\d.]+)\] no_plan (\d+)/\d+ prereq (\d+) budget (\d+)", line)
+        if m:
+            arms[m.group(1)] = (float(m.group(3)), float(m.group(4)), float(m.group(5)), int(m.group(6)),
+                                int(m.group(7)), int(m.group(8)))
+        m = re.match(r"^(\w+) - (\w+): (-?[\d.]+) \[(-?[\d.]+), (-?[\d.]+)\] changed (\d+) \(\+(\d+) / -(\d+)\)", line)
+        if m:
+            pairs[(m.group(1), m.group(2))] = (float(m.group(3)), float(m.group(4)), float(m.group(5)),
+                                               int(m.group(6)), int(m.group(7)), int(m.group(8)))
+    return arms, pairs
+
+
+def _before_after_toy_s0():
+    """Toy S0 block of the committed before/after table: per-arm before/after means and no-plan days."""
+    block = open(BEFORE_AFTER_TXT, encoding="utf-8").read().split("### toy S0")[1].split("### ")[0]
+    rows = {}
+    for m in re.finditer(r"^\| (\w+) \| ([\d.]+) → ([\d.]+) \| [^|]+\| (\d+) → (\d+) / \d+ \|", block, re.M):
+        rows[m.group(1)] = (float(m.group(2)), float(m.group(3)), int(m.group(4)), int(m.group(5)))
+    assert len(rows) == 4, rows
+    return rows
+
+
+def _pool_dir(d):
+    return pd.concat([pd.read_csv(f"{d}/per_learner_seed_{s}.csv") for s in SEEDS], ignore_index=True)
+
+
+def _sorted(df, arm):
+    return df[df.arm == arm].sort_values("seed", kind="mergesort").reset_index(drop=True)
+
+
 def build_s0():
     files = [f"{S0_DIR}/per_learner_seed_{s}.csv" for s in SEEDS]
     df = pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
@@ -155,6 +193,7 @@ def build_s0():
         arms.append({
             "arm": arm, "n": int(len(g)),
             "mastered": f4(m), "lo": f4(lo), "hi": f4(hi),
+            "retained": f4(g.retained_recall.mean()),
             "no_plan_days": int(g.no_plan_days.sum()), "learner_days": int(len(g) * 5),
             "prereq_violations": int(g.prereq_violations.sum()),
             "budget_violations": int(g.budget_violations.sum()),
@@ -162,8 +201,7 @@ def build_s0():
         })
 
     def paired(a, b):
-        ga = df[df.arm == a].sort_values("seed", kind="mergesort").reset_index(drop=True)
-        gb = df[df.arm == b].sort_values("seed", kind="mergesort").reset_index(drop=True)
+        ga, gb = _sorted(df, a), _sorted(df, b)
         assert (ga[["seed", "learner_id"]].values == gb[["seed", "learner_id"]].values).all()
         d = (ga.mastered_concepts - gb.mastered_concepts).values
         m, lo, hi = compute_paired_bootstrap_ci(d, 1000, 0.95, 42)
@@ -193,18 +231,17 @@ def build_s0():
     ]
     diffs = [paired(a, b) for a, b in pairs]
 
-    # Before/after the deadlock fix, same learners (scripts/w7_deadlock_fix_compare.py).
+    # Before/after the Week 8 final fixes (B10 diagnostic evidence, B11 review order), same learners.
     before_files = [f"{S0_BEFORE_DIR}/per_learner_seed_{s}.csv" for s in SEEDS]
     before = pd.concat([pd.read_csv(f) for f in before_files], ignore_index=True)
+    common = [c for c in before.columns if c in df.columns and c != "runtime_ms"]  # final_v2 adds calibration columns
     fix_rows = []
-    for arm in ("adaptive_full", "ablation_no_diagnostic", "ablation_no_difficulty_step",
+    for arm in ("adaptive_full", "ablation_no_replan", "ablation_no_difficulty_step",
                 "ablation_no_review", "ablation_no_remediation"):
-        ga = df[df.arm == arm].sort_values("seed", kind="mergesort").reset_index(drop=True)
-        gb = before[before.arm == arm].sort_values("seed", kind="mergesort").reset_index(drop=True)
+        ga, gb = _sorted(df, arm), _sorted(before, arm)
         assert (ga[["seed", "learner_id"]].values == gb[["seed", "learner_id"]].values).all()
         d = (ga.mastered_concepts - gb.mastered_concepts).values
         m, lo, hi = compute_paired_bootstrap_ci(d, 1000, 0.95, 42)
-        # Per-arm CI in file order, as scripts/w7_pooled_s0.py does (only paired rows are sorted).
         bm, blo, bhi = compute_paired_bootstrap_ci(before[before.arm == arm].mastered_concepts.values, 1000, 0.95, 42)
         fix_rows.append({
             "arm": arm, "before_mastered": f4(bm), "before_lo": f4(blo), "before_hi": f4(bhi),
@@ -212,33 +249,49 @@ def build_s0():
             "mean": f4(m), "lo": f4(lo), "hi": f4(hi),
             "changed": int((d != 0).sum()), "up": int((d > 0).sum()), "down": int((d < 0).sum()),
         })
-    f0 = fix_rows[0]
-    # docs/w7/comparison.md section 3: adaptive_full 1.9340 [1.8309, 2.0380], 4,000 no-plan days.
-    assert (f0["before_mastered"], f0["before_lo"], f0["before_hi"], f0["before_no_plan"], f0["after_no_plan"]) == (1.9340, 1.8309, 2.0380, 4000, 1000), f0
-    assert (f0["mean"], f0["lo"], f0["hi"], f0["changed"], f0["up"], f0["down"]) == (0.2420, 0.2110, 0.2740, 204, 204, 0), f0
-    # Arms the fix must not change: identical per-learner columns except runtime_ms.
-    cols = [c for c in df.columns if c != "runtime_ms"]
-    for arm in ("static_prerequisite_order", "non_adaptive_greedy", "non_adaptive_greedy_best_singleton", "ablation_no_replan"):
-        a = df[df.arm == arm].sort_values("seed", kind="mergesort").reset_index(drop=True)[cols]
-        b = before[before.arm == arm].sort_values("seed", kind="mergesort").reset_index(drop=True)[cols]
-        assert a.equals(b), arm
+    # Arms the fixes must not change (baselines keep the pre-B10 priors; no_diagnostic is cold start):
+    # identical on every column both runs have, except runtime_ms.
+    unchanged = ["static_prerequisite_order", "non_adaptive_greedy", "non_adaptive_greedy_best_singleton",
+                 "ablation_no_diagnostic"]
+    for arm in unchanged:
+        assert _sorted(df, arm)[common].equals(_sorted(before, arm)[common]), arm
 
-    # Cross-check against docs/w7/deadlock_fix_results.md (and docs/w7/comparison.md for unchanged arms).
-    by = {a["arm"]: a for a in arms}
-    expect = {
-        "adaptive_full": (2.1760, 2.0800, 2.2680, 1000),
-        "static_prerequisite_order": (2.0360, 1.9360, 2.1400, 0),
-        "non_adaptive_greedy": (2.0360, 1.9360, 2.1400, 0),
-        "non_adaptive_greedy_best_singleton": (2.0490, 1.9510, 2.1510, 0),
-    }
-    for arm, (m, lo, hi, np_days) in expect.items():
-        a = by[arm]
-        assert (a["mastered"], a["lo"], a["hi"], a["no_plan_days"]) == (m, lo, hi, np_days), (arm, a)
-    d_bs = diffs[3]
-    assert (d_bs["mean"], d_bs["lo"], d_bs["hi"], d_bs["changed"], d_bs["up"], d_bs["down"]) == (0.0130, 0.0040, 0.0230, 23, 18, 5), d_bs
-    d_af = diffs[0]
-    assert (d_af["mean"], d_af["lo"], d_af["hi"], d_af["changed"], d_af["up"], d_af["down"]) == (0.1400, 0.1110, 0.1690, 194, 156, 38), d_af
+    # Cross-check against the committed pooled output and before/after table; stop on any difference.
+    p_arms, p_pairs = _pooled_txt()
+    assert set(p_arms) == {a["arm"] for a in arms}, sorted(p_arms)
+    for a in arms:
+        got = (a["mastered"], a["lo"], a["hi"], a["no_plan_days"], a["prereq_violations"], a["budget_violations"])
+        assert got == p_arms[a["arm"]], (a["arm"], got, p_arms[a["arm"]])
+    assert len(p_pairs) == 3, p_pairs
+    by_pair = {(d["a"], d["b"]): d for d in diffs}
+    for (a, b), want in p_pairs.items():
+        if (a, b) in by_pair:
+            d = by_pair[(a, b)]
+            got = (d["mean"], d["lo"], d["hi"], d["changed"], d["up"], d["down"])
+        else:  # the page shows ablation_no_diagnostic - adaptive_full; the txt has the reverse
+            d = by_pair[(b, a)]
+            got = (f4(-d["mean"]), f4(-d["hi"]), f4(-d["lo"]), d["changed"], d["down"], d["up"])
+        assert got == want, ((a, b), got, want)
+    by_arm = {a["arm"]: a for a in arms}
+    by_fix = {f["arm"]: f for f in fix_rows}
+    for arm, (b_m, a_m, b_np, a_np) in _before_after_toy_s0().items():
+        assert by_arm[arm]["mastered"] == a_m and by_arm[arm]["no_plan_days"] == a_np, arm
+        gb = _sorted(before, arm)
+        assert f4(gb.mastered_concepts.mean()) == b_m and int(gb.no_plan_days.sum()) == b_np, arm
+        if arm in by_fix:
+            assert by_fix[arm]["before_mastered"] == b_m and by_fix[arm]["after_no_plan"] == a_np, arm
+    assert all(a["prereq_violations"] == 0 and a["budget_violations"] == 0 for a in arms)
     assert all(a["trace_coverage"] == "100.0%" for a in arms if a["trace_coverage"] is not None)
+
+    # History: the Week 7 deadlock fix took adaptive_full - static from -0.1020 to +0.1400
+    # (docs/w7/deadlock_fix_results.md); recomputed here from the Week 7 runs.
+    history = {}
+    for key, d in (("w7_before", W7_BEFORE_DIR), ("w7_after", W7_AFTER_DIR)):
+        h = _pool_dir(d)
+        ga, gb = _sorted(h, "adaptive_full"), _sorted(h, "static_prerequisite_order")
+        m, lo, hi = compute_paired_bootstrap_ci((ga.mastered_concepts - gb.mastered_concepts).values, 1000, 0.95, 42)
+        history[key] = {"mean": f4(m), "lo": f4(lo), "hi": f4(hi), "dir": d}
+    assert history["w7_before"]["mean"] == -0.1020 and history["w7_after"]["mean"] == 0.1400, history
 
     return {
         "sources": {
@@ -246,13 +299,16 @@ def build_s0():
             "coverage": [f"{S0_DIR}/summary_seed_{s}.md" for s in SEEDS],
             "per_learner_before": before_files,
             "method": "scripts/w7_pooled_s0.py",
-            "fix_method": "scripts/w7_deadlock_fix_compare.py",
-            "checked_against": "docs/w7/deadlock_fix_results.md",
-            "fix_prereg": "docs/w7/preregistration_deadlock_fix.md",
+            "fix_method": "scripts/w8_final_v2_compare.py",
+            "checked_against": [S0_POOLED_TXT, BEFORE_AFTER_TXT],
+            "writeup": "docs/final/FINAL_REPORT.md",
+            "limitations": "docs/final/LIMITATIONS.md",
+            "history_writeup": "docs/w7/deadlock_fix_results.md",
         },
         "arms": arms,
         "diffs": diffs,
         "fix": fix_rows,
+        "history": history,
     }
 
 
@@ -260,7 +316,6 @@ def build_s0():
 # Week 8 final_v2: S1 after all Week 8 fixes (S1 forgetting, best effort, B10, B11).
 S1_DIR = "evaluation/results/w8/final_v2/integrated_s1"
 S1_BEFORE_DIR = "evaluation/results/w8/before/integrated_s1"
-S0_W8_DIR = "evaluation/results/w8/final/integrated_s0"
 
 
 def _pooled(d):
@@ -281,8 +336,6 @@ def build_s1():
     df, before = _pooled(S1_DIR), _pooled(S1_BEFORE_DIR)
     assert len(df) == len(before) == 9000
     # The Week 8 S0 run must equal the Week 7 S0 run the page shows (all columns but runtime_ms).
-    cols = [c for c in before.columns if c != "runtime_ms"]  # final_v2 adds calibration columns after these
-    assert _pooled(S0_W8_DIR)[cols].equals(_pooled(S0_DIR)[cols]), "W8 S0 differs from W7 S0"
 
     arms = []
     for arm, g in df.groupby("arm", sort=False):
