@@ -51,8 +51,8 @@ from src.provenance import get_git_info, get_package_versions, resolved_config_h
 REFERENCE_ARM = "adaptive"
 COMPARED_ARMS = ("fixed", "random")
 METRICS = ("abs_theta_error", "brier", "log_loss")
-METRIC_LABELS = {
-    "abs_theta_error": "|θ̂ − θ*| error",
+METRIC_LABELS = {  # markdown table cells: literal pipes escaped
+    "abs_theta_error": "\\|θ̂ − θ*\\| error",
     "brier": "concept Brier score",
     "log_loss": "held-out log loss",
 }
@@ -144,6 +144,8 @@ def run_pooled_diagnostic_comparison(
 ) -> Dict[str, Any]:
     """Runs every configured seed, pools, and writes per_learner.csv, summary.md, manifest.json."""
     cfg_file = config_path or DEFAULT_COMPARISON_CONFIG
+    # Git state before any output is written, so the run's own files do not mark it dirty.
+    git_sha, dirty = get_git_info()
     config = load_comparison_config(cfg_file)
     seeds = [int(s) for s in config["seeds"]]
     n_learners = override_learners or int(config["evaluation_scale"]["num_synthetic_learners"])
@@ -209,7 +211,7 @@ def run_pooled_diagnostic_comparison(
         "",
         "## Arms (pooled mean [95% CI])",
         "",
-        "| Arm | n | Items used | |θ̂ − θ*| error | Concept Brier | Held-out log loss |",
+        f"| Arm | n | Items used | {METRIC_LABELS['abs_theta_error']} | Concept Brier | Held-out log loss |",
         "|---|---|---|---|---|---|",
     ]
     for e in arm_rows:
@@ -231,7 +233,6 @@ def run_pooled_diagnostic_comparison(
     with open(md_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
-    git_sha, dirty = get_git_info()
     manifest = {
         "benchmark_name": "w8_diagnostic_comparison_pooled",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
