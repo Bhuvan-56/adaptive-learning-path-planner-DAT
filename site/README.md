@@ -10,8 +10,9 @@ Made by: Bhuvan and Abdur
 | Overview | `index.html` | headline numbers from `data/scheduling.json`, `data/s0_pooled.json` |
 | Curriculum | `curriculum.html` | `../data/curricula/maths_curriculum.json` (16-concept Mathematics demo curriculum, Week 8) and `../data/curricula/demo_curriculum.json` (4-concept toy curriculum used by every evaluation), read directly |
 | Scheduling benchmark | `scheduling.html` | `data/scheduling.json` ← `evaluation/results/w7/improvement/scheduling/`, `tests/fixtures/w7/bad_cases.json` |
-| Integrated S0 and S1 | `results.html` | `data/s0_pooled.json` ← the five `evaluation/results/w7/deadlock_fix/integrated_s0/per_learner_seed_*.csv` (after the adaptive deadlock fix), with `evaluation/results/w7/improvement/integrated_s0/` as the before run |
-|  |  | `data/s1_pooled.json` ← `evaluation/results/w8/final/integrated_s1/` (Week 8, forgetting during study), with `evaluation/results/w8/before/integrated_s1/` as the before run |
+| Integrated S0 and S1 | `results.html` | `data/s0_pooled.json` ← the five `evaluation/results/w8/final_v2/integrated_s0/per_learner_seed_*.csv` (final Week 8 run, the one `docs/final/FINAL_REPORT.md` uses), with `evaluation/results/w8/final/integrated_s0/` (before the B10/B11 fixes) as the before run; the Week 7 deadlock-fix change (`evaluation/results/w7/improvement/` → `w7/deadlock_fix/`) is kept as history |
+|  |  | `data/s1_pooled.json` ← `evaluation/results/w8/final_v2/integrated_s1/` (Week 8, forgetting during study), with `evaluation/results/w8/before/integrated_s1/` as the before run |
+|  |  | `data/robust.json` ← `evaluation/results/w8/final_v2/{integrated_s0,toy_s3,maths_s0,maths_s3}/` (2 × 2: curriculum × simulator) |
 | Live demos | `demos.html` | Pyodide + `py/demo_api.py` + the `src/` files listed in `assets/pyrunner.js`; fallback `data/fallback.json`. Demo B plans on either curriculum (`curriculum` in the payload: `maths` or `toy`) |
 
 All results come from a simulator with synthetic learners.
@@ -41,10 +42,10 @@ purpose, open `demos.html?fallback`.
 
 The script
 
-- computes the pooled S0 table with `compute_paired_bootstrap_ci` exactly as `scripts/w7_pooled_s0.py` does (seed order
-  42, 101, 2024, 777, 999; B = 1000, seed 42; paired rows sorted by learner seed) and stops unless the numbers equal
-  `docs/w7/deadlock_fix_results.md` (and `docs/w7/comparison.md` for the arms the fix does not touch), and checks
-  the before/after differences and that the unchanged arms are identical;
+- computes the pooled S0, S1 and 2 × 2 tables with `compute_paired_bootstrap_ci` exactly as `scripts/w7_pooled_s0.py` does
+  (seed order 42, 101, 2024, 777, 999; B = 1000, seed 42; paired rows sorted by learner seed) and stops unless the
+  numbers equal `evaluation/results/w8/final_v2/pooled_*.txt` and `before_after.txt` (the figures in
+  `docs/final/FINAL_REPORT.md` §4);
 - recomputes the scheduling summary from `per_instance.csv` and stops unless it equals `summary.md`;
 - runs every demo preset through `site/py/demo_api.py` natively and saves the outputs as the offline fallback, checking
   the two bad cases reproduce the fixture scores (12 / 18 and 3 / 14);
