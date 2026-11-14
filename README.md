@@ -1,7 +1,16 @@
 # Adaptive Learning and Path-Planning Engine
 
 **Team:** Bhuvan Chandra (AI23BTECH11013), Abdur Rehman (AI23BTECH11015)
-**Course:** CS5903 — Distributed AI Training (DAT)
+**Course:** CS5903 — Distributed AI Training (DAT) · **Project 03 · Group 11**
+
+## Status and Final Submission
+
+- **Status:** milestones M1–M8 are implemented and evaluated on synthetic learners only (no real learner data). 20 of 21 acceptance groups pass; M4-a (infeasibility repair for `HEURISTIC_NO_PLAN`) is partial, as agreed with the mentor. The full test suite reports **299 passed**.
+- **Final revision:** tag [`cs5903-final-2026`](https://github.com/Bhuvan-56/adaptive-learning-path-planner-DAT/tree/cs5903-final-2026).
+- **Deliverable A, Project Report:** [`docs/Project_Report.pdf`](docs/Project_Report.pdf)
+- **Deliverable B, Architecture Decision Records:** [`docs/Architecture_Decision_Records.md`](docs/Architecture_Decision_Records.md)
+- **Demo:** <https://bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/> (see [Operational Handover](#operational-handover))
+- **Known limitations and open defects:** [`docs/final/LIMITATIONS.md`](docs/final/LIMITATIONS.md)
 
 ## Overview
 
@@ -21,7 +30,9 @@ See `docs/PROBLEM_BOUNDARY.md` for the full scope statement and actor definition
 
 | Document | Contents |
 | --- | --- |
-| [`docs/final/FINAL_REPORT.md`](docs/final/FINAL_REPORT.md) | Problem, system, method, final results, reproduction commands |
+| [`docs/Project_Report.pdf`](docs/Project_Report.pdf) | **Final project report (submission deliverable A)** |
+| [`docs/Architecture_Decision_Records.md`](docs/Architecture_Decision_Records.md) | **Decision log ADR-001 to ADR-022, incl. the methodology record ADR-010 (deliverable B)** |
+| [`docs/final/FINAL_REPORT.md`](docs/final/FINAL_REPORT.md) | Markdown summary of the final results and reproduction commands (the PDF is the full report) |
 | [`docs/final/LIMITATIONS.md`](docs/final/LIMITATIONS.md) | What the evidence cannot support; open defects |
 | [`docs/final/DEMO.md`](docs/final/DEMO.md) | Final demo script (website and live demos) |
 | [`docs/final/ownership_track_A.md`](docs/final/ownership_track_A.md), [`ownership_track_B.md`](docs/final/ownership_track_B.md) | Code explanation and live change task per track |
@@ -79,6 +90,8 @@ TRACEABILITY.md- requirement -> milestone -> acceptance test mapping
 pip install -r requirements.txt
 ```
 
+**Environment variables and secrets:** none. The project needs no API keys, accounts, database or environment variables, so there is no `.env` file. All data is synthetic and committed under `data/`. The only network access is optional: the website's live demos download Pyodide from `cdn.jsdelivr.net` once.
+
 ## Running Tests
 
 Run the full pytest suite:
@@ -86,6 +99,8 @@ Run the full pytest suite:
 ```bash
 pytest
 ```
+
+**Expected outcome:** `299 passed` (Windows, Python 3.11, at the final tag). Note that `tests/test_m7_explainability.py` rewrites `evaluation/results/sample_trace_normal.json`; restore it with `git checkout -- evaluation/results/sample_trace_normal.json` if you want a clean tree afterwards.
 
 Run specific test modules:
 
@@ -142,8 +157,18 @@ This executes:
 Generate and trace a single plan request from input data:
 
 ```bash
-python -m src.cli plan --curriculum data/curricula/demo_curriculum.json --target D --budget 10 --deadline-days 3 --out evaluation/results/plan_run
+python -m src.cli plan --curriculum data/curricula/demo_curriculum.json --target D --budget 10 --deadline-days 3 --out out/plan_demo
 ```
+
+**Example input and expected output.** The command above plans the 4-concept demo curriculum (A → B → C → D) for a cold-start learner, target D, 10 minutes a day for 3 days. It prints:
+
+```text
+Plan request succeeded. Target: D, Status: FEASIBLE
+Policy: using declared default (.../config/bkt_params.yaml)
+Artifacts written to 'out/plan_demo'.
+```
+
+and writes `out/plan_demo/plan.json` with day 1 = A, B; day 2 = C; day 3 = D (10 of 10 minutes each day; C listed as an assessment candidate), plus `out/plan_demo/trace.json` with 12 entries (4 candidates × 3 days), each with a reason code. With `--budget 8` instead, it prints `Status: INFEASIBLE_PROVED`, and `plan.json` holds the proof instead of days: reason `BLOCK_EXCEEDS_DAILY_BUDGET`, offending concepts C and D, and the minimum fix "raise daily budget to at least 10 minutes" (extra days cannot help).
 
 Options:
 - `--curriculum <file>`: Path to curriculum DAG JSON definition (required).
@@ -187,7 +212,7 @@ This executes:
 Run the closed-loop integrated evaluation pipeline:
 
 ```bash
-python -m src.cli evaluate --config experiments/w8_final.yaml --out evaluation/results/w5/eval_run --learners 10
+python -m src.cli evaluate --config experiments/w8_final.yaml --out out/eval_run --learners 10
 ```
 
 Options:
@@ -228,7 +253,40 @@ Verify that the online BKT adapter matches pyBKT's predictions step-by-step to w
 pytest tests/test_m1_bkt_parity.py -v
 ```
 
+## Operational Handover
+
+**Starting and stopping.** There are no services to keep running. The engine is a command-line program (`python -m src.cli ...`) that exits when done. To view the website locally, serve the repository root and open `/site/`:
+
+```bash
+python -m http.server 8000      # from the repository root; stop with Ctrl+C
+# then open http://localhost:8000/site/
+```
+
+Pages read files with `fetch()`, so opening the HTML files directly from disk does not work. The published copy is <https://bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/> (GitHub Pages builds `main`). `site/build_data.py` regenerates the website's result data from `evaluation/results/w8/final_v2/` and stops if any number differs from the committed result files.
+
+**Where outputs and logs go.** There are no log files; every command prints to the terminal.
+- `plan`, `demo`, `slice`: `plan.json`, `trace.json` and the other artifacts in the `--out` folder.
+- `evaluate` and `python -m src.evaluation.integrated`: `per_learner.csv`, `summary.md` and `manifest.json` (git SHA, dirty flag, SHA-256 config hash, input paths, output checksums) in the `--out` folder.
+- Committed results used in the report: `evaluation/results/` (final runs in `evaluation/results/w8/final_v2/`).
+
+**Resetting.** Delete your own output folders (for example `out/`). Committed results are never overwritten by the examples above. `git checkout -- evaluation/results/` restores any committed result file you changed.
+
+**Common failures.**
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `Error: Tracked git tree is dirty and --require-clean is active.` | Output folder is under `evaluation/results/` and a tracked file is modified | Commit or restore your changes, or write to a folder outside `evaluation/results/` (e.g. `out/`), where the clean-tree check is off by default |
+| Demos page shows a red "Python engine unavailable" banner and "Saved output" notes | Pyodide could not be downloaded from `cdn.jsdelivr.net` (offline or blocked) | Allow the CDN, or use the saved outputs (`demos.html?fallback`); presets still show real engine output |
+| Website pages are empty when opened from disk | Browsers block `fetch()` on `file://` | Serve the repository root with `python -m http.server` as above |
+| `ModuleNotFoundError` (e.g. `catsim`, `pyBKT`) | Dependencies not installed in the active environment | `pip install -r requirements.txt` in a Python 3.11 environment |
+| `git status` shows `evaluation/results/sample_trace_normal.json` modified after tests | The test suite rewrites this sample trace | `git checkout -- evaluation/results/sample_trace_normal.json` |
+
+**External services and costs.** None required. GitHub Pages hosts the website for free; the Pyodide CDN is used only by the live demos. The clean-clone audit `scripts/clean_run.ps1 -Sha <commit>` is a PowerShell (Windows) script.
+
 ## Documentation Index
+
+- `docs/Project_Report.pdf` — Final project report (deliverable A)
+- `docs/Architecture_Decision_Records.md` — Decision log, ADR-001 to ADR-022 (deliverable B)
 
 - `docs/PROBLEM_BOUNDARY.md` — Actors, system boundary, in/out of scope
 - `ASSUMPTIONS.md` — Documented assumptions and known limitations
