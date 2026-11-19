@@ -40,6 +40,7 @@ The **Toy** presets show the same behaviours on 4 concepts. The 4-concept curric
 **Live session** (<http://127.0.0.1:8001/site/live.html>): answer 2–3 diagnostic questions yourself, one of them wrong on purpose. Each wrong option shows the mistake it indicates. Continue to day 1 and get one practice question wrong: p falls, the class changes, and the later days are replanned. **Undo** goes back one answer.
 
 **What to say if asked:**
+- To go straight to a moment, use the **Jump to step** slider or the jump buttons (Diagnostic, Day 1 of the plan, Skipped days, End); arrow keys step back and forward, Space starts and pauses. For the missed-days story pick the "average learner, skips 4 days" run and press **Skipped days**.
 - The target ends **Uncertain** in every run. It is last in the prerequisite chain, so the plan reaches it only at the end and it gets 0 or 1 answers; the engine calls a concept Mastered or Weak only after at least 3 answers and a full window of 4 recent ones. Say: "Uncertain means not enough evidence yet, not failed." The pages show the same sentence.
 - After a skip, a due review can be missing. That is defect **B14** (`LIMITATIONS.md`), found while building this demo.
 - Questions are hand-written for the demo (`data/demo/questions_maths.json`), not from a dataset.
