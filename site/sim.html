@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Live Simulation</title>
-<link rel="stylesheet" href="assets/style.css?v=w8i">
-<script src="assets/common.js?v=w8i"></script>
+<link rel="stylesheet" href="assets/style.css?v=w8j">
+<script src="assets/common.js?v=w8j"></script>
 <style>
   .live-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
   @media (max-width: 860px) { .live-grid { grid-template-columns: 1fr; } }
@@ -48,6 +48,21 @@
     S0 simulator; its true knowledge (read only by the evaluator) is shown beside the engine's estimate.</p>
   <p class="small" id="source"></p>
   <p class="err" id="error" role="alert" hidden></p>
+
+  <div class="card explain">
+    <h2>What you are watching</h2>
+    <ul>
+      <li><b>Diagnostic first.</b> The CAT asks a few questions and sets a starting estimate for every concept; questions it
+        did not ask are filled in from the ability estimate.</li>
+      <li><b>Then daily practice.</b> Each day the planner picks concepts whose prerequisites are ready and that fit the daily
+        budget. After every answer the estimate (p) updates and the rest of the plan is rebuilt.</li>
+      <li><b>Estimate vs truth.</b> The engine never sees the learner's true knowledge; the evaluator does. Differences
+        between the two columns are the engine's mistakes, for example a concept marked Weak after a few unlucky slips.</li>
+      <li><b>Missed days.</b> In the &ldquo;skips 4 days&rdquo; run the learner misses days; the plan is rebuilt with the
+        days that are left.</li>
+    </ul>
+    <p class="takeaway"><b>Why the target ends Uncertain.</b> The target is the last concept in the prerequisite chain, so the plan reaches it only at the end of the horizon and it gets 0 or 1 answers. The engine calls a concept Mastered or Weak only after at least 3 answers and a full window of 4 recent ones, so Uncertain here means &ldquo;not enough evidence yet&rdquo;, not &ldquo;failed&rdquo;.</p>
+  </div>
 
   <div class="controls">
     <label>Learner <select id="learner"></select></label>

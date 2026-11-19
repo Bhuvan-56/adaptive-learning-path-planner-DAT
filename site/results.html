@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Integrated Results</title>
-<link rel="stylesheet" href="assets/style.css?v=w8i">
-<script src="assets/common.js?v=w8i"></script>
+<link rel="stylesheet" href="assets/style.css?v=w8j">
+<script src="assets/common.js?v=w8j"></script>
 </head>
 <body>
 <main>
@@ -74,12 +74,14 @@
   <h2>How these numbers are computed</h2>
   <div class="card small" id="method"></div>
 
-  <h2 id="robust">Week 8: larger curriculum and a mismatched simulator</h2>
+  <h2 id="robust">Week 8: larger curriculum, a mismatched simulator and real-student parameters</h2>
   <p class="hint">Is the result only true for a tiny curriculum, or for learners that behave exactly as the planner
     assumes? This checks both. Read each cell as “adaptive minus static”: positive everywhere means the advantage held.</p>
   <p>A pre-registered 2 × 2 check: the 4-concept toy curriculum or the 16-concept maths curriculum (target Integrals,
     10 days × 30 minutes), each with the matched simulator (S0) or a mismatched one (S3: learning comes from practice
-    counts, not the planner's BKT model). Every cell is 1,000 paired learners.</p>
+    counts, not the planner's BKT model). Every cell is 1,000 paired learners. The last row, S4, was added afterwards
+    (not pre-registered): toy curriculum, with each simulated learner's slip, guess and learn values drawn from BKT fits on
+    real ASSISTments 2009&ndash;2010 students.</p>
   <div class="card"><div class="table-wrap" id="robust-table"><p class="small">Loading…</p></div></div>
 
   <h2 id="s1">Week 8: S1, forgetting during study</h2>
@@ -195,11 +197,12 @@
     document.getElementById("robust-table").innerHTML = `<table><thead><tr><th>Curriculum</th><th>Simulator</th>
       <th class="num">Mastered: adaptive / static / greedy</th><th class="num">Adaptive − static [95% CI]</th>
       <th class="num">Adaptive − greedy [95% CI]</th><th class="num">Retained recall, adaptive − static</th></tr></thead>
-      <tbody>${rb.cells.map(c => `<tr><td>${c.curriculum === "maths" ? "Maths (16)" : "Toy (4)"}</td><td>${c.scenario === "S0" ? "S0 matched" : "S3 mismatched"}</td>
+      <tbody>${rb.cells.map(c => `<tr><td>${c.curriculum === "maths" ? "Maths (16)" : "Toy (4)"}</td><td>${({S0: "S0 matched", S3: "S3 mismatched", S4: "S4 real-student parameters"})[c.scenario]}</td>
         <td class="num">${["adaptive_full", "static_prerequisite_order", "non_adaptive_greedy"].map(a => Site.fmt4(c.mastered[a])).join(" / ")}</td>
         <td class="num"><b>${ci4(c.vs_static_prerequisite_order.mastered)}</b></td><td class="num">${ci4(c.vs_non_adaptive_greedy.mastered)}</td>
         <td class="num">${ci4(c.vs_static_prerequisite_order.retained)}</td></tr>`).join("")}</tbody></table>
-      <p class="small">Adaptive is better than static in every cell, and better than greedy in every cell except maths S0 (no difference shown).
+      <p class="small">Adaptive is better than static in every cell, and better than greedy in every cell except maths S0 (no difference shown); this includes S4, where the
+        simulated learners do not share the engine's parameters.
         Under S3 learning comes from the number of practice attempts, which favours the adaptive arm's extra practice, so the larger S3 gains
         are not evidence of larger gains with real learners. Since the Week 8 diagnostic fix (B10) the diagnostic changes plans, and
         <code>ablation_no_diagnostic</code> (cold start) is better than adaptive_full on mastery in every cell; the difficulty, review and

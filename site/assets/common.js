@@ -42,7 +42,7 @@
       label();
     });
     const f = document.createElement("footer");
-    f.innerHTML = `Made by Bhuvan Chandra and Abdur Rehman &middot; CS5903 &middot; Week 7 and Week 8 results &middot; every number comes from a simulator with synthetic learners`;
+    f.innerHTML = `Made by Bhuvan Chandra and Abdur Rehman &middot; CS5903 &middot; Week 8 final results &middot; planning results come from simulated learners; the S4 learners and the BKT fit use real ASSISTments 2009&ndash;2010 students`;
     document.body.append(f);
   }
 

@@ -4,15 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Live Demos</title>
-<link rel="stylesheet" href="assets/style.css?v=w8i">
-<script src="assets/common.js?v=w8i"></script>
-<script src="assets/pyrunner.js?v=w8i"></script>
+<link rel="stylesheet" href="assets/style.css?v=w8j">
+<script src="assets/common.js?v=w8j"></script>
+<script src="assets/pyrunner.js?v=w8j"></script>
 </head>
 <body>
 <main>
   <h1>Live demos</h1>
   <p class="lede">Both demos call the project's own Python functions from <code>src/</code>, running in this browser
     through Pyodide. Nothing is re-implemented in JavaScript.</p>
+  <p class="small">The first visit downloads Python for the browser (about 10 MB), so starting can take 10&ndash;30 seconds;
+    later visits use the browser cache. For a whole adaptive session that plays by itself, see the
+    <a href="sim.html">Simulation</a> page.</p>
   <div class="engine loading" id="engine" role="status" aria-live="polite"><span class="dot"></span><span id="engine-text">Starting…</span></div>
 
   <div class="tabs" role="tablist">

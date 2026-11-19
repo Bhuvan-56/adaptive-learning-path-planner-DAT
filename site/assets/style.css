@@ -276,7 +276,7 @@ svg.dag .dag-node:hover rect:first-child { stroke: var(--accent); }
 details.state-box { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px; }
 details.state-box summary { cursor: pointer; padding: 2px 0; }
 details.state-box[open] summary { margin-bottom: 4px; }
-@media (max-width: 560px) {
+@media (max-width: 900px) {
   header.site .theme-toggle { order: 2; }
   header.site nav { order: 3; width: 100%; }
 }

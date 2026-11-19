@@ -384,6 +384,8 @@ ROBUST = {
     ("toy", "S3"): ("evaluation/results/w8/final_v2/toy_s3", 4),
     ("maths", "S0"): ("evaluation/results/w8/final_v2/maths_s0", 16),
     ("maths", "S3"): ("evaluation/results/w8/final_v2/maths_s3", 16),
+    # Week 8 public-data extension (ADR-023): not part of the pre-registered 2 x 2.
+    ("toy", "S4"): ("evaluation/results/w8/final_v2/integrated_s4", 4),
 }
 
 
@@ -405,7 +407,8 @@ def build_robust():
         cells.append(cell)
     # Cross-check against evaluation/results/w8/final_v2/before_after.txt (docs/final/FINAL_REPORT.md section 4.4).
     want = {("toy", "S0"): (0.0560, 0.0400, 0.0740), ("toy", "S3"): (0.1170, 0.0960, 0.1390),
-            ("maths", "S0"): (0.0940, 0.0470, 0.1400), ("maths", "S3"): (0.7270, 0.6310, 0.8240)}
+            ("maths", "S0"): (0.0940, 0.0470, 0.1400), ("maths", "S3"): (0.7270, 0.6310, 0.8240),
+            ("toy", "S4"): (0.0550, 0.0270, 0.0830)}  # S4: pooled_integrated_s4.txt
     for c in cells:
         v = c["vs_static_prerequisite_order"]["mastered"]
         assert (v["mean"], v["lo"], v["hi"]) == want[(c["curriculum"], c["scenario"])], (c["curriculum"], c["scenario"], v)

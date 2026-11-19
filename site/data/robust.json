@@ -180,6 +180,50 @@
     "ablation_no_review",
     "ablation_no_remediation"
    ]
+  },
+  {
+   "curriculum": "toy",
+   "scenario": "S4",
+   "dir": "evaluation/results/w8/final_v2/integrated_s4",
+   "concepts": 4,
+   "mastered": {
+    "adaptive_full": 2.247,
+    "static_prerequisite_order": 2.192,
+    "non_adaptive_greedy": 2.192
+   },
+   "vs_static_prerequisite_order": {
+    "mastered": {
+     "mean": 0.055,
+     "lo": 0.027,
+     "hi": 0.083,
+     "claim": "A better"
+    },
+    "retained": {
+     "mean": 0.0299,
+     "lo": 0.0214,
+     "hi": 0.0385,
+     "claim": "A better"
+    }
+   },
+   "vs_non_adaptive_greedy": {
+    "mastered": {
+     "mean": 0.055,
+     "lo": 0.027,
+     "hi": 0.083,
+     "claim": "A better"
+    },
+    "retained": {
+     "mean": 0.0299,
+     "lo": 0.0214,
+     "hi": 0.0385,
+     "claim": "A better"
+    }
+   },
+   "ablations_identical": [
+    "ablation_no_difficulty_step",
+    "ablation_no_review",
+    "ablation_no_remediation"
+   ]
   }
  ]
 }
