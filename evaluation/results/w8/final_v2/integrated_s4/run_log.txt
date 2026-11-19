@@ -1,0 +1,10 @@
+Seed 42 completed in 173.52s
+Seed 101 completed in 184.64s
+Seed 2024 completed in 174.77s
+Seed 777 completed in 170.77s
+Seed 999 completed in 174.27s
+Integrated evaluation completed successfully in 879.02 seconds.
+Artifacts emitted to: evaluation\results\w8\final_v2\integrated_s4_rerun
+ - CSV: evaluation\results\w8\final_v2\integrated_s4_rerun\per_learner.csv
+ - Summary: evaluation\results\w8\final_v2\integrated_s4_rerun\summary.md
+ - Manifest: evaluation\results\w8\final_v2\integrated_s4_rerun\manifest.json

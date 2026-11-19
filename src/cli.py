@@ -1360,6 +1360,7 @@ KNOWN_INTEGRATED_CONFIG_KEYS = {
     "generators",
     "retention",
     "scenarios",
+    "scenario",  # active scenario, read by integrated.resolve_scenario_name (W8 configs set it)
     "outcomes",
     "primary_outcome",
     "secondary_outcomes",

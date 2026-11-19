@@ -1,0 +1,291 @@
+dataset_type: PUBLIC_REAL_LEARNER_DATA
+description: Standard 4-parameter BKT fitted per skill on ASSISTments 2009-2010 Skill
+  Builder (corrected), train students only. Skills are ASSISTments skills, not project
+  curriculum nodes.
+provenance: data/provenance/assistments_2009_2010.json
+fit:
+  library: pyBKT
+  seed: 20261119
+  num_fits: 5
+  forgets: false
+skills:
+  Absolute Value:
+    prior: 0.849701
+    p_T: 0.092711
+    p_G: 0.31772
+    p_S: 0.097424
+  Addition Whole Numbers:
+    prior: 0.835706
+    p_T: 0.141726
+    p_G: 0.276325
+    p_S: 0.114276
+  Addition and Subtraction Fractions:
+    prior: 0.753605
+    p_T: 0.076551
+    p_G: 0.111732
+    p_S: 0.197788
+  Addition and Subtraction Integers:
+    prior: 0.711866
+    p_T: 0.011662
+    p_G: 0.333419
+    p_S: 0.21548
+  Addition and Subtraction Positive Decimals:
+    prior: 0.646597
+    p_T: 0.078972
+    p_G: 0.131503
+    p_S: 0.196058
+  Area Circle:
+    prior: 0.88856
+    p_T: 0.18307
+    p_G: 0.125944
+    p_S: 0.276227
+  Area Irregular Figure:
+    prior: 0.701893
+    p_T: 0.270997
+    p_G: 0.021249
+    p_S: 0.324229
+  Area Trapezoid:
+    prior: 0.484241
+    p_T: 0.373709
+    p_G: 0.134436
+    p_S: 0.236979
+  Calculations with Similar Figures:
+    prior: 0.671924
+    p_T: 0.092567
+    p_G: 0.349021
+    p_S: 0.198071
+  'Circumference ':
+    prior: 0.930945
+    p_T: 0.058038
+    p_G: 0.112629
+    p_S: 0.269038
+  Complementary and Supplementary Angles:
+    prior: 0.813035
+    p_T: 0.15742
+    p_G: 0.088736
+    p_S: 0.189139
+  Congruence:
+    prior: 0.992458
+    p_T: 0.189759
+    p_G: 0.0
+    p_S: 0.126274
+  Conversion of Fraction Decimals Percents:
+    prior: 0.620494
+    p_T: 0.017302
+    p_G: 0.412345
+    p_S: 0.201108
+  Counting Methods:
+    prior: 0.957325
+    p_T: 0.190024
+    p_G: 0.0
+    p_S: 0.221173
+  Divisibility Rules:
+    prior: 0.328103
+    p_T: 0.175996
+    p_G: 0.241131
+    p_S: 0.213636
+  Division Fractions:
+    prior: 0.716869
+    p_T: 0.203016
+    p_G: 0.096255
+    p_S: 0.196487
+  Equation Solving More Than Two Steps:
+    prior: 0.490032
+    p_T: 0.109189
+    p_G: 0.241852
+    p_S: 0.230085
+  Equation Solving Two or Fewer Steps:
+    prior: 0.680727
+    p_T: 0.040856
+    p_G: 0.245501
+    p_S: 0.258463
+  Exponents:
+    prior: 0.862112
+    p_T: 0.240852
+    p_G: 0.088339
+    p_S: 0.199767
+  Finding Percents:
+    prior: 0.407335
+    p_T: 0.124762
+    p_G: 0.084567
+    p_S: 0.172169
+  Histogram as Table or Graph:
+    prior: 0.661803
+    p_T: 0.286792
+    p_G: 0.399263
+    p_S: 0.229411
+  Least Common Multiple:
+    prior: 0.540378
+    p_T: 0.281328
+    p_G: 0.091179
+    p_S: 0.237198
+  Mean:
+    prior: 0.674383
+    p_T: 0.233087
+    p_G: 0.004772
+    p_S: 0.431105
+  Median:
+    prior: 0.857771
+    p_T: 0.045664
+    p_G: 0.017384
+    p_S: 0.401194
+  Multiplication Fractions:
+    prior: 0.663254
+    p_T: 0.132094
+    p_G: 0.257531
+    p_S: 0.227865
+  Multiplication and Division Integers:
+    prior: 0.913651
+    p_T: 0.070269
+    p_G: 0.117426
+    p_S: 0.157759
+  Multiplication and Division Positive Decimals:
+    prior: 0.769464
+    p_T: 0.09615
+    p_G: 0.420012
+    p_S: 0.082622
+  Order of Operations +,-,/,* () positive reals:
+    prior: 0.910118
+    p_T: 0.061889
+    p_G: 0.08776
+    p_S: 0.275271
+  Order of Operations All:
+    prior: 0.687751
+    p_T: 0.157737
+    p_G: 0.18326
+    p_S: 0.273492
+  Ordering Fractions:
+    prior: 0.662438
+    p_T: 0.073345
+    p_G: 0.537249
+    p_S: 0.03951
+  Ordering Integers:
+    prior: 0.679704
+    p_T: 0.075972
+    p_G: 0.720262
+    p_S: 0.045063
+  Ordering Positive Decimals:
+    prior: 0.78779
+    p_T: 0.083274
+    p_G: 0.316102
+    p_S: 0.135046
+  'Pattern Finding ':
+    prior: 0.763269
+    p_T: 0.039611
+    p_G: 0.065838
+    p_S: 0.4746
+  Percent Of:
+    prior: 0.643447
+    p_T: 0.258301
+    p_G: 0.010358
+    p_S: 0.244533
+  Perimeter of a Polygon:
+    prior: 0.935858
+    p_T: 0.097584
+    p_G: 1.3e-05
+    p_S: 0.300651
+  Prime Number:
+    prior: 0.619966
+    p_T: 0.746236
+    p_G: 0.000143
+    p_S: 0.150751
+  Probability of Two Distinct Events:
+    prior: 0.648988
+    p_T: 0.051776
+    p_G: 0.21383
+    p_S: 0.256202
+  Probability of a Single Event:
+    prior: 0.881728
+    p_T: 0.09761
+    p_G: 0.114962
+    p_S: 0.177421
+  Proportion:
+    prior: 0.545496
+    p_T: 0.035738
+    p_G: 0.394546
+    p_S: 0.143776
+  Pythagorean Theorem:
+    prior: 0.702657
+    p_T: 0.020114
+    p_G: 0.38019
+    p_S: 0.303251
+  Range:
+    prior: 0.601866
+    p_T: 0.16078
+    p_G: 0.258635
+    p_S: 0.100566
+  Rounding:
+    prior: 0.682749
+    p_T: 0.284668
+    p_G: 0.151171
+    p_S: 0.172587
+  Scatter Plot:
+    prior: 0.708238
+    p_T: 0.47008
+    p_G: 0.311179
+    p_S: 0.059379
+  Scientific Notation:
+    prior: 0.670563
+    p_T: 0.160071
+    p_G: 0.280362
+    p_S: 0.111796
+  Solving for a variable:
+    prior: 0.674289
+    p_T: 0.070175
+    p_G: 0.297797
+    p_S: 0.162863
+  Square Root:
+    prior: 0.831491
+    p_T: 0.101727
+    p_G: 0.292108
+    p_S: 0.091397
+  Surface Area Rectangular Prism:
+    prior: 0.415226
+    p_T: 0.230476
+    p_G: 0.158785
+    p_S: 0.221354
+  Unit Conversion Within a System:
+    prior: 0.870566
+    p_T: 0.00293
+    p_G: 0.065919
+    p_S: 0.356125
+  Unit Rate:
+    prior: 0.619954
+    p_T: 0.088513
+    p_G: 0.165029
+    p_S: 0.36343
+  Venn Diagram:
+    prior: 0.629816
+    p_T: 0.329951
+    p_G: 0.146132
+    p_S: 0.18235
+  Volume Cylinder:
+    prior: 0.614591
+    p_T: 0.25218
+    p_G: 0.120131
+    p_S: 0.29833
+  Volume Rectangular Prism:
+    prior: 0.978832
+    p_T: 3.9e-05
+    p_G: 0.11032
+    p_S: 0.147351
+  Volume Sphere:
+    prior: 0.738034
+    p_T: 0.592476
+    p_G: 0.040867
+    p_S: 0.384232
+  Write Linear Equation from Graph:
+    prior: 0.664022
+    p_T: 0.128738
+    p_G: 0.022279
+    p_S: 0.49409
+  Write Linear Equation from Ordered Pairs:
+    prior: 0.925899
+    p_T: 0.095659
+    p_G: 0.0
+    p_S: 0.441284
+  Write Linear Equation from Situation:
+    prior: 0.607916
+    p_T: 0.857804
+    p_G: 0.644518
+    p_S: 0.079723

@@ -65,6 +65,7 @@ from src.diagnostic.diagnostic import (
     DEFAULT_CURRICULUM_PATH,
 )
 from src.simulation.simulator import SimulatedLearner, MatchedBKTGenerator, MismatchedPFAOrLogisticGenerator
+from src.simulation.calibrated import CalibratedBKTGenerator
 from src.evaluation.retention import administer_retention_quiz
 from src.evaluation.calibration import NOT_APPLICABLE, brier_score, calibration_markdown, encode_pairs
 from src.planning.greedy_fallback import best_singleton_fallback
@@ -172,6 +173,7 @@ def make_learner_generator(
     scenario_name: str,
     theta: Optional[float] = None,
     concept_difficulties: Optional[Dict[str, float]] = None,
+    learner_seed: Optional[int] = None,
 ) -> Tuple[Any, bool]:
     """
     Constructs the generator family and retention quiz flag for the given scenario.
@@ -183,6 +185,9 @@ def make_learner_generator(
         per-learner intercept beta_c = (theta* - b_c) + logit(0.75), so ability matters
         and the initial mastered set equals the S0 truth rule theta* >= b_c.
         Called without theta (config validation), it returns an unconfigured instance.
+    S4: ASSISTments-calibrated BKT (W8 public-data extension, src/simulation/calibrated.py): per (learner, concept)
+        slip/guess/learn drawn from the real-student fits in config/bkt_assistments.yaml;
+        p_F 0, k 0; initial mastery and the engine's own parameters unchanged.
     """
     s = str(scenario_name).strip()
     if s == "S3":
@@ -194,6 +199,8 @@ def make_learner_generator(
                 gamma=0.40, rho=0.10, difficulty_weight=1.0, mastered_p=0.75, p_F=0.0,
             )
         return gen, False
+    if s == "S4":
+        return CalibratedBKTGenerator(learner_seed=learner_seed), False
     if s == "S0":
         return MatchedBKTGenerator(p_S=0.10, p_G=0.25, p_T=0.10, p_F=0.00, k=0.00), False
     elif s == "S1":
@@ -201,7 +208,21 @@ def make_learner_generator(
     elif s == "S2":
         return MatchedBKTGenerator(p_S=0.10, p_G=0.25, p_T=0.10, p_F=0.00, k=0.50), False
     else:
-        raise ValueError(f"Unknown scenario '{s}'. Expected one of: 'S0', 'S1', 'S2', 'S3'.")
+        raise ValueError(f"Unknown scenario '{s}'. Expected one of: 'S0', 'S1', 'S2', 'S3', 'S4'.")
+
+
+# Scenario of the run in progress, set by run_integrated_evaluation; read only by the summary
+# writers so their simulator wording matches the run. S0-S3 keep their original wording.
+_SUMMARY_SCENARIO = "S0"
+_S4_SIMULATOR_LINE = ("`CalibratedBKTGenerator` (scenario S4: BKT response dynamics with per learner-concept "
+                      "slip/guess/learn drawn from per-skill fits on ASSISTments 2009-2010 students, "
+                      "config/bkt_assistments.yaml)")
+
+
+def _simulator_line() -> str:
+    if _SUMMARY_SCENARIO == "S4":
+        return _S4_SIMULATOR_LINE
+    return "`MatchedBKTGenerator` (BKT response dynamics)"
 
 
 # Baseline arms start from the pre-W8 diagnostic priors (n = 0) so their behaviour is unchanged.
@@ -306,7 +327,8 @@ def _evaluate_single_seed(
             # Instantiate simulation learner (held strictly by evaluation harness)
             scenario_name = resolve_scenario_name(config)
             learner_gen, eval_retention = make_learner_generator(
-                scenario_name, theta=gt.theta_true, concept_difficulties=concept_diffs)
+                scenario_name, theta=gt.theta_true, concept_difficulties=concept_diffs,
+                learner_seed=learner_seed)
             sim_learner = SimulatedLearner(
                 profile_id="profile_1",
                 initial_mastery=gt.latent_mastery,
@@ -811,7 +833,7 @@ def _build_multi_seed_summary_markdown(
     lines.append(f"- **Planning Horizon:** {horizon} days")
     lines.append(f"- **Daily Study Budget:** {budget} minutes")
     lines.append(f"- **Bootstrap Resamples per Seed:** {bootstrap_resamples} (paired percentile bootstrap)")
-    lines.append("- **Generative Simulator:** `MatchedBKTGenerator` (BKT response dynamics)")
+    lines.append(f"- **Generative Simulator:** {_simulator_line()}")
     lines.append("")
     lines.append("## 2. Per-Seed Performance Table (Primary Arms)")
     lines.append("")
@@ -884,6 +906,8 @@ def run_integrated_evaluation(
     config = load_integrated_config(cfg_file)
     scenario_name = resolve_scenario_name(config)
     make_learner_generator(scenario_name)
+    global _SUMMARY_SCENARIO
+    _SUMMARY_SCENARIO = scenario_name
 
     n_learners = override_learners or int(config["evaluation_scale"]["num_synthetic_learners"])
     raw_seeds = config.get("seeds", [42])
@@ -1051,7 +1075,7 @@ def _build_summary_markdown(
     lines.append(f"- **Planning Horizon:** {horizon} days")
     lines.append(f"- **Daily Study Budget:** {budget} minutes")
     lines.append(f"- **Bootstrap Resamples (B):** {bootstrap_resamples} (paired percentile bootstrap)")
-    lines.append(f"- **Generative Simulator:** `MatchedBKTGenerator` (BKT response dynamics)")
+    lines.append(f"- **Generative Simulator:** {_simulator_line()}")
     lines.append(f"- **Runtime Note:** Planning runtimes reported from one machine and one run.")
     lines.append("")
     lines.append("### Arm Configuration Matrix")
@@ -1142,8 +1166,12 @@ def _build_summary_markdown(
     lines.append("")
     lines.append("## 5. Architectural & Behavioral Notes")
     lines.append("")
-    lines.append("1. **Simulator Properties Disclaimer:** Under the default simulator (`MatchedBKTGenerator`), difficulty and review ablations cannot change a latent mastery outcome, because it ignores difficulty and has no forgetting.")
-    lines.append("2. **Synthetic Learner Invariant:** All reported figures represent simulator behavior on synthetic learners fitted to synthetic data. Never calibrated, validated or real-world.")
+    if _SUMMARY_SCENARIO == "S4":
+        lines.append("1. **Simulator Properties Disclaimer:** Under S4 (`CalibratedBKTGenerator`), as under the default simulator, difficulty and review ablations cannot change a latent mastery outcome, because it ignores difficulty and has no forgetting.")
+        lines.append("2. **Simulated Learner Invariant:** All reported figures are simulator behaviour. S4 learners take their slip/guess/learn parameters from BKT fits on real ASSISTments 2009-2010 students (train split); the learners, curriculum and outcomes are still simulated, not real-world.")
+    else:
+        lines.append("1. **Simulator Properties Disclaimer:** Under the default simulator (`MatchedBKTGenerator`), difficulty and review ablations cannot change a latent mastery outcome, because it ignores difficulty and has no forgetting.")
+        lines.append("2. **Synthetic Learner Invariant:** All reported figures represent simulator behavior on synthetic learners fitted to synthetic data. Never calibrated, validated or real-world.")
     lines.append("3. **Safety Invariants:** Zero prerequisite violations and zero budget violations were observed across all primary and ablation runs.")
     lines.append("")
     lines.extend(_calibration_lines([arm_results], primary_arms + ablation_arms, bootstrap_resamples, seed))

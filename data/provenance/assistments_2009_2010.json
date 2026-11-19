@@ -1,0 +1,376 @@
+{
+  "dataset_type": "PUBLIC_REAL_LEARNER_DATA",
+  "dataset": "ASSISTments 2009-2010 Skill Builder, corrected version (skill_builder_data_corrected_collapsed.csv)",
+  "source_page": "https://sites.google.com/site/assistmentsdata/home/2009-2010-assistment-data/skill-builder-data-2009-2010",
+  "download_link": "https://drive.google.com/file/d/1NNXHFRxcArrU0ZJSb9BIL56vmUt5FhlE/view?usp=sharing",
+  "acquisition_date": "2026-11-19",
+  "raw_file": "data/raw/skill_builder_data_corrected_collapsed.csv",
+  "raw_sha256": "162ef8d2d28bcbfea6591a282994062bd8d5eaa00636544292a0d268dca6e5da",
+  "raw_encoding": "not valid UTF-8; read as latin-1",
+  "terms_of_use": "https://sites.google.com/site/assistmentsdata/termsofuseforusingdata (research and educational use; see the page)",
+  "citation": "Feng, M., Heffernan, N.T., & Koedinger, K.R. (2009). Addressing the assessment challenge in an online system that tutors as it assesses. User Modeling and User-Adapted Interaction, 19(3), 243-266. Dataset URL as source_page.",
+  "field_mapping": {
+    "user_id": "learner id",
+    "skill_name": "concept (ASSISTments skill; NOT a node of either project curriculum)",
+    "correct": "first-attempt correctness (0/1)",
+    "order_id": "temporal order of attempts within a learner",
+    "ms_first_response": "milliseconds to first response (timing; not yet used)",
+    "attempt_count, hint_count": "kept for reference; not used by BKT"
+  },
+  "prerequisite_fields": "none in this dataset; no prerequisite edges are taken from it",
+  "timing_fields": "ms_first_response (milliseconds)",
+  "cleaning_steps": [
+    {
+      "step": "raw",
+      "rows": 346860,
+      "students": 4217
+    },
+    {
+      "step": "original == 1",
+      "rows": 275458,
+      "students": 4217,
+      "skills": 101
+    },
+    {
+      "step": "skill_name present",
+      "rows": 251405,
+      "students": 4151,
+      "skills": 101
+    },
+    {
+      "step": "single-skill rows only",
+      "rows": 206578,
+      "students": 3991,
+      "skills": 92
+    },
+    {
+      "step": "first attempt per (user_id, problem_id)",
+      "rows": 203723,
+      "students": 3991,
+      "skills": 92
+    },
+    {
+      "step": "skills with >= 50 students and >= 500 rows",
+      "rows": 196143,
+      "students": 3958,
+      "skills": 56
+    }
+  ],
+  "skill_filter": {
+    "min_students": 50,
+    "min_rows": 500,
+    "skills_kept": 56
+  },
+  "split": {
+    "unit": "student",
+    "ratios": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "seed": 20261119,
+    "outputs": {
+      "train": {
+        "file": "data/processed/assistments/train.csv",
+        "rows": 135569,
+        "students": 2771,
+        "sha256": "4b0d12765af5859ca5adff1df757929f419aa74ba0207ec95f5d4c0535fdaa07"
+      },
+      "dev": {
+        "file": "data/processed/assistments/dev.csv",
+        "rows": 32909,
+        "students": 594,
+        "sha256": "db7d2655287b1c810af61ad425933e135e9a99ea340a020c46f48ddeb06f121b"
+      },
+      "test": {
+        "file": "data/processed/assistments/test.csv",
+        "rows": 27665,
+        "students": 593,
+        "sha256": "6f566a5593f910db4e92ad3b9457574eed53db5a036b728384e76a6e1bf4438e"
+      }
+    }
+  },
+  "skills": {
+    "Conversion of Fraction Decimals Percents": {
+      "rows": 18394,
+      "students": 1225,
+      "p_correct": 0.6396
+    },
+    "Equation Solving Two or Fewer Steps": {
+      "rows": 17008,
+      "students": 961,
+      "p_correct": 0.6442
+    },
+    "Addition and Subtraction Integers": {
+      "rows": 12382,
+      "students": 1226,
+      "p_correct": 0.5968
+    },
+    "Addition and Subtraction Fractions": {
+      "rows": 11284,
+      "students": 1353,
+      "p_correct": 0.6764
+    },
+    "Proportion": {
+      "rows": 7966,
+      "students": 671,
+      "p_correct": 0.646
+    },
+    "Multiplication and Division Integers": {
+      "rows": 6840,
+      "students": 900,
+      "p_correct": 0.7877
+    },
+    "Pythagorean Theorem": {
+      "rows": 6574,
+      "students": 283,
+      "p_correct": 0.6285
+    },
+    "Probability of a Single Event": {
+      "rows": 6132,
+      "students": 885,
+      "p_correct": 0.7524
+    },
+    "Ordering Fractions": {
+      "rows": 6058,
+      "students": 838,
+      "p_correct": 0.8055
+    },
+    "Finding Percents": {
+      "rows": 5972,
+      "students": 676,
+      "p_correct": 0.5732
+    },
+    "Multiplication Fractions": {
+      "rows": 5505,
+      "students": 783,
+      "p_correct": 0.6578
+    },
+    "Ordering Positive Decimals": {
+      "rows": 4863,
+      "students": 815,
+      "p_correct": 0.7477
+    },
+    "Equation Solving More Than Two Steps": {
+      "rows": 4546,
+      "students": 412,
+      "p_correct": 0.6252
+    },
+    "Calculations with Similar Figures": {
+      "rows": 4388,
+      "students": 374,
+      "p_correct": 0.7224
+    },
+    "Addition and Subtraction Positive Decimals": {
+      "rows": 4222,
+      "students": 665,
+      "p_correct": 0.5767
+    },
+    "Percent Of": {
+      "rows": 4216,
+      "students": 874,
+      "p_correct": 0.6058
+    },
+    "Division Fractions": {
+      "rows": 4020,
+      "students": 724,
+      "p_correct": 0.6731
+    },
+    "Venn Diagram": {
+      "rows": 3806,
+      "students": 549,
+      "p_correct": 0.7202
+    },
+    "Probability of Two Distinct Events": {
+      "rows": 3325,
+      "students": 418,
+      "p_correct": 0.5582
+    },
+    "Order of Operations All": {
+      "rows": 3306,
+      "students": 651,
+      "p_correct": 0.6131
+    },
+    "Least Common Multiple": {
+      "rows": 3236,
+      "students": 367,
+      "p_correct": 0.6499
+    },
+    "Unit Rate": {
+      "rows": 3181,
+      "students": 602,
+      "p_correct": 0.4643
+    },
+    "Exponents": {
+      "rows": 2947,
+      "students": 619,
+      "p_correct": 0.7581
+    },
+    "Absolute Value": {
+      "rows": 2828,
+      "students": 613,
+      "p_correct": 0.8179
+    },
+    "Divisibility Rules": {
+      "rows": 2753,
+      "students": 274,
+      "p_correct": 0.6266
+    },
+    "Square Root": {
+      "rows": 2527,
+      "students": 328,
+      "p_correct": 0.8247
+    },
+    "Order of Operations +,-,/,* () positive reals": {
+      "rows": 2334,
+      "students": 664,
+      "p_correct": 0.6427
+    },
+    "Ordering Integers": {
+      "rows": 2006,
+      "students": 447,
+      "p_correct": 0.8739
+    },
+    "Multiplication and Division Positive Decimals": {
+      "rows": 1970,
+      "students": 348,
+      "p_correct": 0.7751
+    },
+    "Write Linear Equation from Graph": {
+      "rows": 1899,
+      "students": 332,
+      "p_correct": 0.4134
+    },
+    "Scientific Notation": {
+      "rows": 1875,
+      "students": 270,
+      "p_correct": 0.7589
+    },
+    "Scatter Plot": {
+      "rows": 1847,
+      "students": 354,
+      "p_correct": 0.869
+    },
+    "Solving for a variable": {
+      "rows": 1792,
+      "students": 307,
+      "p_correct": 0.62
+    },
+    "Histogram as Table or Graph": {
+      "rows": 1772,
+      "students": 230,
+      "p_correct": 0.7099
+    },
+    "Circumference ": {
+      "rows": 1766,
+      "students": 256,
+      "p_correct": 0.6874
+    },
+    "Addition Whole Numbers": {
+      "rows": 1682,
+      "students": 304,
+      "p_correct": 0.8222
+    },
+    "Complementary and Supplementary Angles": {
+      "rows": 1518,
+      "students": 458,
+      "p_correct": 0.6871
+    },
+    "Surface Area Rectangular Prism": {
+      "rows": 1480,
+      "students": 283,
+      "p_correct": 0.5595
+    },
+    "Median": {
+      "rows": 1451,
+      "students": 462,
+      "p_correct": 0.5107
+    },
+    "Pattern Finding ": {
+      "rows": 1299,
+      "students": 396,
+      "p_correct": 0.4334
+    },
+    "Volume Cylinder": {
+      "rows": 1284,
+      "students": 304,
+      "p_correct": 0.5561
+    },
+    "Area Circle": {
+      "rows": 1144,
+      "students": 264,
+      "p_correct": 0.6827
+    },
+    "Write Linear Equation from Ordered Pairs": {
+      "rows": 947,
+      "students": 223,
+      "p_correct": 0.5491
+    },
+    "Rounding": {
+      "rows": 944,
+      "students": 229,
+      "p_correct": 0.7066
+    },
+    "Volume Rectangular Prism": {
+      "rows": 919,
+      "students": 345,
+      "p_correct": 0.8411
+    },
+    "Area Trapezoid": {
+      "rows": 912,
+      "students": 269,
+      "p_correct": 0.58
+    },
+    "Write Linear Equation from Situation": {
+      "rows": 905,
+      "students": 186,
+      "p_correct": 0.8972
+    },
+    "Counting Methods": {
+      "rows": 785,
+      "students": 338,
+      "p_correct": 0.786
+    },
+    "Volume Sphere": {
+      "rows": 774,
+      "students": 184,
+      "p_correct": 0.593
+    },
+    "Area Irregular Figure": {
+      "rows": 749,
+      "students": 194,
+      "p_correct": 0.5407
+    },
+    "Mean": {
+      "rows": 732,
+      "students": 337,
+      "p_correct": 0.4467
+    },
+    "Range": {
+      "rows": 729,
+      "students": 363,
+      "p_correct": 0.6872
+    },
+    "Prime Number": {
+      "rows": 646,
+      "students": 155,
+      "p_correct": 0.7755
+    },
+    "Perimeter of a Polygon": {
+      "rows": 595,
+      "students": 264,
+      "p_correct": 0.6487
+    },
+    "Congruence": {
+      "rows": 569,
+      "students": 364,
+      "p_correct": 0.9016
+    },
+    "Unit Conversion Within a System": {
+      "rows": 539,
+      "students": 222,
+      "p_correct": 0.5584
+    }
+  },
+  "fallbacks": "none; every field used is observed in the dataset"
+}

@@ -1,0 +1,25 @@
+Seed 42 completed in 197.89s
+Seed 101 completed in 199.87s
+Seed 2024 completed in 201.61s
+Seed 777 completed in 200.36s
+Seed 999 completed in 200.40s
+======================================================================
+ADAPTIVE LEARNING ENGINE: INTEGRATED EVALUATION SUMMARY
+======================================================================
+Config: experiments\w9_s4.yaml | Output Dir: evaluation\results\w9\s4
+Benchmark: w5_integrated_multiseed
+Commit SHA: 7ac3474 | Dirty: True
+Config Hash: 56da7ee1459bc1f6...
+Arm Results:
+  * adaptive_full: Mastered=2.2000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * static_prerequisite_order: Mastered=2.1700, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * non_adaptive_greedy: Mastered=2.1700, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * non_adaptive_greedy_best_singleton: Mastered=2.1500, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * ablation_no_diagnostic: Mastered=2.2850, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * ablation_no_replan: Mastered=2.1700, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * ablation_no_difficulty_step: Mastered=2.2000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * ablation_no_review: Mastered=2.2000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+  * ablation_no_remediation: Mastered=2.2000, Prereq Violations=0, Budget Violations=0, Trace Coverage=100.0%
+======================================================================
+Artifacts written: evaluation\results\w9\s4\per_learner.csv, evaluation\results\w9\s4\summary.md, evaluation\results\w9\s4\manifest.json
+SUCCESS: All hard-correctness counts are zero and trace coverage is 1.0.
