@@ -5,7 +5,7 @@
 
 ## Status and Final Submission
 
-- **Status:** milestones M1–M8 are implemented and evaluated on synthetic learners only (no real learner data). 20 of 21 acceptance groups pass; M4-a (infeasibility repair for `HEURISTIC_NO_PLAN`) is partial, as agreed with the mentor. The full test suite reports **299 passed**.
+- **Status:** milestones M1–M8 are implemented and evaluated on simulated learners (no real learner used the planner). BKT has also been fitted on the public ASSISTments 2009–2010 dataset and tested on held-out students, and scenario S4 re-runs the evaluation on learners calibrated to those fits ([`docs/w8/results_assistments.md`](docs/w8/results_assistments.md)). 20 of 21 acceptance groups pass; M4-a (infeasibility repair for `HEURISTIC_NO_PLAN`) is partial, as agreed with the mentor. The full test suite reports **299 passed**.
 - **Final revision:** tag [`cs5903-final-2026`](https://github.com/Bhuvan-56/adaptive-learning-path-planner-DAT/tree/cs5903-final-2026).
 - **Deliverable A, Project Report:** [`docs/Project_Report.pdf`](docs/Project_Report.pdf)
 - **Deliverable B, Architecture Decision Records:** [`docs/Architecture_Decision_Records.md`](docs/Architecture_Decision_Records.md)
@@ -31,12 +31,13 @@ See `docs/PROBLEM_BOUNDARY.md` for the full scope statement and actor definition
 | Document | Contents |
 | --- | --- |
 | [`docs/Project_Report.pdf`](docs/Project_Report.pdf) | **Final project report (submission deliverable A)** |
-| [`docs/Architecture_Decision_Records.md`](docs/Architecture_Decision_Records.md) | **Decision log ADR-001 to ADR-022, incl. the methodology record ADR-010 (deliverable B)** |
+| [`docs/Architecture_Decision_Records.md`](docs/Architecture_Decision_Records.md) | **Decision log ADR-001 to ADR-023, incl. the methodology record ADR-010 (deliverable B)** |
 | [`docs/final/FINAL_REPORT.md`](docs/final/FINAL_REPORT.md) | Markdown summary of the final results and reproduction commands (the PDF is the full report) |
 | [`docs/final/LIMITATIONS.md`](docs/final/LIMITATIONS.md) | What the evidence cannot support; open defects |
 | [`docs/final/DEMO.md`](docs/final/DEMO.md) | Final demo script (website and live demos) |
 | [`docs/final/ownership_track_A.md`](docs/final/ownership_track_A.md), [`ownership_track_B.md`](docs/final/ownership_track_B.md) | Code explanation and live change task per track |
 | [`docs/w8/results.md`](docs/w8/results.md) | Week 8 fixes: S1 daily forgetting, best-effort plan on infeasible days |
+| [`docs/w8/results_assistments.md`](docs/w8/results_assistments.md) | Week 8 public-data extension: BKT fitted on ASSISTments 2009–2010, held-out test, calibrated-learner scenario S4 |
 | [`weekly/W8.md`](weekly/W8.md) | Week 8 report |
 
 Project website: <https://bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/> (source in `site/`).
@@ -245,7 +246,18 @@ python examples/pybkt_fit_predict.py
 
 This outputs fitted parameters (`prior`, `p_T`, `p_G`, `p_S`, `forget=0.0`) and evaluates prediction on a held-out student.
 
-### 2. Run the BKT Parity Test
+### 2. Fit BKT on public data (ASSISTments 2009–2010)
+
+With the corrected Skill Builder file in `data/raw/` (see `data/README.md`):
+
+```bash
+python scripts/assistments_prepare.py   # cleaning, 70/15/15 student split, provenance record
+python scripts/assistments_fit_bkt.py   # per-skill fit on train students, held-out test -> config/bkt_assistments.yaml
+```
+
+Results and the S4 scenario built from the fits: [`docs/w8/results_assistments.md`](docs/w8/results_assistments.md).
+
+### 3. Run the BKT Parity Test
 
 Verify that the online BKT adapter matches pyBKT's predictions step-by-step to within $10^{-6}$:
 
@@ -255,7 +267,14 @@ pytest tests/test_m1_bkt_parity.py -v
 
 ## Operational Handover
 
-**Starting and stopping.** There are no services to keep running. The engine is a command-line program (`python -m src.cli ...`) that exits when done. To view the website locally, serve the repository root and open `/site/`:
+**Starting and stopping.** There are no services to keep running for the CLI or the static website. The two Week 8 demo pages that run the engine with a person or a simulated learner need one local server (standard library only; Ctrl+C stops it):
+
+```bash
+python site/build_live_sim.py   # once: records the Simulation runs into site/data/live_sim.json (needs catsim)
+python site/serve_live.py       # http://127.0.0.1:8001/site/live.html and /site/sim.html
+```
+
+The engine is a command-line program (`python -m src.cli ...`) that exits when done. To view the website locally, serve the repository root and open `/site/`:
 
 ```bash
 python -m http.server 8000      # from the repository root; stop with Ctrl+C
@@ -279,6 +298,8 @@ Pages read files with `fetch()`, so opening the HTML files directly from disk do
 | Demos page shows a red "Python engine unavailable" banner and "Saved output" notes | Pyodide could not be downloaded from `cdn.jsdelivr.net` (offline or blocked) | Allow the CDN, or use the saved outputs (`demos.html?fallback`); presets still show real engine output |
 | Website pages are empty when opened from disk | Browsers block `fetch()` on `file://` | Serve the repository root with `python -m http.server` as above |
 | `ModuleNotFoundError` (e.g. `catsim`, `pyBKT`) | Dependencies not installed in the active environment | `pip install -r requirements.txt` in a Python 3.11 environment |
+| Simulation page says "No recorded runs yet" | `site/data/live_sim.json` not built | `python site/build_live_sim.py` |
+| Live session page says "The engine did not answer" | `site/serve_live.py` is not running, or the page was opened from another server | Start `python site/serve_live.py` and use port 8001 |
 | `git status` shows `evaluation/results/sample_trace_normal.json` modified after tests | The test suite rewrites this sample trace | `git checkout -- evaluation/results/sample_trace_normal.json` |
 
 **External services and costs.** None required. GitHub Pages hosts the website for free; the Pyodide CDN is used only by the live demos. The clean-clone audit `scripts/clean_run.ps1 -Sha <commit>` is a PowerShell (Windows) script.
@@ -286,7 +307,7 @@ Pages read files with `fetch()`, so opening the HTML files directly from disk do
 ## Documentation Index
 
 - `docs/Project_Report.pdf` — Final project report (deliverable A)
-- `docs/Architecture_Decision_Records.md` — Decision log, ADR-001 to ADR-022 (deliverable B)
+- `docs/Architecture_Decision_Records.md` — Decision log, ADR-001 to ADR-023 (deliverable B)
 
 - `docs/PROBLEM_BOUNDARY.md` — Actors, system boundary, in/out of scope
 - `ASSUMPTIONS.md` — Documented assumptions and known limitations

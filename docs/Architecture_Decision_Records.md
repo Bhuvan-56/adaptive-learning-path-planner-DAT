@@ -5,15 +5,15 @@
 **Log compiled:** 14 November 2026, at evidence revision [`d974503`](https://github.com/Bhuvan-56/adaptive-learning-path-planner-DAT/commit/d974503)
 **Companion documents:** [Project report](Project_Report.pdf) · [Limitations](final/LIMITATIONS.md) · [Acceptance groups](ACCEPTANCE_GROUPS.md)
 
-This is the single decision log required by the submission guide (§3). It has one record per material architecture, data, evaluation or methodology decision, in the guide's template. ADR-001 to ADR-009 were first written in [`decisions/`](../decisions/) between 26 September and 12 October 2026; those original files are kept unchanged, and the records below restate them in the template and add what happened afterwards. ADR-010 is the mandatory methodology record. ADR-011 to ADR-022 record later decisions that previously lived only in weekly reports and pre-registrations. Superseded records are kept, not deleted.
+This is the single decision log required by the submission guide (§3). It has one record per material architecture, data, evaluation or methodology decision, in the guide's template. ADR-001 to ADR-009 were first written in [`decisions/`](../decisions/) between 26 September and 12 October 2026; those original files are kept unchanged, and the records below restate them in the template and add what happened afterwards. ADR-010 is the mandatory methodology record. ADR-011 to ADR-022 record later decisions that previously lived only in weekly reports and pre-registrations. ADR-023 (added 19 November 2026) records the Week 8 public-data extension. Superseded records are kept, not deleted.
 
-All outcome numbers are simulator behaviour on synthetic learners. "Measured" means a number from a committed result file; "judgment" means a design choice that was not tested against alternatives.
+All planning outcome numbers are simulator behaviour on simulated learners; the only real-student data is the ASSISTments fit of ADR-023. "Measured" means a number from a committed result file; "judgment" means a design choice that was not tested against alternatives.
 
 ## Index
 
 | ADR | Title | Date | Status | Milestones |
 |---|---|---|---|---|
-| [001](#adr-001) | BKT, not DKT, for mastery estimation | 2026-09-25 | Accepted (fitting route superseded by ADR-010) | M1, M7 |
+| [001](#adr-001) | BKT, not DKT, for mastery estimation | 2026-09-25 | Accepted (fitting route superseded by ADR-010; revisit trigger met, see ADR-023) | M1, M7 |
 | [002](#adr-002) | CAT with 2PL IRT for the cold-start diagnostic | 2026-09-25 | Accepted | M2 |
 | [003](#adr-003) | Explicit DAG scheduling, not neural sequence recommendation | 2026-09-25 | Accepted | M1, M3, M6, M7 |
 | [004](#adr-004) | Half-Life Regression for spaced review | 2026-09-25 | Accepted in part; unified score superseded by ADR-020 | M5 |
@@ -35,6 +35,7 @@ All outcome numbers are simulator behaviour on synthetic learners. "Measured" me
 | [020](#adr-020) | Review priority = forgetting risk × prerequisite importance | 2026-11-13 | Accepted | M5 |
 | [021](#adr-021) | Demonstration interface: static site running the engine in the browser | 2026-11-06 | Accepted | M7, M8 |
 | [022](#adr-022) | Keep the diagnostic in the delivered configuration | 2026-11-14 | Accepted | M2, M8 |
+| [023](#adr-023) | Public-data extension: BKT fitted on ASSISTments 2009–2010 and calibrated-learner scenario S4; engine keeps default parameters | 2026-11-19 | Accepted | M1, M8 |
 
 ---
 
@@ -56,7 +57,7 @@ All outcome numbers are simulator behaviour on synthetic learners. "Measured" me
 
 **Evidence & validation.** Posterior parity with pyBKT 1.4.3 below 10⁻⁴ on canonical sequences ([`tests/test_m1_bkt_parity.py`](../tests/test_m1_bkt_parity.py), commit [`2025da5`](https://github.com/Bhuvan-56/adaptive-learning-path-planner-DAT/commit/2025da5)). Calibration of `p` against latent mastery is measured in the final runs (Brier 0.136, ECE 0.082 on toy S0; [`evaluation/results/w8/final_v2/integrated_s0/summary.md`](../evaluation/results/w8/final_v2/integrated_s0/summary.md)).
 
-**Revisit trigger.** A real-data fit where DKT (or fitted BKT) beats default BKT on held-out log loss by a margin whose paired CI excludes zero, or a calibration ECE above 0.20 on the matched simulator.
+**Revisit trigger.** A real-data fit where DKT (or fitted BKT) beats default BKT on held-out log loss by a margin whose paired CI excludes zero, or a calibration ECE above 0.20 on the matched simulator. *Met on 19 November 2026 for fitted BKT* (ASSISTments 2009–2010, −0.0288 [−0.0378, −0.0192]); the response is recorded in ADR-023.
 
 ---
 
@@ -234,7 +235,7 @@ All outcome numbers are simulator behaviour on synthetic learners. "Measured" me
 
 **Evidence & validation.** [`decisions/METHODOLOGY_RECORD.md`](../decisions/METHODOLOGY_RECORD.md) §2 (13 changes with file citations); simulator commit [`b02177c`](https://github.com/Bhuvan-56/adaptive-learning-path-planner-DAT/commit/b02177c).
 
-**Revisit trigger.** Access to a dataset with prerequisite structure and per-learner timing, or any claim intended for real learners.
+**Revisit trigger.** Access to a dataset with prerequisite structure and per-learner timing, or any claim intended for real learners. *Partly acted on:* ADR-023 fits BKT on ASSISTments 2009–2010 (option 2's fitting half) and calibrates one simulator scenario to it. The planning evaluation stays simulator-first, because ASSISTments has neither prerequisites nor counterfactual outcomes.
 
 ---
 
@@ -445,6 +446,16 @@ All outcome numbers are simulator behaviour on synthetic learners. "Measured" me
 
 **Revisit trigger.** If the CDN becomes unavailable (vendor Pyodide), or if a real learner pilot needs persistence.
 
+**Week 8 addendum (2026-11-20).** Two pages run the full adaptive loop, including the CAT diagnostic:
+- `live.html`: a person answers;
+- `sim.html`: the S0 simulated learner answers.
+
+The diagnostic needs catsim, and therefore SciPy, and the Pyodide download was already slow in testing: the first 241 KB took about 58 s. So these pages do **not** follow option 3:
+- the live session runs from a local standard-library server (`site/serve_live.py`) using the project's own Python;
+- the simulation page also plays runs recorded from that engine (`site/data/live_sim.json`), so it still works on GitHub Pages.
+
+The engine code is unchanged; `site/py/live_session.py` replays the integrated harness's adaptive_full loop.
+
 ---
 
 <a id="adr-022"></a>
@@ -463,3 +474,45 @@ All outcome numbers are simulator behaviour on synthetic learners. "Measured" me
 **Evidence & validation.** [`docs/final/LIMITATIONS.md`](final/LIMITATIONS.md) B12; report §5.7 and §8.
 
 **Revisit trigger.** Per-concept priors (ADR-019, option 3) that still leave the diagnostic harmful; then removing it would be a documented, pre-registered change.
+
+---
+
+<a id="adr-023"></a>
+## ADR-023 — Public-data extension: BKT fitted on ASSISTments 2009–2010, calibrated-learner scenario S4, engine keeps default parameters
+
+**Date, status & scope.** 2026-11-19. Accepted. Scope: M1 learner state (parameter evidence), M8 evaluation (new scenario S4). Not pre-registered; the design was fixed before the S4 run (docstring of `src/simulation/calibrated.py`), a disclosed deviation from ADR-013 like the other Week 8 final fixes.
+
+**Context & decision drivers.**
+- The report's way-forward task P3 asked for validation on a public dataset.
+- ADR-010 had moved all fitting off real data.
+- Two questions remained open: does the engine's model family fit real students, and does the adaptive advantage depend on learners behaving exactly as the engine assumes?
+- Constraints: ASSISTments has no prerequisite fields and no counterfactual outcomes, so it cannot evaluate a planner directly (ADR-010).
+
+**Options considered.**
+1. *Fit only:* fit BKT and report held-out prediction; leave the evaluation unchanged.
+2. *Fit and adopt:* replace the engine's BKT parameters with fitted ones and re-run every scenario.
+3. *Fit and calibrate a scenario:* fit BKT; add a simulator scenario whose learners draw per-concept parameters from the fits; keep the engine's defaults, so the planner meets learners who differ from its assumptions.
+
+**Decision & rationale.** Option 3. Judgment:
+- *Against option 2:* it would change the delivered system after its results were seen, an unregistered post-hoc change (the same reasoning as ADR-022). It would also need a skill-to-concept mapping that covers only 5 of the 16 maths concepts and none of the toy ones.
+- *For option 3:* it answers both questions with one new run and leaves every earlier result valid.
+- Details:
+  - the dataset is the corrected Skill Builder file;
+  - cleaning and the 70/15/15 student split are recorded in `data/provenance/assistments_2009_2010.json`;
+  - S4 uses only fits with guess < 0.5 and slip < 0.5 (53 of 56), excluding poorly identified EM solutions;
+  - initial latent mastery stays θ* ≥ b_c.
+
+**Consequences & trade-offs.**
+- Measured: fitted BKT beats the engine defaults on held-out students. AUC is 0.7142 against 0.6807, and log loss per student differs by −0.0288 [−0.0378, −0.0192]. **This meets ADR-001's revisit trigger.** The engine nevertheless keeps its defaults in the delivered configuration; adopting fitted parameters is listed as future work.
+- Measured: under S4 the adaptive advantage holds, +0.0550 [0.0270, 0.0830] against static order. B12 also holds, −0.0690 [−0.1030, −0.0360]. Mastery calibration worsens: Brier 0.1607 against 0.1358 in S0.
+- S4 covers the toy curriculum without forgetting only. HLR is not fitted. No real learner used the planner.
+
+**Evidence & validation.**
+- Write-up: [`docs/w8/results_assistments.md`](w8/results_assistments.md).
+- Fit results: [`evaluation/results/w8/assistments_bkt/metrics.txt`](../evaluation/results/w8/assistments_bkt/metrics.txt).
+- S4 comparison: [`evaluation/results/w8/final_v2/s4_vs_s0.txt`](../evaluation/results/w8/final_v2/s4_vs_s0.txt).
+- Tests: [`tests/test_w8_s4_calibrated.py`](../tests/test_w8_s4_calibrated.py), covering determinism across arms, the filter and the response rule.
+
+**Revisit trigger.**
+- A concept-level mapping from fitted skills to curriculum concepts, which would allow option 2 as a pre-registered change.
+- S4 under forgetting or on the maths curriculum giving a different sign.

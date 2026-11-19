@@ -1,4 +1,4 @@
-# Final Demo Script (about 12 minutes)
+# Final Demo Script (about 15 minutes)
 
 Website: <https://bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/> (or run it locally: `python -m http.server 8000` from the repository root, then open <http://localhost:8000/site/>). The live demos run the real `src/` code in the browser. Without internet they show saved outputs of every preset (`site/data/fallback.json`).
 
@@ -24,6 +24,25 @@ Each plan is drawn on the curriculum graph, with each concept shaded by the day 
 7. **Deadline cut to 4 days** (replan, Week 8): `INFEASIBLE_PROVED / CAPACITY_EXCEEDED` with the necessary fixes, plus a **best-effort plan** of the work that still fits. The learner keeps working instead of idling.
 
 The **Toy** presets show the same behaviours on 4 concepts. The 4-concept curriculum is the one behind every number in section 4.
+
+## 2b. Simulation and live session (3 min): `sim.html`, `live.html` (Week 8, added 2026-11-20)
+
+**Before the demo:** in a second terminal at the repository root run `.venv\Scripts\python site\serve_live.py`. It needs no internet and binds to 127.0.0.1 only.
+
+**Simulation** (<http://127.0.0.1:8001/site/sim.html>, also on the public site from the recorded runs):
+
+1. Pick **Integrals · average learner, skips 4 days** and press **Start** at 2×. A simulated learner (the evaluation's S0 simulator, θ* = 0.3) answers the 10-question CAT diagnostic, then studies day by day.
+2. Point at **Engine estimate vs truth**. The engine's class and p sit next to what the simulator *truly* knows (evaluator-only), so a slip shows up as a "Weak" concept the learner actually knows.
+3. Point at the **mastery chart** while it plays: each answer moves one line, and replanning follows in **Plan** and **What changed**.
+4. At day 5 the learner skips 4 days. The plan shows the skipped days and replans the rest.
+5. Optional, with the server: **Simulate new learner** with another θ*, target or budget; it runs in a few seconds.
+
+**Live session** (<http://127.0.0.1:8001/site/live.html>): answer 2–3 diagnostic questions yourself, one of them wrong on purpose. Each wrong option shows the mistake it indicates. Continue to day 1 and get one practice question wrong: p falls, the class changes, and the later days are replanned. **Undo** goes back one answer.
+
+**What to say if asked:**
+- The target ends **Uncertain** in every run: a concept counts as done once practised, and Mastered needs at least 3 answers.
+- After a skip, a due review can be missing. That is defect **B14** (`LIMITATIONS.md`), found while building this demo.
+- Questions are hand-written for the demo (`data/demo/questions_maths.json`), not from a dataset.
 
 ## 3. Scheduling (1 min): `demos.html` demo A, `scheduling.html`
 

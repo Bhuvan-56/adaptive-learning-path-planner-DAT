@@ -2,7 +2,7 @@
 
 **Team:** Bhuvan Chandra (AI23BTECH11013), Abdur Rehman (AI23BTECH11015) · **Course:** CS5903 Distributed AI Training (DAT) · **Week 8 (final)**
 
-Every number below names the file it comes from. All outcomes are **simulator behaviour on synthetic learners**; no real learner data was used.
+Every number below names the file it comes from. All planning outcomes are **simulator behaviour on simulated learners**; no real learner used the planner. Real student data enters in one place: BKT fitted on ASSISTments 2009–2010 and the S4 scenario built from those fits (§4.8).
 
 ---
 
@@ -27,21 +27,22 @@ Scope and actors are in `docs/PROBLEM_BOUNDARY.md`. Not in scope: an LMS front e
 | M5 Review and remediation | `src/planning/review.py` | HLR recall decay review (recall < 0.85); remediation after 2 consecutive failures |
 | M6 Replanning and infeasibility | `src/planning/replan.py`, `feasibility.py` | Event-driven replanning; infeasibility proofs with necessary fixes; practice-for-evidence (W7); best-effort plan (W8) |
 | M7 Explainability | `src/trace/` | One trace entry per candidate per day with a reason code; `check_trace` enforces completeness |
-| M8 Evaluation | `src/evaluation/`, `src/simulation/` | Closed-loop harness, 9 arms, matched synthetic learners, paired bootstrap |
+| M8 Evaluation | `src/evaluation/`, `src/simulation/` | Closed-loop harness, 9 arms, matched simulated learners (incl. S4, calibrated to real-student BKT fits), paired bootstrap |
 
-Design decisions: `decisions/ADR-001` … `ADR-009`. Per-track code walkthroughs: [`ownership_track_A.md`](ownership_track_A.md), [`ownership_track_B.md`](ownership_track_B.md).
+Design decisions: `decisions/ADR-001` … `ADR-009`; the full log, including ADR-023 for the public-data extension, is `docs/Architecture_Decision_Records.md`. Per-track code walkthroughs: [`ownership_track_A.md`](ownership_track_A.md), [`ownership_track_B.md`](ownership_track_B.md).
 
 ## 3. Method
 
 - **Scheduling benchmark:** 250 random instances (5 seeds × 50), each planner's score compared with the oracle's (`experiments/w2_scheduling_benchmark.yaml`).
 - **Integrated evaluation:** 5 seeds × 200 synthetic learners = 1,000 paired learners, 5 days, 10-minute budget, target D on the 4-concept demo curriculum.
-  - Scenarios: S0 is a matched BKT generator; S1 adds daily forgetting (`p_F = 0.05`) and a 7-day delayed retention quiz; S3 is a mismatched PFA generator. A 16-concept maths curriculum (10 days × 30 min) is run under S0 and S3.
+  - Scenarios: S0 is a matched BKT generator; S1 adds daily forgetting (`p_F = 0.05`) and a 7-day delayed retention quiz; S3 is a mismatched PFA generator; S4 is BKT with per-learner, per-concept slip/guess/learn drawn from real-student fits (§4.8). A 16-concept maths curriculum (10 days × 30 min) is run under S0 and S3.
   - Arms: adaptive_full, static_prerequisite_order, non_adaptive_greedy, non_adaptive_greedy_best_singleton, and five ablations.
 - **Claim rule:** an arm is better only if the paired 95% bootstrap CI (B = 1,000) of the difference excludes zero. Otherwise the result is "no difference shown".
 - **Hard constraints:** 0 prerequisite violations, 0 budget violations and 100% trace coverage, all recounted independently of the planner. A prerequisite counts as met if it was studied or was evidence-Mastered before day 1 (the planner's own rule; Week 8 B10 fix).
+- **Public data:** ASSISTments 2009–2010 Skill Builder (corrected), cleaned and split 70/15/15 by student; one BKT model per skill fitted on train students and scored on 593 held-out test students (`docs/w8/results_assistments.md`).
 - **Calibration:** at the end of the horizon, the engine's p per concept is scored against the simulator's latent mastery (Brier, 10-bin ECE) for the arms that update p.
 - **Process:**
-  - every change up to Week 8 addendum 2 was pre-registered (`docs/w7/preregistration*.md`, `docs/w8/preregistration*.md`); the final fixes (B10, B11, M2 comparison, calibration) were not;
+  - every change up to Week 8 addendum 2 was pre-registered (`docs/w7/preregistration*.md`, `docs/w8/preregistration*.md`); the final fixes (B10, B11, M2 comparison, calibration) and the public-data extension (§4.8) were not;
   - tests were written to fail first;
   - before and after evidence is stored under `evaluation/results/*_evidence/`.
 
@@ -101,7 +102,7 @@ The pre-registered 2 × 2 check (`docs/w8/preregistration_maths.md`): toy (4 con
 
 ### 4.5 Hard constraints (`evaluation/results/w8/final_v2/before_after.txt`)
 
-0 prerequisite violations and 0 budget violations in every arm of every final_v2 run, recounted independently. Trace coverage is 100% for the four primary arms in every run (`summary_seed_<s>.md`); the harness does not write coverage for ablation arms.
+0 prerequisite violations and 0 budget violations in every arm of every final_v2 run, including S4, recounted independently. Trace coverage is 100% for the four primary arms in every run (`summary_seed_<s>.md`); the harness does not write coverage for ablation arms.
 
 ### 4.6 Diagnostic (M2)
 
@@ -127,8 +128,39 @@ Engine p per concept at the end of the horizon against the simulator's latent ma
 | Toy S3 | 0.1667 [0.1581, 0.1760] / 0.0888 | 0.1416 [0.1346, 0.1481] / 0.0791 |
 | Maths S0 | 0.1897 [0.1865, 0.1928] / 0.1657 | 0.1872 [0.1842, 0.1903] / 0.1407 |
 | Maths S3 | 0.1881 [0.1846, 0.1918] / 0.1550 | 0.1914 [0.1877, 0.1950] / 0.1563 |
+| Toy S4 (calibrated learners) | 0.1607 [0.1539, 0.1681] / 0.1135 | 0.1817 [0.1747, 0.1891] / 0.1244 |
 
-The static and greedy arms never update p after the diagnostic, so calibration is **not applicable** to them. Calibration is worse under forgetting (S1) and on the 16-concept curriculum. Concepts never practised keep p = 0.5 (cold start), which is the largest miscalibrated bin on the toy curriculum (`evaluation/results/w8/calibration_s0/summary.md`, 0.5–0.6 bin).
+The static and greedy arms never update p after the diagnostic, so calibration is **not applicable** to them. Calibration is worse under forgetting (S1), on the 16-concept curriculum, and when learners' parameters differ from the engine's (S4). Concepts never practised keep p = 0.5 (cold start), which is the largest miscalibrated bin on the toy curriculum (`evaluation/results/w8/calibration_s0/summary.md`, 0.5–0.6 bin).
+
+### 4.8 Public data: BKT on ASSISTments 2009–2010 and calibrated learners (S4) (`docs/w8/results_assistments.md`)
+
+**Data.** The ASSISTments 2009–2010 Skill Builder corrected file has 346,860 rows. After cleaning (original questions only; skill present; single-skill rows; first attempt per student and problem; skills with ≥ 50 students and ≥ 500 rows) it holds **196,143 answers from 3,958 students in 56 skills**. It is split by student into 2,771 train, 594 dev and 593 test students. Provenance (source, date, SHA-256, every count) is in `data/provenance/assistments_2009_2010.json`.
+
+**BKT on held-out real students** (`evaluation/results/w8/assistments_bkt/metrics.txt`, 27,665 test answers):
+
+| Model | AUC | Log loss | ECE |
+|---|---|---|---|
+| BKT fitted per skill (train students) | **0.7142** | **0.5732** | 0.0169 |
+| BKT with the engine's default parameters | 0.6807 | 0.6134 | 0.0694 |
+| Per-skill training correct-rate | 0.6208 | 0.6207 | 0.0087 |
+
+- Fitted − default log loss per test student: **−0.0288 [−0.0378, −0.0192]**, fitted better. This meets ADR-001's revisit trigger. The engine keeps its defaults for the delivered runs (ADR-023).
+- The fitted slip is about twice the assumed value: median 0.207 against 0.10. Guess is lower: median 0.140 against 0.25. All three parameters vary widely between skills.
+
+**S4: the integrated evaluation on learners calibrated to those fits** (`evaluation/results/w8/final_v2/s4_vs_s0.txt`). Each learner gets slip, guess and learn per concept from the 53 identifiable fits; everything else equals the final_v2 S0 run, and the engine is unchanged.
+
+| Paired difference (1,000 learners) | S0 | S4 |
+|---|---|---|
+| adaptive_full − static (= − greedy), mastered | +0.0560 [0.0400, 0.0740] | **+0.0550 [0.0270, 0.0830]**, adaptive better |
+| adaptive_full − static, retained recall | +0.0242 [0.0168, 0.0316] | **+0.0299 [0.0214, 0.0385]**, adaptive better |
+| best-singleton − greedy, mastered | +0.0130 [0.0040, 0.0230] | −0.0030 [−0.0240, 0.0200], no difference shown |
+| adaptive_full − ablation_no_diagnostic, mastered | −0.0840 [−0.1110, −0.0580] | −0.0690 [−0.1030, −0.0360], no-diagnostic better |
+
+- **The adaptive advantage holds** on calibrated learners.
+- **B12 holds too.**
+- **The engine's mastery calibration worsens** (Brier 0.1358 → 0.1607). This is the expected cost of default parameters on learners who behave differently.
+- **Hard constraints:** 0 / 0 violations and 100% primary-arm trace coverage.
+- **Scope:** S4 was run on the toy curriculum without forgetting only.
 
 ## 5. What changed over the project
 
@@ -139,18 +171,20 @@ The static and greedy arms never update p after the diagnostic, so calibration i
 | W5 | Integrated M1–M8 evaluation against both baselines; failed acceptance groups fixed |
 | W6 | Beta: clean-run audit, multi-seed fix, S1/S2 configs, retention quiz, ownership packs |
 | W7 | Best-singleton fallback (measured improvement); project website; adaptive deadlock fix (adaptive went from worse than static to better) |
-| W8 | S1 daily forgetting fixed; best-effort plan instead of idling on infeasible days; final runs, limitations, report, code walkthroughs. Final fixes: diagnostic answers count as evidence (B10); review ordered by forgetting risk × prerequisite importance (B11); pooled CAT vs fixed vs random comparison with paired CIs (M2); end-of-horizon mastery calibration, Brier and ECE (M8); all integrated runs re-made (`evaluation/results/w8/final_v2/`) |
+| W8 | S1 daily forgetting fixed; best-effort plan instead of idling on infeasible days; final runs, limitations, report, code walkthroughs. Final fixes: diagnostic answers count as evidence (B10); review ordered by forgetting risk × prerequisite importance (B11); pooled CAT vs fixed vs random comparison with paired CIs (M2); end-of-horizon mastery calibration, Brier and ECE (M8); all integrated runs re-made (`evaluation/results/w8/final_v2/`). Public-data extension: BKT fitted on ASSISTments 2009–2010 and tested on held-out students; S4 calibrated-learner scenario (§4.8) |
 
 ## 6. Limitations
 
 See [`LIMITATIONS.md`](LIMITATIONS.md). The most important:
-- **synthetic learners only.** The main results use a generator that matches the planner's own model; the mismatched check (§4.4) has its own bias.
-- **two hand-made curricula** (4 and 16 concepts), neither from real data.
+- **simulated learners only.** No real learner used the planner. The main results use a generator that matches the planner's own model; the mismatched check (§4.4) has its own bias. S4 (§4.8) takes learner parameters from real-student fits, but its learners are still simulated, and it was run on the toy curriculum without forgetting only.
+- **two hand-made curricula** (4 and 16 concepts), neither from real data (ASSISTments has no prerequisite fields).
+- **the engine keeps its default BKT parameters,** although fitted ones predict held-out real students better (§4.8, ADR-023). HLR half-lives are still not fitted.
 - **no single component can be credited positively:**
   - the diagnostic now changes plans, but the cold-start ablation is better than adaptive_full (§4.6);
   - the difficulty and remediation ablations show no difference on mastery; the review ablation shows none except under S1, where it is better than adaptive_full, −0.0170 [−0.0330, −0.0010] (adaptive − no_review; recomputed from `evaluation/results/w8/final_v2/integrated_s1/per_learner_seed_*.csv`);
   - the remediation ablation never disables remediation;
   - remediation never fires in the closed loop.
+- **planned reviews are logged as done (B14, found 2026-11-20, not fixed):** `replan` records a review in the log when it *plans* it, so a later replan or a missed day drops reviews the learner still needs (`evaluation/results/w8_evidence/b14_planned_reviews.txt`). Its effect on the reported runs was not measured.
 - **prerequisite importance** now orders due reviews (B11 fix). Its effect on the final runs was not isolated: a 20-learner toy S0 check showed no change (`evaluation/results/w8_evidence/after_fix4_review_importance.txt`).
 
 ## 7. Reproduce
@@ -166,6 +200,11 @@ python -m src.evaluation.integrated --config experiments/w8_maths_s3.yaml --out 
 python scripts/w7_pooled_s0.py out/s1 adaptive_full:static_prerequisite_order adaptive_full:non_adaptive_greedy adaptive_full:ablation_no_diagnostic
 python scripts/w8_final_v2_compare.py
 python -m src.evaluation.diagnostic_comparison --config experiments/w4_comparison.yaml --out out/diagnostic_comparison
+# public-data extension (raw file in data/raw/, see data/README.md)
+python scripts/assistments_prepare.py
+python scripts/assistments_fit_bkt.py
+python -m src.evaluation.integrated --config experiments/w8_s4_assistments.yaml --out out/s4
+python scripts/w8_s4_compare.py
 ```
 
 Compare the per-learner CSVs with `evaluation/results/w8/final_v2/` on all columns except `runtime_ms` (add `--horizon=10` to `w7_pooled_s0.py` for the maths runs). `scripts/w8_final_v2_compare.py` reads the committed runs. The clean-clone audit is `scripts/clean_run.ps1`. The demo walkthrough is in [`DEMO.md`](DEMO.md).
