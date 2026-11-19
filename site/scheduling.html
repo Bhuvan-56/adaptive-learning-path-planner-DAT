@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scheduling Benchmark</title>
-<link rel="stylesheet" href="assets/style.css?v=w8h">
-<script src="assets/common.js?v=w8h"></script>
+<link rel="stylesheet" href="assets/style.css?v=w8i">
+<script src="assets/common.js?v=w8i"></script>
 </head>
 <body>
 <main>
@@ -15,13 +15,42 @@
     (seeds 7, 17, 27, 37, 47 × 50).</p>
   <div class="note">Synthetic scheduling instances from one generator configuration; no learners are involved here.</div>
 
+  <div class="card explain">
+    <h2>What this page shows</h2>
+    <p>Every day the planner has to choose which lessons to put into the learner's minutes. Each lesson takes some
+      minutes, is worth some score (how much it moves the learner towards the target) and may need other lessons first.
+      Picking the best set is a knapsack-style problem: the exact answer needs a search over combinations, which is too
+      slow to run every time.</p>
+    <ul>
+      <li><b>Greedy</b> (what the engine uses) keeps taking the item with the best score per minute whose
+        prerequisites are in, until the day is full. Fast, but it can miss the best set.</li>
+      <li><b>Oracle</b> tries every combination and finds the true best score. Too slow for daily use; here it is the
+        yardstick.</li>
+      <li><b>Best-singleton fallback</b> (added in Week 7) also checks the single most valuable item on its own and keeps
+        whichever is better. It fixes the case where one big lesson is worth more than several small ones.</li>
+    </ul>
+    <p><b>The ratio</b> is a policy's score divided by the oracle's: 1.0 means it found the best plan, 0.9 means it got 90%
+      of the best possible score.</p>
+    <p class="takeaway"><b>Takeaway:</b> greedy averages 0.974 of the optimum and the fallback 0.981. The fallback fixes 10
+      of 250 instances and makes none worse. Neither has a worst-case guarantee: the saved 12/18 case at the bottom still
+      scores 12.</p>
+  </div>
+
   <h2>Summary</h2>
+  <p class="hint">One row per policy: the mean ratio, the ratio that only 5% of instances fall below, the worst instance,
+    and how many of the 250 instances came out below 0.95.</p>
   <div class="card table-wrap" id="summary"><p class="small">Loading…</p></div>
 
   <h2>Paired difference in ratio</h2>
+  <p class="hint">Both policies solve the same 250 instances, so we compare them instance by instance. The dot is the
+    average gain of the fallback; the bar is its 95% confidence interval. A bar entirely right of “no difference” means
+    the gain is real, not luck.</p>
   <div class="card" id="diff"></div>
 
   <h2>Distribution of ratios</h2>
+  <p class="hint">How many instances land in each ratio band (log scale). Most are at exactly 1.0, i.e. optimal; the bars
+    further left are the instances where the policy lost score. Orange bars lower than blue on the left, and higher at 1.0,
+    mean the fallback moved instances to the optimum.</p>
   <div class="card">
     <div class="legend" id="hist-legend"></div>
     <div id="hist"></div>
@@ -29,6 +58,8 @@
   </div>
 
   <h2>Instances where the score changed</h2>
+  <p class="hint">Every instance where the fallback's score differs from greedy's. In all of them it went up; none went
+    down.</p>
   <div class="card table-wrap" id="changed"></div>
 
   <h2>Saved bad cases</h2>

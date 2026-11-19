@@ -280,3 +280,12 @@ details.state-box[open] summary { margin-bottom: 4px; }
   header.site .theme-toggle { order: 2; }
   header.site nav { order: 3; width: 100%; }
 }
+
+/* Plain-language explanations (Week 8, 20 Nov) */
+.explain { border-left: 4px solid var(--accent); margin: 14px 0 6px; }
+.explain h2 { margin: 2px 0 8px; font-size: 1.1rem; }
+.explain p { margin: 6px 0; }
+.explain ul { margin: 6px 0 2px; padding-left: 20px; }
+.explain li { margin: 4px 0; }
+.explain .takeaway { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.hint { color: var(--text-2); font-size: 0.92rem; margin: -2px 0 10px; max-width: 820px; }

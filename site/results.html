@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Integrated Results</title>
-<link rel="stylesheet" href="assets/style.css?v=w8h">
-<script src="assets/common.js?v=w8h"></script>
+<link rel="stylesheet" href="assets/style.css?v=w8i">
+<script src="assets/common.js?v=w8i"></script>
 </head>
 <body>
 <main>
@@ -17,7 +17,34 @@
     <a href="#s1">S1 (Week 8)</a> is further down.</p>
   <div class="note">Results from a simulator with synthetic learners (<code>MatchedBKTGenerator</code>), scenarios S0 and S1.</div>
 
+  <div class="card explain">
+    <h2>What this page shows</h2>
+    <p>We cannot give the planner to real students, so we test it in a closed loop with simulated ones. Each simulated
+      learner secretly knows some concepts. It takes the diagnostic, gets a plan, answers every activity on every day,
+      and the planner updates its beliefs and replans after each answer. After 5 days the evaluator counts how many of
+      the 4 concepts the learner <i>truly</i> knows. That hidden truth is read only by the evaluator, never by the
+      planner.</p>
+    <ul>
+      <li><b>adaptive_full</b> is our system: diagnostic, learner state, difficulty, review, replanning.</li>
+      <li><b>static_prerequisite_order</b> is a fixed course order, and <b>non_adaptive_greedy</b> plans once and never
+        adapts. These are the baselines the brief asks us to beat.</li>
+      <li><b>ablation_…</b> arms switch off one part of our system each, to see what that part contributes.</li>
+    </ul>
+    <p><b>How to read the numbers:</b> every arm runs on the same 1,000 learners, so we compare arms learner by learner.
+      A difference like +0.056 [0.040, 0.074] means adaptive taught 0.056 more concepts per learner on average, and the
+      95% interval in brackets does not include zero, so we call it better. If the interval crosses zero, the page says
+      “no difference shown”.</p>
+    <p class="takeaway"><b>Takeaways:</b> adaptive beats the static course order in every scenario, on concepts mastered and
+      on retained recall. The no-diagnostic ablation beats the full system (defect B12, explained on this page and in
+      <code>docs/final/LIMITATIONS.md</code>). Since 20 November the same comparison has also been run on learners whose
+      parameters come from real ASSISTments students (scenario S4). There, adaptive − static is +0.055 [0.027, 0.083]
+      (<a href="../docs/w8/results_assistments.md">write-up</a>, and the <a href="sim.html">Simulation</a> page to watch
+      one learner).</p>
+  </div>
+
   <h2>Arms</h2>
+  <p class="hint">Average concepts mastered per learner for each arm, with its 95% interval, plus the hard constraints:
+    prerequisite and budget violations (all zero) and trace coverage.</p>
   <div class="card">
     <div class="table-wrap" id="arms"><p class="small">Loading…</p></div>
   </div>
@@ -36,6 +63,9 @@
   <div class="card" style="margin-top:12px"><div id="diff-forest"></div></div>
 
   <h2>Week 8 final fixes: before and after</h2>
+  <p class="hint">Why the adaptive arm's number dropped in the final week: once the diagnostic's answers counted as
+    evidence, probed concepts started as Developing or Weak instead of Uncertain. That changed the plans and mastery
+    fell; why it fell was not tested. We report the drop rather than undo the fix.</p>
   <p>The final Week 8 fixes let the diagnostic's answers count as evidence (B10) and order reviews by forgetting risk
     and prerequisite importance (B11). Same 1,000 learners, the earlier Week 8 run against the final one.</p>
   <div class="card"><div class="table-wrap" id="fix"></div></div>
@@ -45,12 +75,16 @@
   <div class="card small" id="method"></div>
 
   <h2 id="robust">Week 8: larger curriculum and a mismatched simulator</h2>
+  <p class="hint">Is the result only true for a tiny curriculum, or for learners that behave exactly as the planner
+    assumes? This checks both. Read each cell as “adaptive minus static”: positive everywhere means the advantage held.</p>
   <p>A pre-registered 2 × 2 check: the 4-concept toy curriculum or the 16-concept maths curriculum (target Integrals,
     10 days × 30 minutes), each with the matched simulator (S0) or a mismatched one (S3: learning comes from practice
     counts, not the planner's BKT model). Every cell is 1,000 paired learners.</p>
   <div class="card"><div class="table-wrap" id="robust-table"><p class="small">Loading…</p></div></div>
 
   <h2 id="s1">Week 8: S1, forgetting during study</h2>
+  <p class="hint">Real learners forget. Here every arm loses concepts between days, so every number is lower. The question
+    is whether adaptive still comes out ahead, and retained recall (a quiz a week later) shows what sticks.</p>
   <p>Scenario S1 adds forgetting: each day, a mastered concept is lost with probability 0.05. Until Week 8 the study
     loop never applied it, so S1 gave the same numbers as S0. Now it does. Same 1,000 learners; "before" is the run
     before that fix, "after" is the final run with all Week 8 fixes (<code>evaluation/results/w8/final_v2/</code>), so
