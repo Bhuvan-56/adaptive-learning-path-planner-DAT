@@ -45,3 +45,21 @@ If a required field is unavailable, its fallback must be explicitly labelled as 
 
 Such fields must not be presented as measured properties of the original dataset.
 
+## ASSISTments 2009–2010 (used, Week 8 public-data extension)
+
+- **File:** `data/raw/skill_builder_data_corrected_collapsed.csv`, the **corrected** Skill Builder release. Download it from the official page <https://sites.google.com/site/assistmentsdata/home/2009-2010-assistment-data/skill-builder-data-2009-2010> ("corrected version"; direct link <https://drive.google.com/file/d/1NNXHFRxcArrU0ZJSb9BIL56vmUt5FhlE/view?usp=sharing>). Not committed.
+- **Provenance:** `data/provenance/assistments_2009_2010.json` records:
+  - source, link and acquisition date (2026-11-19);
+  - SHA-256;
+  - encoding (not valid UTF-8; read as latin-1);
+  - field mapping and terms of use;
+  - citation;
+  - every cleaning step's counts;
+  - the student split and per-skill counts.
+- **Processed:** `scripts/assistments_prepare.py` writes `data/processed/assistments/{train,dev,test}.csv` (git-ignored; rebuilt by the script). Rules:
+  - `original == 1`, skill present, single-skill rows, first attempt per (student, problem);
+  - skills with ≥ 50 students and ≥ 500 rows;
+  - split 70/15/15 by student, seed 20261119.
+- **Prerequisite fields:** none in this dataset, so no curriculum edges are taken from it. **Timing:** `ms_first_response` is kept but unused.
+- **Use:** per-skill BKT fit on train students only (`scripts/assistments_fit_bkt.py` → `config/bkt_assistments.yaml`) and simulator scenario S4. See `docs/w8/results_assistments.md`.
+- **Junyi Academy:** not used.

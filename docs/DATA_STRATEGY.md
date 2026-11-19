@@ -87,3 +87,15 @@ Diagnostic policies share the same item bank and learner pool.
 
 Temporal order within each learner sequence is preserved.
 
+## Status at the end of Week 8 (added 19 November 2026)
+
+The hybrid strategy above was replaced by a simulator-first route on 12 October (ADR-010). In the Week 8 public-data extension (ADR-023), part of it was carried out:
+
+| Planned above | Done? |
+|---|---|
+| ASSISTments 2009–2010 split by student 70/15/15 | **Yes**, corrected Skill Builder file; `data/provenance/assistments_2009_2010.json` records all nine provenance items listed above |
+| Fit BKT parameters on training students | **Yes**, per skill; held-out test on 593 students (`docs/w8/results_assistments.md`) |
+| Fit IRT item parameters | No; the item bank stays synthetic |
+| Fit HLR half-lives | No; the half-life stays a fixed prior |
+| Simulator parameters sampled from empirical distributions | **Yes, for one scenario:** S4 draws per-concept slip/guess/learn from the fits; S0–S3 are unchanged |
+| Junyi Academy DAG and durations | No; both curricula stay hand-made, and ASSISTments has no prerequisite fields |

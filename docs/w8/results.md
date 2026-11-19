@@ -1,5 +1,7 @@
 # Week 8 Results: S1 Daily Forgetting and Best-Effort Infeasible Days
 
+> Other Week 8 result files: [`results_maths.md`](results_maths.md) (larger curriculum, mismatched simulator) and [`results_assistments.md`](results_assistments.md) (public data: BKT fitted on ASSISTments 2009–2010, calibrated-learner scenario S4).
+
 Pre-registration: [`docs/w8/preregistration.md`](preregistration.md) (commit `ace6b00`, addendum `aad3c4d`). Fixes: `72b8f02` (S1), `840a12b` (best effort). All figures are simulator behaviour on synthetic learners: 1,000 paired learners (5 seeds × 200), 5 days, 10-minute budget, B = 1,000 paired bootstrap resamples.
 
 | Run | Config | Code | Output |
