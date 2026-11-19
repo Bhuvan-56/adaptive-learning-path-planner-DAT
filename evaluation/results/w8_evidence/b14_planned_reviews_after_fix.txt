@@ -1,0 +1,10 @@
+Setup: A Mastered, practised once on day 1; target T answered on day 2; budget 20, 20 days.
+Day-2 plan schedules A reviews on days [5, 9, 13, 17].
+ReviewLog for A right after planning: [1.0] (only day 1 really happened).
+
+Case 1, missed days 3-8, replan on day 9:
+  true recall of A on day 9 = 0.673 (< 0.85, so a review is due)
+  A reviews in the day-9 plan: [9, 13, 17]
+
+Case 2, any replan on day 3 (no answers, same deadline):
+  A reviews in the day-3 plan: [5, 9, 13, 17] (the day-2 plan had them on 5, 9, 13, 17)

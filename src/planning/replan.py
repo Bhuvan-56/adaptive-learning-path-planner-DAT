@@ -316,6 +316,14 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                 "target_node": target_node
             }
 
+    # B14 fix (W8, 2026-11-20): reviews packed into FUTURE days are recorded only in a
+    # planning copy of the log, so the same review is not packed again on the next planned
+    # days of this plan. The returned review_log keeps only attempts that happened (event
+    # answers), so a later replan or a missed day re-checks the review instead of treating a
+    # planned-but-not-done review as done. Before the fix the planned review was written into
+    # the shared log (scripts/w8_b14_planned_reviews.py).
+    planning_log = ReviewLog(records={c: list(recs) for c, recs in review_log.records.items()})
+
     # 2. Recompute only future plan from current_day to deadline_days
     evidence_mastered = {
         nid for nid in candidate_universe
@@ -646,7 +654,7 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
             is_elig, recall_val = is_review_eligible(
                 nid,
                 learner_states.get(nid, ConceptState.cold_start()),
-                review_log,
+                planning_log,
                 current_day=float(day_num),
                 policy=active_policy,
                 half_life_days=h_days,
@@ -677,8 +685,8 @@ def replan(state: Union[ReplanState, Dict[str, Any]], event: Any) -> Dict[str, A
                 day_activities.append(r_nid)
                 scheduled_today.add(r_nid)
                 rem_budget -= dur
-                # In simulation, record review attempt so it won't be immediately due next day
-                review_log.record_attempt(r_nid, time_in_days=float(day_num), correct=True)
+                # Planning copy only (B14 fix): not due again on this plan's next days.
+                planning_log.record_attempt(r_nid, time_in_days=float(day_num), correct=True)
             else:
                 decision = "FILTERED"
                 reason = ReasonCode.BUDGET_EXCEEDED
