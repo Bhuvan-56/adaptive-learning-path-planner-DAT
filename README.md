@@ -307,6 +307,7 @@ Pages read files with `fetch()`, so opening the HTML files directly from disk do
 ## Documentation Index
 
 - `docs/Project_Report.pdf` — Final project report (deliverable A)
+- `docs/report/` — LaTeX source of the report (`latexmk -pdf main.tex` in that folder; revised 20 Nov 2026 for the Week 8 extension)
 - `docs/Architecture_Decision_Records.md` — Decision log, ADR-001 to ADR-023 (deliverable B)
 
 - `docs/PROBLEM_BOUNDARY.md` — Actors, system boundary, in/out of scope
