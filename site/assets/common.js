@@ -7,6 +7,7 @@
     ["scheduling.html", "Scheduling"],
     ["results.html", "Results"],
     ["demos.html", "Live demos"],
+    ["sim.html", "Simulation"],
   ];
 
   // Theme: follows the system unless the visitor picks one (remembered per browser when storage works).

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Session</title>
+<link rel="stylesheet" href="assets/style.css?v=w8h">
+<script src="assets/common.js?v=w8h"></script>
+<style>
+  .live-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 860px) { .live-grid { grid-template-columns: 1fr; } }
+  .phase { font-size: 0.85rem; color: var(--text-2); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }
+  .stem { font-size: 1.25rem; font-weight: 600; margin: 8px 0 14px; line-height: 1.35; }
+  .opts { display: grid; gap: 8px; }
+  .opts button { text-align: left; padding: 10px 12px; font-size: 1rem; width: 100%; }
+  .opts button:hover:not(:disabled) { border-color: var(--accent); }
+  .fb { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.95rem; }
+  .fb.good { background: var(--good-bg); color: var(--good); }
+  .fb.bad { background: var(--bad-bg); color: var(--bad); }
+  .bar { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; min-width: 70px; }
+  .bar > span { display: block; height: 100%; background: var(--accent); }
+  .days { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+  @media (max-width: 640px) { .days { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .day { border: 1px solid var(--border); border-radius: 8px; padding: 6px; min-height: 72px; background: var(--surface); font-size: 0.82rem; }
+  .day.now { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+  .day.past { opacity: 0.72; }
+  .day.missed { background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 6px, var(--surface-2) 6px, var(--surface-2) 12px); }
+  .day .h { font-weight: 600; margin-bottom: 4px; color: var(--text-2); }
+  .day .c { display: inline-block; margin: 2px 2px 0 0; padding: 0 6px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface-2); }
+  .feed { max-height: 260px; overflow: auto; font-size: 0.9rem; }
+  .feed div { padding: 4px 0; border-bottom: 1px solid var(--grid); }
+  .err { color: var(--bad); }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Live session</h1>
+  <p class="lede">Answer real questions as a learner. The engine runs the CAT diagnostic, builds a plan to
+    <b id="target-name">the target</b>, and replans after every answer, using the project's own code in <code>src/</code>
+    through a local server (<code>site/serve_live.py</code>). Questions are hand-written for this demo.</p>
+  <p class="err" id="error" role="alert" hidden></p>
+
+  <div class="live-grid">
+    <section class="card" aria-labelledby="q-title">
+      <h2 id="q-title" class="sr-only" style="position:absolute;left:-9999px">Question</h2>
+      <div class="phase" id="phase">Connecting…</div>
+      <div class="stem" id="stem"></div>
+      <div class="opts" id="opts"></div>
+      <div id="feedback"></div>
+      <div class="toolbar">
+        <button id="undo" type="button">Undo last answer</button>
+        <button id="skip" type="button" title="Skip study days: recall decays and due reviews are planned">Skip 4 days</button>
+        <button id="restart" type="button">Restart</button>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="st-title">
+      <h2 id="st-title">Learner state</h2>
+      <p class="small" id="theta"></p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Concept</th><th>Class</th><th>p (mastery)</th><th class="num">n</th><th class="num">Recall</th></tr></thead>
+        <tbody id="states"></tbody>
+      </table></div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px" aria-labelledby="plan-title">
+    <h2 id="plan-title">Plan</h2>
+    <p class="small" id="plan-status"></p>
+    <div class="days" id="days"></div>
+  </section>
+
+  <div class="live-grid" style="margin-top:16px">
+    <section class="card" aria-labelledby="tr-title">
+      <h2 id="tr-title">Today's decisions (trace)</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Concept</th><th>Decision</th><th>Reason code</th><th>Class</th></tr></thead>
+        <tbody id="trace"></tbody>
+      </table></div>
+    </section>
+    <section class="card" aria-labelledby="feed-title">
+      <h2 id="feed-title">What changed</h2>
+      <div class="feed" id="feed"></div>
+    </section>
+  </div>
+</main>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  let log = { diag: [], events: [] };
+  let last = null, busy = false;
+
+  const CLASS_PILL = { Mastered: "good", Weak: "bad", Developing: "warn", Uncertain: "" };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  function pathConcepts(st) {
+    const pre = {}; st.edges.forEach(([u, v]) => (pre[v] = pre[v] || []).push(u));
+    const seen = new Set(), order = [];
+    (function visit(n) { if (seen.has(n)) return; seen.add(n); (pre[n] || []).forEach(visit); order.push(n); })(st.target);
+    return order;
+  }
+
+  async function call() {
+    busy = true; setButtons();
+    try {
+      const r = await fetch("/api/live", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(log) });
+      const st = await r.json();
+      if (!st.ok) throw new Error(st.error || "server error");
+      $("error").hidden = true; last = st; render(st);
+    } catch (e) {
+      $("error").hidden = false;
+      $("error").textContent = "The engine did not answer: " + e.message + ". Is site/serve_live.py running?";
+    } finally { busy = false; setButtons(); }
+  }
+
+  function setButtons() {
+    const empty = !log.diag.length && !log.events.length;
+    $("undo").disabled = busy || empty;
+    $("restart").disabled = busy || empty;
+    $("skip").disabled = busy || !(last && last.phase === "study" && last.can_skip);
+    document.querySelectorAll("#opts button").forEach((b) => (b.disabled = busy));
+  }
+
+  function answer(i) {
+    if (!last || busy) return;
+    if (last.phase === "diagnostic") log.diag.push(i); else log.events.push({ type: "answer", choice: i });
+    call();
+  }
+
+  function renderFeedback(st) {
+    let fb = null, concept = null;
+    const lastEv = log.events[log.events.length - 1];
+    if (log.events.length && lastEv.type === "answer" && st.answered && st.answered.length) {
+      fb = st.answered[st.answered.length - 1]; concept = fb.concept;
+    } else if (!log.events.length && log.diag.length) {
+      const items = st.asked || (st.diagnostic && st.diagnostic.items) || [];
+      fb = items[items.length - 1]; concept = fb && fb.concept;
+    }
+    if (!fb) { $("feedback").innerHTML = ""; return; }
+    const name = st.names[concept] || concept;
+    let html = fb.correct ? `<b>Right.</b> (${esc(name)})` : `<b>Not quite.</b> (${esc(name)}) ${fb.why ? esc(fb.why) : ""}`;
+    if (fb.p_before !== undefined) html += `<br><span class="small">p ${fb.p_before.toFixed(2)} → ${fb.p_after.toFixed(2)}, ${esc(fb.class_before)} → ${esc(fb.class_after)}</span>`;
+    $("feedback").innerHTML = `<div class="fb ${fb.correct ? "good" : "bad"}">${html}</div>`;
+  }
+
+  function render(st) {
+    $("target-name").textContent = st.names[st.target];
+    const concepts = pathConcepts(st);
+
+    // Question
+    if (st.phase === "done") {
+      $("phase").innerHTML = `<span class="pill good">Finished</span> Horizon of ${st.horizon} days used.`;
+      $("stem").textContent = `${st.names[st.target]} ended as ${st.target_class || "unknown"}.`;
+      $("opts").innerHTML = "";
+    } else {
+      const q = st.question;
+      if (st.phase === "diagnostic") {
+        $("phase").innerHTML = `<span class="pill">Diagnostic</span> Question ${st.asked.length + 1} (CAT, at most ${st.max_questions}) · ${esc(st.names[q.concept])}`;
+      } else {
+        $("phase").innerHTML = `<span class="pill">Day ${st.day} of ${st.horizon}</span> Activity ${st.activity_index + 1} of ${st.today.length} · ${esc(st.names[q.concept])} · difficulty ${st.difficulty}`;
+      }
+      $("stem").textContent = q.stem;
+      $("opts").innerHTML = q.options.map((o, i) => `<button type="button" data-i="${i}">${String.fromCharCode(65 + i)}. ${esc(o)}</button>`).join("");
+      $("opts").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => answer(+b.dataset.i)));
+    }
+    renderFeedback(st);
+
+    // Learner state
+    const d = st.diagnostic;
+    $("theta").textContent = d ? `Diagnostic: θ̂ = ${d.theta_hat.toFixed(2)} after ${d.items.length} questions (Var ${d.variance.toFixed(2)}).`
+                               : `Diagnostic in progress: ${st.asked.length} answered.`;
+    const states = st.states || (d && d.states) || {};
+    const recall = st.recall || {};
+    $("states").innerHTML = concepts.map((c) => {
+      const s = states[c];
+      if (!s) return `<tr><td>${esc(st.names[c])}</td><td><span class="pill">Uncertain</span></td><td class="small">not yet estimated</td><td class="num">0</td><td class="num">–</td></tr>`;
+      return `<tr${c === st.target ? ' class="hl"' : ""}><td>${esc(st.names[c])}</td><td><span class="pill ${CLASS_PILL[s.class] || ""}">${s.class}</span></td>
+        <td><div class="row" style="gap:6px;flex-wrap:nowrap"><div class="bar"><span style="width:${(s.p * 100).toFixed(0)}%"></span></div><span class="mono">${s.p.toFixed(2)}</span></div></td>
+        <td class="num">${s.n}</td><td class="num">${recall[c] !== undefined ? recall[c].toFixed(2) : "–"}</td></tr>`;
+    }).join("");
+
+    // Plan
+    const plan = st.plan || (st.first_plan && st.phase !== "diagnostic" ? st.first_plan : null);
+    const days = {};
+    (st.days || []).forEach((x) => (days[x.day] = { ...x, past: true }));
+    (st.past_days || []).forEach((x) => (days[x.day] = { ...x, pastFixed: true }));
+    if (plan) plan.days.forEach((x) => { if (!(days[x.day] && days[x.day].pastFixed) && (!days[x.day] || x.day >= (st.day || 99))) days[x.day] = { ...x, past: x.day < (st.day || 1) || !!x.missed }; });
+    $("plan-status").textContent = st.phase === "diagnostic" ? "The plan is built after the diagnostic."
+      : plan ? `Status: ${plan.status}. Budget ${st.budget} min a day, ${st.horizon} days.` : "";
+    $("days").innerHTML = st.phase === "diagnostic" ? "" : Array.from({ length: st.horizon }, (_, k) => {
+      const n = k + 1, x = days[n] || { activities: [] };
+      const cls = ["day", n === st.day ? "now" : "", (st.day && n < st.day) || st.phase === "done" ? "past" : "", x.missed ? "missed" : ""].join(" ");
+      const chips = (x.activities || []).map((a) => `<span class="c">${esc(a)}</span>`).join("");
+      return `<div class="${cls}"><div class="h">Day ${n}${x.missed ? " · skipped" : ""}</div>${chips || '<span class="small">–</span>'}</div>`;
+    }).join("");
+
+    // Trace and feed
+    const tr = st.today_trace || [];
+    $("trace").innerHTML = tr.length ? tr.map((t) => `<tr><td>${esc(st.names[t.node_id] || t.node_id)}</td><td>${esc(t.decision)}</td><td class="mono">${esc(t.reason_code)}</td><td>${esc(t.class || "")}</td></tr>`).join("")
+      : `<tr><td colspan="4" class="small">${st.phase === "diagnostic" ? "Appears once the plan exists." : "No trace for this day."}</td></tr>`;
+    $("feed").innerHTML = (st.feed || []).slice().reverse().map((f) => `<div><span class="pill">Day ${f.day}</span> ${esc(f.text)}</div>`).join("") || '<div class="small">Nothing yet.</div>';
+  }
+
+  $("undo").addEventListener("click", () => { if (log.events.length) log.events.pop(); else log.diag.pop(); call(); });
+  $("restart").addEventListener("click", () => { log = { diag: [], events: [] }; call(); });
+  $("skip").addEventListener("click", () => { log.events.push({ type: "skip_days", n: 4 }); call(); });
+  call();
+})();
+</script>
+</body>
+</html>

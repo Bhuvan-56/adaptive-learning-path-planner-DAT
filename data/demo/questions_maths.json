@@ -1,0 +1,1377 @@
+{
+ "description": "Hand-written demo questions for the live demo (site/live.html). NOT from any dataset. Diagnostic keys are the item ids of data/processed/item_bank_synthetic.csv mapped to concepts by data/processed/q_matrix_maths.csv; question difficulty was written to follow each item's IRT b (easier for lower b). Practice difficulty is on the engine's 0-1 exercise scale (src/planning/difficulty.py). Each wrong option names the misconception it indicates.",
+ "diagnostic": {
+  "item_003": {
+   "concept": "ARITH",
+   "stem": "1/2 + 1/4 = ?",
+   "options": [
+    "3/4",
+    "2/6",
+    "1/6",
+    "2/4"
+   ],
+   "answer": 0,
+   "misconceptions": {
+    "1": "Added the tops and the bottoms; fractions need a common denominator first.",
+    "2": "Multiplied instead of adding.",
+    "3": "Added only the numerators and kept one denominator."
+   }
+  },
+  "item_001": {
+   "concept": "ARITH",
+   "stem": "Simplify 6/8.",
+   "options": [
+    "3/8",
+    "3/4",
+    "2/3",
+    "8/6"
+   ],
+   "answer": 1,
+   "misconceptions": {
+    "0": "Simplified only the numerator.",
+    "2": "Subtracted the same number from top and bottom instead of dividing.",
+    "3": "Turned the fraction upside down."
+   }
+  },
+  "item_008": {
+   "concept": "ARITH",
+   "stem": "Boys and girls in a class are in the ratio 2 : 3. There are 10 boys. How many girls?",
+   "options": [
+    "11",
+    "about 6.7",
+    "15",
+    "25"
+   ],
+   "answer": 2,
+   "misconceptions": {
+    "0": "Added 1 to match the 2 → 3 step instead of scaling.",
+    "1": "Applied the ratio the wrong way round.",
+    "3": "Gave the class total, not the girls."
+   }
+  },
+  "item_005": {
+   "concept": "ARITH",
+   "stem": "What is 3/5 of 20?",
+   "options": [
+    "4",
+    "15",
+    "100/3",
+    "12"
+   ],
+   "answer": 3,
+   "misconceptions": {
+    "0": "Found 1/5 and stopped.",
+    "1": "Divided by 4 instead of 5.",
+    "2": "Divided by 3/5 instead of multiplying."
+   }
+  },
+  "item_004": {
+   "concept": "ARITH",
+   "stem": "2/3 × 3/4 = ?",
+   "options": [
+    "1/2",
+    "5/7",
+    "8/9",
+    "6/7"
+   ],
+   "answer": 0,
+   "misconceptions": {
+    "1": "Added tops and bottoms instead of multiplying.",
+    "2": "Flipped the second fraction (that is the rule for division).",
+    "3": "Multiplied the tops but added the bottoms."
+   }
+  },
+  "item_006": {
+   "concept": "ARITH",
+   "stem": "3/4 ÷ 3/8 = ?",
+   "options": [
+    "9/32",
+    "2",
+    "1/2",
+    "1"
+   ],
+   "answer": 1,
+   "misconceptions": {
+    "0": "Multiplied instead of dividing.",
+    "2": "Flipped the first fraction instead of the second.",
+    "3": "Divided the numerators (3 ÷ 3) and ignored the denominators."
+   }
+  },
+  "item_002": {
+   "concept": "ARITH",
+   "stem": "5/6 − 3/4 = ?",
+   "options": [
+    "2/2",
+    "2/12",
+    "1/12",
+    "1/3"
+   ],
+   "answer": 2,
+   "misconceptions": {
+    "0": "Subtracted tops and bottoms separately.",
+    "1": "Converted 3/4 to 8/12; it is 9/12.",
+    "3": "Treated 3/4 as 3/6 and subtracted."
+   }
+  },
+  "item_007": {
+   "concept": "ARITH",
+   "stem": "A recipe uses flour and sugar in the ratio 5 : 2. There are 350 g in total. How much sugar?",
+   "options": [
+    "140 g",
+    "70 g",
+    "250 g",
+    "100 g"
+   ],
+   "answer": 3,
+   "misconceptions": {
+    "0": "Took 2/5 of the total; the parts are 2 out of 7.",
+    "1": "Took 1/5 of the total.",
+    "2": "Found the flour, not the sugar."
+   }
+  },
+  "item_009": {
+   "concept": "VARS",
+   "stem": "If x = 3, what is 2x + 1?",
+   "options": [
+    "7",
+    "24",
+    "6",
+    "8"
+   ],
+   "answer": 0,
+   "misconceptions": {
+    "1": "Read 2x as the number 23.",
+    "2": "Forgot to add 1.",
+    "3": "Calculated 2(x + 1)."
+   }
+  },
+  "item_011": {
+   "concept": "VARS",
+   "stem": "Simplify 3a + 2a.",
+   "options": [
+    "6a",
+    "5a",
+    "5a²",
+    "32a"
+   ],
+   "answer": 1,
+   "misconceptions": {
+    "0": "Multiplied the coefficients.",
+    "2": "Added the powers as well.",
+    "3": "Wrote the coefficients side by side."
+   }
+  },
+  "item_016": {
+   "concept": "VARS",
+   "stem": "Expand 2(x + 4).",
+   "options": [
+    "2x + 4",
+    "x + 8",
+    "2x + 8",
+    "2x + 6"
+   ],
+   "answer": 2,
+   "misconceptions": {
+    "0": "Multiplied only the first term.",
+    "1": "Multiplied only the second term.",
+    "3": "Added 2 instead of multiplying."
+   }
+  },
+  "item_013": {
+   "concept": "VARS",
+   "stem": "Simplify 4x + 3 − x + 5.",
+   "options": [
+    "4x + 8",
+    "5x + 8",
+    "3x + 2",
+    "3x + 8"
+   ],
+   "answer": 3,
+   "misconceptions": {
+    "0": "Ignored the − x.",
+    "1": "Added x instead of subtracting it.",
+    "2": "Subtracted 3 from 5 instead of adding."
+   }
+  },
+  "item_012": {
+   "concept": "VARS",
+   "stem": "If a = −2, what is a² + 3a?",
+   "options": [
+    "−2",
+    "−10",
+    "10",
+    "2"
+   ],
+   "answer": 0,
+   "misconceptions": {
+    "1": "Took a² as −4; (−2)² = 4.",
+    "2": "Took 3a as +6.",
+    "3": "Got the sign of the answer wrong."
+   }
+  },
+  "item_010": {
+   "concept": "VARS",
+   "stem": "Which is equal to 3(2x − 1) − 2x?",
+   "options": [
+    "4x − 1",
+    "4x − 3",
+    "8x − 3",
+    "4x + 3"
+   ],
+   "answer": 1,
+   "misconceptions": {
+    "0": "Multiplied only the first term in the bracket.",
+    "2": "Added the 2x instead of subtracting it.",
+    "3": "Lost the minus sign of −3."
+   }
+  },
+  "item_014": {
+   "concept": "VARS",
+   "stem": "Factorise 6x + 9.",
+   "options": [
+    "3(2x + 9)",
+    "6(x + 9)",
+    "3(2x + 3)",
+    "15x"
+   ],
+   "answer": 2,
+   "misconceptions": {
+    "0": "Took the factor out of the first term only.",
+    "1": "Took 6 out of 9, which it does not divide.",
+    "3": "Added unlike terms."
+   }
+  },
+  "item_015": {
+   "concept": "VARS",
+   "stem": "Write an expression for '5 less than twice a number n'.",
+   "options": [
+    "5 − 2n",
+    "2(n − 5)",
+    "2n + 5",
+    "2n − 5"
+   ],
+   "answer": 3,
+   "misconceptions": {
+    "0": "Reversed the order: 'less than' subtracts 5 from 2n.",
+    "1": "Subtracted before doubling.",
+    "2": "Read 'less than' as 'more than'."
+   }
+  },
+  "item_019": {
+   "concept": "LIN",
+   "stem": "Solve x + 7 = 12.",
+   "options": [
+    "x = 5",
+    "x = 19",
+    "x = 12/7",
+    "x = −5"
+   ],
+   "answer": 0,
+   "misconceptions": {
+    "1": "Added 7 instead of subtracting it.",
+    "2": "Divided instead of subtracting.",
+    "3": "Sign error when moving 7."
+   }
+  },
+  "item_017": {
+   "concept": "LIN",
+   "stem": "Solve 3x = 18.",
+   "options": [
+    "x = 15",
+    "x = 6",
+    "x = 54",
+    "x = 21"
+   ],
+   "answer": 1,
+   "misconceptions": {
+    "0": "Subtracted 3 instead of dividing.",
+    "2": "Multiplied instead of dividing.",
+    "3": "Added 3."
+   }
+  },
+  "item_022": {
+   "concept": "LIN",
+   "stem": "Solve 2x + 5 = 17.",
+   "options": [
+    "x = 11",
+    "x = 8.5",
+    "x = 6",
+    "x = 12"
+   ],
+   "answer": 2,
+   "misconceptions": {
+    "0": "Added 5 instead of subtracting it.",
+    "1": "Divided 17 by 2 before removing the 5.",
+    "3": "Forgot to divide by 2."
+   }
+  },
+  "item_024": {
+   "concept": "LIN",
+   "stem": "Solve 5x − 3 = 2x + 9.",
+   "options": [
+    "x = 12/7",
+    "x = 2",
+    "x = 12",
+    "x = 4"
+   ],
+   "answer": 3,
+   "misconceptions": {
+    "0": "Added 2x to both sides instead of subtracting it.",
+    "1": "Combined −3 and 9 as 6 instead of 12.",
+    "2": "Forgot to divide by 3."
+   }
+  },
+  "item_023": {
+   "concept": "LIN",
+   "stem": "Solve x/4 + 1 = 3.",
+   "options": [
+    "x = 8",
+    "x = 1/2",
+    "x = 16",
+    "x = 2"
+   ],
+   "answer": 0,
+   "misconceptions": {
+    "1": "Divided 2 by 4 instead of multiplying.",
+    "2": "Added 1 instead of subtracting it.",
+    "3": "Stopped before multiplying by 4."
+   }
+  },
+  "item_021": {
+   "concept": "LIN",
+   "stem": "Solve 3(x − 2) = 12.",
+   "options": [
+    "x = 14/3",
+    "x = 6",
+    "x = 2",
+    "x = 4"
+   ],
+   "answer": 1,
+   "misconceptions": {
+    "0": "Multiplied only the x by 3.",
+    "2": "Subtracted 2 instead of adding it.",
+    "3": "Stopped at x − 2 = 4."
+   }
+  },
+  "item_020": {
+   "concept": "LIN",
+   "stem": "Solve 2(x + 3) = 4x − 2.",
+   "options": [
+    "x = 5/2",
+    "x = −4",
+    "x = 4",
+    "x = 8"
+   ],
+   "answer": 2,
+   "misconceptions": {
+    "0": "Multiplied only the x in the bracket.",
+    "1": "Sign error when moving terms.",
+    "3": "Stopped at 2x = 8 without dividing by 2."
+   }
+  },
+  "item_018": {
+   "concept": "LIN",
+   "stem": "A taxi charges ₹50 plus ₹12 per km. A ride cost ₹170. How many km?",
+   "options": [
+    "about 14.2 km",
+    "about 18.3 km",
+    "120 km",
+    "10 km"
+   ],
+   "answer": 3,
+   "misconceptions": {
+    "0": "Forgot to remove the fixed ₹50 first.",
+    "1": "Added the ₹50 instead of subtracting it.",
+    "2": "Forgot to divide by ₹12 per km."
+   }
+  }
+ },
+ "practice": {
+  "ARITH": [
+   {
+    "id": "p_arith_1",
+    "concept": "ARITH",
+    "difficulty": 0.05,
+    "stem": "1/3 + 1/3 = ?",
+    "options": [
+     "2/6",
+     "2/3",
+     "1/9",
+     "1/3"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Added the tops and the bottoms.",
+     "2": "Multiplied instead of adding.",
+     "3": "Kept one fraction only."
+    }
+   },
+   {
+    "id": "p_arith_2",
+    "concept": "ARITH",
+    "difficulty": 0.15,
+    "stem": "Which fraction equals 0.4?",
+    "options": [
+     "4/100",
+     "1/4",
+     "2/5",
+     "4/5"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "0.4 is four tenths, not four hundredths.",
+     "1": "Matched the digit 4 to a quarter.",
+     "3": "0.4 is 4/10, which simplifies to 2/5."
+    }
+   },
+   {
+    "id": "p_arith_3",
+    "concept": "ARITH",
+    "difficulty": 0.25,
+    "stem": "What is 3/4 of 36?",
+    "options": [
+     "9",
+     "48",
+     "12",
+     "27"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Found 1/4 and stopped.",
+     "1": "Divided by 3 and multiplied by 4.",
+     "2": "Divided by 3."
+    }
+   },
+   {
+    "id": "p_arith_4",
+    "concept": "ARITH",
+    "difficulty": 0.35,
+    "stem": "Share ₹60 in the ratio 1 : 2. What is the larger share?",
+    "options": [
+     "₹40",
+     "₹30",
+     "₹20",
+     "₹120"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Split equally.",
+     "2": "Gave the smaller share.",
+     "3": "Multiplied by 2 instead of sharing."
+    }
+   }
+  ],
+  "VARS": [
+   {
+    "id": "p_vars_1",
+    "concept": "VARS",
+    "difficulty": 0.1,
+    "stem": "If y = 4, what is 3y − 2?",
+    "options": [
+     "32",
+     "10",
+     "12",
+     "6"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Read 3y as the number 34.",
+     "2": "Forgot to subtract 2.",
+     "3": "Calculated 3(y − 2)."
+    }
+   },
+   {
+    "id": "p_vars_2",
+    "concept": "VARS",
+    "difficulty": 0.2,
+    "stem": "Simplify 5b − 2b + b.",
+    "options": [
+     "2b",
+     "3b",
+     "4b",
+     "8b"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "Subtracted the + b as well.",
+     "1": "Dropped the + b.",
+     "3": "Added every term."
+    }
+   },
+   {
+    "id": "p_vars_3",
+    "concept": "VARS",
+    "difficulty": 0.3,
+    "stem": "Expand 3(2x − 5).",
+    "options": [
+     "6x − 5",
+     "5x − 15",
+     "6x + 15",
+     "6x − 15"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Multiplied only the first term.",
+     "1": "Added 3 to 2x.",
+     "2": "Lost the minus sign."
+    }
+   },
+   {
+    "id": "p_vars_4",
+    "concept": "VARS",
+    "difficulty": 0.4,
+    "stem": "Simplify 2(x + 3) + 3(x − 1).",
+    "options": [
+     "5x + 3",
+     "5x + 5",
+     "5x + 9",
+     "5x − 3"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Multiplied only the x in 3(x − 1).",
+     "2": "Took −3 as +3.",
+     "3": "Dropped the +6."
+    }
+   }
+  ],
+  "LIN": [
+   {
+    "id": "p_lin_1",
+    "concept": "LIN",
+    "difficulty": 0.2,
+    "stem": "Solve x − 4 = 9.",
+    "options": [
+     "x = 5",
+     "x = 13",
+     "x = −13",
+     "x = 36"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Subtracted 4 again instead of adding it.",
+     "2": "Sign error.",
+     "3": "Multiplied."
+    }
+   },
+   {
+    "id": "p_lin_2",
+    "concept": "LIN",
+    "difficulty": 0.3,
+    "stem": "Solve 4x + 2 = 22.",
+    "options": [
+     "x = 6",
+     "x = 20",
+     "x = 5",
+     "x = 5.5"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "Added 2 instead of subtracting it.",
+     "1": "Forgot to divide by 4.",
+     "3": "Divided before removing the 2."
+    }
+   },
+   {
+    "id": "p_lin_3",
+    "concept": "LIN",
+    "difficulty": 0.4,
+    "stem": "Solve 7x − 4 = 3x + 8.",
+    "options": [
+     "x = 1.2",
+     "x = 1",
+     "x = −3",
+     "x = 3"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Added 3x instead of subtracting it.",
+     "1": "Took −4 and 8 as 4.",
+     "2": "Sign error when moving terms."
+    }
+   },
+   {
+    "id": "p_lin_4",
+    "concept": "LIN",
+    "difficulty": 0.5,
+    "stem": "Solve (2x − 1)/3 = 5.",
+    "options": [
+     "x = 8",
+     "x = 3",
+     "x = 7",
+     "x = 16"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Forgot to multiply by 3 first.",
+     "2": "Subtracted 1 instead of adding it.",
+     "3": "Stopped at 2x = 16 without dividing by 2."
+    }
+   }
+  ],
+  "FUNC": [
+   {
+    "id": "p_func_1",
+    "concept": "FUNC",
+    "difficulty": 0.25,
+    "stem": "f(x) = 2x + 3. What is f(4)?",
+    "options": [
+     "24",
+     "11",
+     "9",
+     "8"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Multiplied 2 × 4 × 3.",
+     "2": "Added 2 + 4 + 3.",
+     "3": "Forgot the + 3."
+    }
+   },
+   {
+    "id": "p_func_2",
+    "concept": "FUNC",
+    "difficulty": 0.35,
+    "stem": "f(x) = x² − 1. What is f(−3)?",
+    "options": [
+     "−10",
+     "10",
+     "8",
+     "−8"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "Took (−3)² as −9.",
+     "1": "Added 1 instead of subtracting.",
+     "3": "Sign error at the end."
+    }
+   },
+   {
+    "id": "p_func_3",
+    "concept": "FUNC",
+    "difficulty": 0.45,
+    "stem": "Which of these is NOT a function?",
+    "options": [
+     "{(1, 2), (2, 3), (3, 4)}",
+     "{(1, 5), (2, 5), (3, 5)}",
+     "y = 3x",
+     "{(1, 2), (1, 3), (2, 4)}"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Each input has exactly one output, so this is a function.",
+     "1": "Repeated outputs are allowed; repeated inputs with different outputs are not.",
+     "2": "Every x gives exactly one y."
+    }
+   },
+   {
+    "id": "p_func_4",
+    "concept": "FUNC",
+    "difficulty": 0.55,
+    "stem": "f(x) = 3x − 2 and f(a) = 10. What is a?",
+    "options": [
+     "4",
+     "28",
+     "8/3",
+     "12"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Calculated f(10) instead of solving f(a) = 10.",
+     "2": "Subtracted 2 instead of adding it.",
+     "3": "Forgot to divide by 3."
+    }
+   }
+  ],
+  "LINF": [
+   {
+    "id": "p_linf_1",
+    "concept": "LINF",
+    "difficulty": 0.3,
+    "stem": "What is the slope of y = 4x − 7?",
+    "options": [
+     "−7",
+     "4",
+     "7",
+     "−4"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "That is the y-intercept.",
+     "2": "Took the intercept and dropped its sign.",
+     "3": "Sign error."
+    }
+   },
+   {
+    "id": "p_linf_2",
+    "concept": "LINF",
+    "difficulty": 0.4,
+    "stem": "Which line passes through (0, 2) with slope 3?",
+    "options": [
+     "y = 2x + 3",
+     "y = 3x − 2",
+     "y = 3x + 2",
+     "y = x + 5"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "Swapped the slope and the intercept.",
+     "1": "Wrong sign on the intercept.",
+     "3": "Added slope and intercept."
+    }
+   },
+   {
+    "id": "p_linf_3",
+    "concept": "LINF",
+    "difficulty": 0.5,
+    "stem": "What is the slope of the line through (1, 2) and (3, 8)?",
+    "options": [
+     "1/3",
+     "6",
+     "2",
+     "3"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Divided run by rise.",
+     "1": "Used the rise only.",
+     "2": "Used the run only."
+    }
+   },
+   {
+    "id": "p_linf_4",
+    "concept": "LINF",
+    "difficulty": 0.6,
+    "stem": "Which line passes through (2, 5) and (4, 9)?",
+    "options": [
+     "y = 2x + 1",
+     "y = 2x + 5",
+     "y = x/2 + 4",
+     "y = 4x − 3"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Used the y-value at x = 2 as the intercept.",
+     "2": "Inverted the slope.",
+     "3": "Took slope as 9 − 5."
+    }
+   }
+  ],
+  "EXPO": [
+   {
+    "id": "p_expo_1",
+    "concept": "EXPO",
+    "difficulty": 0.15,
+    "stem": "2³ × 2² = ?",
+    "options": [
+     "2⁶",
+     "2⁵",
+     "4⁵",
+     "2¹"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Multiplied the powers; when multiplying, powers add.",
+     "2": "Multiplied the bases as well.",
+     "3": "Subtracted the powers."
+    }
+   },
+   {
+    "id": "p_expo_2",
+    "concept": "EXPO",
+    "difficulty": 0.25,
+    "stem": "√49 + √16 = ?",
+    "options": [
+     "√65",
+     "65",
+     "11",
+     "3"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "Added under one root; square roots do not add like that.",
+     "1": "Added the squares instead of the roots.",
+     "3": "Subtracted the roots."
+    }
+   },
+   {
+    "id": "p_expo_3",
+    "concept": "EXPO",
+    "difficulty": 0.35,
+    "stem": "(x⁴)³ = ?",
+    "options": [
+     "x⁷",
+     "x⁶⁴",
+     "3x⁴",
+     "x¹²"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Added the powers; a power of a power multiplies them.",
+     "1": "Raised 4 to the power 3.",
+     "2": "Multiplied by 3 instead of raising to the power 3."
+    }
+   }
+  ],
+  "INEQ": [
+   {
+    "id": "p_ineq_1",
+    "concept": "INEQ",
+    "difficulty": 0.25,
+    "stem": "Solve x + 3 > 7.",
+    "options": [
+     "x > 4",
+     "x > 10",
+     "x < 4",
+     "x = 4"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Added 3 instead of subtracting it.",
+     "2": "Flipped the sign without a reason.",
+     "3": "Solved as an equation."
+    }
+   },
+   {
+    "id": "p_ineq_2",
+    "concept": "INEQ",
+    "difficulty": 0.35,
+    "stem": "Solve 2x − 1 ≤ 9.",
+    "options": [
+     "x ≤ 4",
+     "x ≤ 5",
+     "x ≥ 5",
+     "x ≤ 10"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Subtracted 1 instead of adding it.",
+     "2": "Flipped the sign; only dividing by a negative flips it.",
+     "3": "Forgot to divide by 2."
+    }
+   },
+   {
+    "id": "p_ineq_3",
+    "concept": "INEQ",
+    "difficulty": 0.45,
+    "stem": "Solve −3x < 12.",
+    "options": [
+     "x < −4",
+     "x > 4",
+     "x > −4",
+     "x < 4"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "Did not flip the sign when dividing by a negative.",
+     "1": "Lost the minus sign.",
+     "3": "Lost the minus sign and did not flip."
+    }
+   }
+  ],
+  "SYS": [
+   {
+    "id": "p_sys_1",
+    "concept": "SYS",
+    "difficulty": 0.35,
+    "stem": "x + y = 10 and x − y = 2. What is x?",
+    "options": [
+     "4",
+     "8",
+     "12",
+     "6"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "That is y.",
+     "1": "Subtracted the equations instead of adding them.",
+     "2": "Added the equations but did not divide by 2."
+    }
+   },
+   {
+    "id": "p_sys_2",
+    "concept": "SYS",
+    "difficulty": 0.45,
+    "stem": "2x + y = 7 and x + y = 4. Which pair solves both?",
+    "options": [
+     "(3, 1)",
+     "(1, 3)",
+     "(2, 3)",
+     "(4, 0)"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Swapped x and y.",
+     "2": "Satisfies only the first equation.",
+     "3": "Satisfies only the second equation."
+    }
+   },
+   {
+    "id": "p_sys_3",
+    "concept": "SYS",
+    "difficulty": 0.55,
+    "stem": "Where do y = 2x + 1 and y = x + 4 meet?",
+    "options": [
+     "(7, 3)",
+     "(3, 7)",
+     "(3, 4)",
+     "(−3, −5)"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Swapped x and y.",
+     "2": "Found x but took y from the constant.",
+     "3": "Sign error when solving 2x + 1 = x + 4."
+    }
+   }
+  ],
+  "QUAD": [
+   {
+    "id": "p_quad_1",
+    "concept": "QUAD",
+    "difficulty": 0.4,
+    "stem": "Solve x² = 25.",
+    "options": [
+     "x = 5",
+     "x = 12.5",
+     "x = 5 or x = −5",
+     "x = ±25"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "Forgot the negative root.",
+     "1": "Halved instead of taking the square root.",
+     "3": "Did not take the square root."
+    }
+   },
+   {
+    "id": "p_quad_2",
+    "concept": "QUAD",
+    "difficulty": 0.5,
+    "stem": "Solve x² − 5x + 6 = 0.",
+    "options": [
+     "x = −2 or x = −3",
+     "x = 1 or x = 6",
+     "x = 6",
+     "x = 2 or x = 3"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Sign error: (x − 2)(x − 3) gives x = 2, 3.",
+     "1": "Factors of 6 that do not add up to 5.",
+     "2": "Read the constant term as the answer."
+    }
+   },
+   {
+    "id": "p_quad_3",
+    "concept": "QUAD",
+    "difficulty": 0.6,
+    "stem": "Solve x² + 2x − 8 = 0.",
+    "options": [
+     "x = 2 or x = −4",
+     "x = −2 or x = 4",
+     "x = 8 or x = −1",
+     "x = 2 or x = 4"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Sign error in (x + 4)(x − 2).",
+     "2": "Factors of 8 that do not add up to 2.",
+     "3": "Ignored the signs."
+    }
+   }
+  ],
+  "POLY": [
+   {
+    "id": "p_poly_1",
+    "concept": "POLY",
+    "difficulty": 0.4,
+    "stem": "Expand (x + 2)(x + 3).",
+    "options": [
+     "x² + 6",
+     "x² + 5x + 6",
+     "x² + 6x + 5",
+     "2x + 5"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Forgot the middle terms.",
+     "2": "Multiplied where it should add, and the reverse.",
+     "3": "Added the brackets."
+    }
+   },
+   {
+    "id": "p_poly_2",
+    "concept": "POLY",
+    "difficulty": 0.5,
+    "stem": "What is the degree of 4x³ − 2x⁵ + 7?",
+    "options": [
+     "3",
+     "4",
+     "5",
+     "8"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "Took the first term's power; the degree is the highest power.",
+     "1": "Took the leading coefficient.",
+     "3": "Added the powers."
+    }
+   },
+   {
+    "id": "p_poly_3",
+    "concept": "POLY",
+    "difficulty": 0.6,
+    "stem": "(x³ − 8) ÷ (x − 2) = ?",
+    "options": [
+     "x² − 4",
+     "x² − 2x + 4",
+     "x² + 4",
+     "x² + 2x + 4"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Divided term by term.",
+     "1": "Sign error in the middle term.",
+     "2": "Dropped the middle term."
+    }
+   }
+  ],
+  "EXPF": [
+   {
+    "id": "p_expf_1",
+    "concept": "EXPF",
+    "difficulty": 0.45,
+    "stem": "f(x) = 3ˣ. What is f(2)?",
+    "options": [
+     "9",
+     "6",
+     "8",
+     "5"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Multiplied 3 × 2.",
+     "2": "Calculated 2³.",
+     "3": "Added 3 + 2."
+    }
+   },
+   {
+    "id": "p_expf_2",
+    "concept": "EXPF",
+    "difficulty": 0.55,
+    "stem": "100 grows by 10% each year. What is it after 2 years?",
+    "options": [
+     "120",
+     "121",
+     "110",
+     "200"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Added 10% of the original twice; growth compounds.",
+     "2": "Applied one year only.",
+     "3": "Doubled."
+    }
+   },
+   {
+    "id": "p_expf_3",
+    "concept": "EXPF",
+    "difficulty": 0.65,
+    "stem": "Which of these is exponential decay?",
+    "options": [
+     "y = 5(1.2)ˣ",
+     "y = 5 − 0.8x",
+     "y = 5(0.8)ˣ",
+     "y = 0.8x²"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "A base above 1 is growth.",
+     "1": "That is linear.",
+     "3": "That is quadratic."
+    }
+   }
+  ],
+  "LOG": [
+   {
+    "id": "p_log_1",
+    "concept": "LOG",
+    "difficulty": 0.5,
+    "stem": "log₂ 8 = ?",
+    "options": [
+     "4",
+     "16",
+     "6",
+     "3"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Divided 8 by 2.",
+     "1": "Multiplied 8 by 2.",
+     "2": "Subtracted 2 from 8."
+    }
+   },
+   {
+    "id": "p_log_2",
+    "concept": "LOG",
+    "difficulty": 0.6,
+    "stem": "log₁₀ 1000 = ?",
+    "options": [
+     "3",
+     "100",
+     "30",
+     "0.001"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Divided 1000 by 10.",
+     "2": "Multiplied the number of zeros by 10.",
+     "3": "Took the reciprocal."
+    }
+   },
+   {
+    "id": "p_log_3",
+    "concept": "LOG",
+    "difficulty": 0.7,
+    "stem": "log(ab) = ?",
+    "options": [
+     "log a × log b",
+     "log a + log b",
+     "log a − log b",
+     "a · log b"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "The log of a product is a sum, not a product.",
+     "2": "That is log(a / b).",
+     "3": "That is log(bᵃ)."
+    }
+   }
+  ],
+  "TRIG": [
+   {
+    "id": "p_trig_1",
+    "concept": "TRIG",
+    "difficulty": 0.45,
+    "stem": "In a right-angled triangle, sin θ = ?",
+    "options": [
+     "adjacent / hypotenuse",
+     "opposite / adjacent",
+     "opposite / hypotenuse",
+     "hypotenuse / opposite"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "That is cos θ.",
+     "1": "That is tan θ.",
+     "3": "Inverted the ratio."
+    }
+   },
+   {
+    "id": "p_trig_2",
+    "concept": "TRIG",
+    "difficulty": 0.55,
+    "stem": "sin 30° = ?",
+    "options": [
+     "√3/2",
+     "1",
+     "30",
+     "1/2"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "That is cos 30°.",
+     "1": "That is sin 90°.",
+     "2": "Confused the angle with its sine."
+    }
+   },
+   {
+    "id": "p_trig_3",
+    "concept": "TRIG",
+    "difficulty": 0.65,
+    "stem": "tan θ = 1 and 0° < θ < 90°. What is θ?",
+    "options": [
+     "45°",
+     "1°",
+     "90°",
+     "60°"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Took the ratio as the angle.",
+     "2": "tan 90° is undefined.",
+     "3": "tan 60° = √3."
+    }
+   }
+  ],
+  "LIM": [
+   {
+    "id": "p_lim_1",
+    "concept": "LIM",
+    "difficulty": 0.6,
+    "stem": "lim (x → 3) of (2x + 1) = ?",
+    "options": [
+     "6",
+     "7",
+     "∞",
+     "3"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Forgot the + 1.",
+     "2": "A polynomial has a finite limit at a finite point.",
+     "3": "Gave the value x approaches."
+    }
+   },
+   {
+    "id": "p_lim_2",
+    "concept": "LIM",
+    "difficulty": 0.7,
+    "stem": "lim (x → 2) of (x² − 4)/(x − 2) = ?",
+    "options": [
+     "No limit, because 0/0",
+     "0",
+     "4",
+     "2"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "0/0 means factorise first: (x + 2)(x − 2)/(x − 2).",
+     "1": "Substituted only in the numerator.",
+     "3": "Gave the value x approaches."
+    }
+   },
+   {
+    "id": "p_lim_3",
+    "concept": "LIM",
+    "difficulty": 0.8,
+    "stem": "lim (x → ∞) of (3x + 1)/(x + 5) = ?",
+    "options": [
+     "1/5",
+     "0",
+     "∞",
+     "3"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Used the constant terms.",
+     "1": "Assumed every fraction tends to 0.",
+     "2": "The top and bottom grow at the same rate."
+    }
+   }
+  ],
+  "DER": [
+   {
+    "id": "p_der_1",
+    "concept": "DER",
+    "difficulty": 0.65,
+    "stem": "d/dx (x³) = ?",
+    "options": [
+     "3x²",
+     "x²",
+     "3x³",
+     "x⁴/4"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Lowered the power but forgot to multiply by 3.",
+     "2": "Multiplied by 3 but kept the power.",
+     "3": "Integrated instead of differentiating."
+    }
+   },
+   {
+    "id": "p_der_2",
+    "concept": "DER",
+    "difficulty": 0.75,
+    "stem": "d/dx (5x² + 3x) = ?",
+    "options": [
+     "10x",
+     "10x + 3",
+     "5x + 3",
+     "10x² + 3"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "Forgot the derivative of 3x.",
+     "2": "Forgot to multiply by the power 2.",
+     "3": "Kept the power."
+    }
+   },
+   {
+    "id": "p_der_3",
+    "concept": "DER",
+    "difficulty": 0.85,
+    "stem": "What is the slope of y = x² at x = 3?",
+    "options": [
+     "9",
+     "3",
+     "6",
+     "2"
+    ],
+    "answer": 2,
+    "misconceptions": {
+     "0": "Gave the y-value, not the slope.",
+     "1": "Gave the x-value.",
+     "3": "Used the derivative's coefficient only."
+    }
+   }
+  ],
+  "INT": [
+   {
+    "id": "p_int_1",
+    "concept": "INT",
+    "difficulty": 0.75,
+    "stem": "∫ 2x dx = ?",
+    "options": [
+     "2 + C",
+     "2x² + C",
+     "x + C",
+     "x² + C"
+    ],
+    "answer": 3,
+    "misconceptions": {
+     "0": "Differentiated instead of integrating.",
+     "1": "Raised the power but did not divide by it.",
+     "2": "Dropped the power."
+    }
+   },
+   {
+    "id": "p_int_2",
+    "concept": "INT",
+    "difficulty": 0.85,
+    "stem": "∫ from 0 to 2 of 3x² dx = ?",
+    "options": [
+     "8",
+     "12",
+     "6",
+     "24"
+    ],
+    "answer": 0,
+    "misconceptions": {
+     "1": "Evaluated 3x² at 2 instead of integrating.",
+     "2": "Evaluated 3x at 2.",
+     "3": "Forgot to divide by the new power."
+    }
+   },
+   {
+    "id": "p_int_3",
+    "concept": "INT",
+    "difficulty": 0.95,
+    "stem": "∫ (1/x) dx, for x > 0 = ?",
+    "options": [
+     "x⁰/0 + C",
+     "ln x + C",
+     "−1/x² + C",
+     "1/x² + C"
+    ],
+    "answer": 1,
+    "misconceptions": {
+     "0": "The power rule fails for x⁻¹.",
+     "2": "Differentiated instead of integrating.",
+     "3": "Guessed a power."
+    }
+   }
+  ]
+ }
+}

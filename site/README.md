@@ -13,6 +13,8 @@ Made by: Bhuvan and Abdur
 | Integrated S0 and S1 | `results.html` | `data/s0_pooled.json` ← the five `evaluation/results/w8/final_v2/integrated_s0/per_learner_seed_*.csv` (final Week 8 run, the one `docs/final/FINAL_REPORT.md` uses), with `evaluation/results/w8/final/integrated_s0/` (before the B10/B11 fixes) as the before run; the Week 7 deadlock-fix change (`evaluation/results/w7/improvement/` → `w7/deadlock_fix/`) is kept as history |
 |  |  | `data/s1_pooled.json` ← `evaluation/results/w8/final_v2/integrated_s1/` (Week 8, forgetting during study), with `evaluation/results/w8/before/integrated_s1/` as the before run |
 |  |  | `data/robust.json` ← `evaluation/results/w8/final_v2/{integrated_s0,toy_s3,maths_s0,maths_s3}/` (2 × 2: curriculum × simulator) |
+| Simulation | `sim.html` | `data/live_sim.json` ← `site/build_live_sim.py` (4 runs recorded from the real engine through `py/live_session.py`: S0 simulated learner, CAT diagnostic, replanning). With `serve_live.py` running, `POST /api/simulate` runs new learners |
+| Live session | `live.html` | Needs `serve_live.py` (`POST /api/live` → `py/live_session.run`); questions `../data/demo/questions_maths.json`. Not usable on GitHub Pages |
 | Live demos | `demos.html` | Pyodide + `py/demo_api.py` + the `src/` files listed in `assets/pyrunner.js`; fallback `data/fallback.json`. Demo B plans on either curriculum (`curriculum` in the payload: `maths` or `toy`) |
 
 All results come from a simulator with synthetic learners.

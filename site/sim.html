@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Simulation</title>
+<link rel="stylesheet" href="assets/style.css?v=w8h">
+<script src="assets/common.js?v=w8h"></script>
+<style>
+  .live-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 860px) { .live-grid { grid-template-columns: 1fr; } }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0 16px; }
+  #custom:not([hidden]) { display: contents; }
+  .controls label { font-size: 0.9rem; color: var(--text-2); display: flex; gap: 6px; align-items: center; }
+  .phase { font-size: 0.85rem; color: var(--text-2); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }
+  .stem { font-size: 1.2rem; font-weight: 600; margin: 8px 0 12px; line-height: 1.35; min-height: 2.6em; }
+  .opts { display: grid; gap: 6px; }
+  .opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+  .opt.chosen.good { background: var(--good-bg); color: var(--good); border-color: transparent; font-weight: 600; }
+  .opt.chosen.bad { background: var(--bad-bg); color: var(--bad); border-color: transparent; font-weight: 600; }
+  .opt.key { outline: 2px dashed var(--good); outline-offset: -2px; }
+  .action { margin-top: 10px; font-size: 0.95rem; min-height: 1.4em; }
+  .bar { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; min-width: 60px; }
+  .bar > span { display: block; height: 100%; background: var(--accent); transition: width .35s ease; }
+  tr.flash td { animation: flash 1.2s ease; }
+  @keyframes flash { from { background: var(--warn-bg); } to { background: transparent; } }
+  .days { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+  .day { border: 1px solid var(--border); border-radius: 8px; padding: 6px; min-height: 64px; background: var(--surface); font-size: 0.82rem; }
+  .day.now { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+  .day.past { opacity: 0.72; }
+  .day.missed { background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 6px, var(--surface-2) 6px, var(--surface-2) 12px); }
+  .day .h { font-weight: 600; margin-bottom: 4px; color: var(--text-2); }
+  .day .c { display: inline-block; margin: 2px 2px 0 0; padding: 0 6px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface-2); }
+  .feed { max-height: 240px; overflow: auto; font-size: 0.9rem; }
+  .feed div { padding: 4px 0; border-bottom: 1px solid var(--grid); }
+  .progress { height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+  .progress > span { display: block; height: 100%; background: var(--accent); }
+  svg.pchart { width: 100%; height: 190px; display: block; }
+  svg.pchart text { font-size: 11px; fill: var(--text-2); }
+  .err { color: var(--bad); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Live simulation</h1>
+  <p class="lede">A simulated learner answers the questions on its own, and the engine diagnoses, plans and replans after
+    every answer. Watch how each answer moves the mastery estimates and the plan. The learner follows the evaluation's
+    S0 simulator; its true knowledge (read only by the evaluator) is shown beside the engine's estimate.</p>
+  <p class="small" id="source"></p>
+  <p class="err" id="error" role="alert" hidden></p>
+
+  <div class="controls">
+    <label>Learner <select id="learner"></select></label>
+    <button id="play" class="primary" type="button">Start</button>
+    <button id="step" type="button">Step</button>
+    <button id="reset" type="button">Restart</button>
+    <label>Speed <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+    <span id="custom" hidden>
+      <label>Target <select id="target"></select></label>
+      <label>θ* <input id="theta" type="number" step="0.1" value="0.4" style="width:5em"></label>
+      <label>seed <input id="seed" type="number" step="1" value="7" style="width:4.5em"></label>
+      <label>min/day <input id="budget" type="number" step="5" min="10" max="120" value="45" style="width:4.5em"></label>
+      <label>days <input id="horizon" type="number" step="1" min="1" max="20" value="14" style="width:4em"></label>
+      <label><input id="doskip" type="checkbox" checked> skip 4 days on day 5</label>
+      <button id="newrun" type="button">Simulate new learner</button>
+    </span>
+  </div>
+  <div class="progress" aria-hidden="true"><span id="prog" style="width:0"></span></div>
+
+  <div class="live-grid">
+    <section class="card">
+      <div class="phase" id="phase"></div>
+      <div class="stem" id="stem"></div>
+      <div class="opts" id="opts"></div>
+      <div class="action" id="action"></div>
+    </section>
+    <section class="card">
+      <h2>Engine estimate vs truth</h2>
+      <p class="small" id="theta-line"></p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Concept</th><th>Class</th><th>p (engine)</th><th class="num">n</th><th>Truly knows</th></tr></thead>
+        <tbody id="states"></tbody>
+      </table></div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Mastery estimates over the session</h2>
+    <p class="small">Engine p per concept after each step; dashed line: Mastered threshold 0.85.</p>
+    <svg class="pchart" id="chart" role="img" aria-label="Mastery estimate per concept over the session"></svg>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Plan</h2>
+    <p class="small" id="plan-status"></p>
+    <div class="days" id="days"></div>
+  </section>
+
+  <div class="live-grid" style="margin-top:16px">
+    <section class="card">
+      <h2>Today's decisions (trace)</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Concept</th><th>Decision</th><th>Reason code</th><th>Class</th></tr></thead>
+        <tbody id="trace"></tbody>
+      </table></div>
+    </section>
+    <section class="card">
+      <h2>What changed</h2>
+      <div class="feed" id="feed"></div>
+    </section>
+  </div>
+</main>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const CLASS_PILL = { Mastered: "good", Weak: "bad", Developing: "warn", Uncertain: "" };
+  const color = (ci, n) => `hsl(${Math.round((ci * 360) / Math.max(n, 1) + 210) % 360} 62% 50%)`;
+  let runs = [], run = null, i = 0, timer = null, prevStates = {};
+
+  function path(r) {
+    const pre = {}; r.edges.forEach(([u, v]) => (pre[v] = pre[v] || []).push(u));
+    const seen = new Set(), order = [];
+    (function visit(n) { if (seen.has(n)) return; seen.add(n); (pre[n] || []).forEach(visit); order.push(n); })(r.target);
+    return order;
+  }
+  function statesAt(k) {
+    for (let j = k; j >= 0; j--) { const s = run.frames[j].state; const st = s.states || (s.diagnostic && s.diagnostic.states); if (st) return st; }
+    return null;
+  }
+
+  function show(k) {
+    const r = run, f = r.frames[k], s = f.state, concepts = path(r);
+    $("prog").style.width = ((k + 1) / r.frames.length * 100).toFixed(1) + "%";
+    // Question and the learner's action
+    const a = f.action || {};
+    if (s.phase === "done") {
+      $("phase").innerHTML = `<span class="pill good">Finished</span> step ${k + 1} of ${r.frames.length}`;
+      $("stem").textContent = `${r.names[r.target]} ended as ${s.target_class || "unknown"}.`;
+      $("opts").innerHTML = ""; $("action").textContent = "";
+    } else {
+      const q = s.question;
+      $("phase").innerHTML = (s.phase === "diagnostic"
+        ? `<span class="pill">Diagnostic</span> question ${(s.asked || []).length + 1} · ${esc(r.names[q.concept])}`
+        : `<span class="pill">Day ${s.day} of ${r.horizon}</span> activity ${s.activity_index + 1} of ${s.today.length} · ${esc(r.names[q.concept])} · difficulty ${s.difficulty}`)
+        + ` · step ${k + 1} of ${r.frames.length}`;
+      $("stem").textContent = q.stem;
+      $("opts").innerHTML = q.options.map((o, j) => {
+        const chosen = a.type === "answer" && a.choice === j;
+        return `<div class="opt${chosen ? " chosen " + (a.correct ? "good" : "bad") : ""}">${String.fromCharCode(65 + j)}. ${esc(o)}</div>`;
+      }).join("");
+      $("action").innerHTML = a.type === "skip_days" ? `<span class="pill warn">The learner skips ${a.n} days</span>`
+        : a.type === "answer" ? (a.correct ? "Answered correctly." : "Answered incorrectly.") : "";
+    }
+    // States vs truth
+    const st = s.states || (s.diagnostic && s.diagnostic.states) || {};
+    const d = s.diagnostic;
+    $("theta-line").textContent = d ? `Simulated θ* = ${r.learner.theta}; diagnostic θ̂ = ${d.theta_hat.toFixed(2)} after ${d.n_items} questions.`
+                                    : `Simulated θ* = ${r.learner.theta}; diagnostic in progress (${(s.asked || []).length} answered).`;
+    $("states").innerHTML = concepts.map((c) => {
+      const x = st[c], t = f.truth[c];
+      const changed = x && prevStates[c] && (prevStates[c].p !== x.p || prevStates[c].class !== x.class);
+      const truth = t ? '<span class="pill good">yes</span>' : '<span class="pill">no</span>';
+      if (!x) return `<tr><td>${esc(r.names[c])}</td><td><span class="pill">Uncertain</span></td><td class="small">not estimated yet</td><td class="num">0</td><td>${truth}</td></tr>`;
+      return `<tr class="${changed ? "flash" : ""}"><td>${esc(r.names[c])}</td><td><span class="pill ${CLASS_PILL[x.class] || ""}">${x.class}</span></td>
+        <td><div class="row" style="gap:6px;flex-wrap:nowrap"><div class="bar"><span style="width:${(x.p * 100).toFixed(0)}%"></span></div><span class="mono">${x.p.toFixed(2)}</span></div></td>
+        <td class="num">${x.n}</td><td>${truth}</td></tr>`;
+    }).join("");
+    prevStates = st;
+    // Chart
+    drawChart(k, concepts);
+    // Plan
+    const days = {};
+    (s.days || []).forEach((x) => (days[x.day] = x));
+    (s.past_days || []).forEach((x) => (days[x.day] = { ...x, pastFixed: true }));
+    if (s.plan) s.plan.days.forEach((x) => { if (!(days[x.day] && days[x.day].pastFixed) && (!days[x.day] || x.day >= s.day)) days[x.day] = x; });
+    $("plan-status").textContent = s.phase === "diagnostic" ? "The plan is built after the diagnostic." : s.plan ? `Status ${s.plan.status}; budget ${r.budget} min a day.` : "";
+    $("days").innerHTML = s.phase === "diagnostic" ? "" : Array.from({ length: r.horizon }, (_, j) => {
+      const n = j + 1, x = days[n] || { activities: [] };
+      const cls = ["day", n === s.day ? "now" : "", (s.day && n < s.day) || s.phase === "done" ? "past" : "", x.missed ? "missed" : ""].join(" ");
+      return `<div class="${cls}"><div class="h">Day ${n}${x.missed ? " · skipped" : ""}</div>${(x.activities || []).map((c) => `<span class="c">${esc(c)}</span>`).join("") || '<span class="small">–</span>'}</div>`;
+    }).join("");
+    const tr = s.today_trace || [];
+    $("trace").innerHTML = tr.length ? tr.map((t) => `<tr><td>${esc(r.names[t.node_id] || t.node_id)}</td><td>${esc(t.decision)}</td><td class="mono">${esc(t.reason_code)}</td><td>${esc(t.class || "")}</td></tr>`).join("")
+      : `<tr><td colspan="4" class="small">${s.phase === "diagnostic" ? "Appears once the plan exists." : "–"}</td></tr>`;
+    $("feed").innerHTML = (s.feed || []).slice().reverse().map((x) => `<div><span class="pill">Day ${x.day}</span> ${esc(x.text)}</div>`).join("") || '<div class="small">Nothing yet.</div>';
+  }
+
+  function drawChart(k, concepts) {
+    const W = 760, H = 190, L = 32, R = 10, T = 8, B = 22, n = run.frames.length;
+    const x = (j) => L + (W - L - R) * (n > 1 ? j / (n - 1) : 0), y = (p) => T + (H - T - B) * (1 - p);
+    let svg = `<line x1="${L}" x2="${W - R}" y1="${y(0.85)}" y2="${y(0.85)}" stroke="var(--edge)" stroke-dasharray="4 4"/>`;
+    [0, 0.5, 1].forEach((p) => (svg += `<text x="4" y="${y(p) + 4}">${p}</text><line x1="${L}" x2="${W - R}" y1="${y(p)}" y2="${y(p)}" stroke="var(--grid)"/>`));
+    const diagEnd = run.frames.findIndex((f) => f.state.phase !== "diagnostic");
+    if (diagEnd > 0) svg += `<text x="${x(diagEnd)}" y="${H - 6}" text-anchor="middle">plan starts</text><line x1="${x(diagEnd)}" x2="${x(diagEnd)}" y1="${T}" y2="${H - B}" stroke="var(--grid)"/>`;
+    concepts.forEach((c, ci) => {
+      const pts = [];
+      for (let j = 0; j <= k; j++) { const st = statesAt(j); if (st && st[c]) pts.push(`${x(j).toFixed(1)},${y(st[c].p).toFixed(1)}`); }
+      if (pts.length) svg += `<polyline fill="none" stroke="${color(ci, concepts.length)}" stroke-width="2" points="${pts.join(" ")}"/>`;
+    });
+    $("chart").setAttribute("viewBox", `0 0 ${W} ${H}`); $("chart").innerHTML = svg;
+    $("legend").innerHTML = concepts.map((c, ci) => `<span><span class="swatch" style="background:${color(ci, concepts.length)}"></span>${esc(run.names[c])}</span>`).join("");
+  }
+
+  function stop() { clearInterval(timer); timer = null; $("play").textContent = i >= run.frames.length - 1 ? "Replay" : "Start"; }
+  function tick() { if (i < run.frames.length - 1) { i++; show(i); } if (i >= run.frames.length - 1) stop(); }
+  $("play").addEventListener("click", () => {
+    if (timer) return stop();
+    if (i >= run.frames.length - 1) { i = 0; prevStates = {}; show(0); }
+    $("play").textContent = "Pause";
+    timer = setInterval(tick, 2500 / +$("speed").value);
+  });
+  $("speed").addEventListener("change", () => { if (timer) { clearInterval(timer); timer = setInterval(tick, 2500 / +$("speed").value); } });
+  $("step").addEventListener("click", () => { stop(); tick(); });
+  $("reset").addEventListener("click", () => { stop(); i = 0; prevStates = {}; show(0); $("play").textContent = "Start"; });
+  $("learner").addEventListener("change", () => { stop(); run = runs[+$("learner").value]; i = 0; prevStates = {}; show(0); $("play").textContent = "Start"; });
+
+  function setRuns(list, selectIdx) {
+    runs = list;
+    $("learner").innerHTML = runs.map((r, j) => `<option value="${j}">${esc(r.label)}</option>`).join("");
+    $("learner").value = String(selectIdx || 0);
+    run = runs[selectIdx || 0]; i = 0; prevStates = {}; show(0);
+  }
+
+  async function init() {
+    try {
+      const rec = await fetch("data/live_sim.json", { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error("No recorded runs yet (site/data/live_sim.json is missing). Build them with: python site/build_live_sim.py"); return r.json(); });
+      setRuns(rec.runs);
+      $("source").textContent = `Recorded runs of the real engine (site/data/live_sim.json, built ${rec.built} by site/build_live_sim.py).`;
+    } catch (e) { $("error").hidden = false; $("error").textContent = e.message; }
+    // When served by site/serve_live.py, new learners can be simulated by the engine on demand.
+    try {
+      const r = await fetch("/api/ping", { cache: "no-store" });
+      if (r.ok) {
+        const names = (runs[0] && runs[0].names) || {};
+        $("target").innerHTML = Object.keys(names).map((c) => `<option value="${c}"${c === "INT" ? " selected" : ""}>${esc(names[c])}</option>`).join("");
+        $("custom").hidden = false; $("source").textContent += " Live engine available: simulate a new learner below."; }
+    } catch (e) { /* static site: recorded runs only */ }
+  }
+  $("newrun").addEventListener("click", async () => {
+    stop(); $("newrun").disabled = true; $("newrun").textContent = "Simulating…";
+    try {
+      const body = { theta: +$("theta").value, seed: +$("seed").value, skip_at_day: $("doskip").checked ? 5 : null,
+                     target: $("target").value, budget: +$("budget").value, horizon: +$("horizon").value };
+      const out = await fetch("/api/simulate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json());
+      if (!out.ok) throw new Error(out.error);
+      out.label = `New: ${out.names[body.target]} · θ* = ${body.theta}, seed ${body.seed}${body.skip_at_day ? ", skips 4 days" : ""} · ${body.horizon} days × ${body.budget} min`;
+      setRuns(runs.concat([out]), runs.length);
+      $("error").hidden = true;
+    } catch (e) { $("error").hidden = false; $("error").textContent = "Simulation failed: " + e.message; }
+    finally { $("newrun").disabled = false; $("newrun").textContent = "Simulate new learner"; }
+  });
+  init();
+})();
+</script>
+</body>
+</html>
