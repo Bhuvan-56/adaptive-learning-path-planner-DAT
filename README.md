@@ -35,7 +35,6 @@ See `docs/PROBLEM_BOUNDARY.md` for the full scope statement and actor definition
 | [`docs/final/FINAL_REPORT.md`](docs/final/FINAL_REPORT.md) | Markdown summary of the final results and reproduction commands (the PDF is the full report) |
 | [`docs/final/LIMITATIONS.md`](docs/final/LIMITATIONS.md) | What the evidence cannot support; open defects |
 | [`docs/final/DEMO.md`](docs/final/DEMO.md) | Final demo script (website and live demos) |
-| [`docs/final/PRESENTATION_SCRIPT.md`](docs/final/PRESENTATION_SCRIPT.md) | Final presentation: who presents which slide, timings, full script and likely questions |
 | [`docs/final/ownership_track_A.md`](docs/final/ownership_track_A.md), [`ownership_track_B.md`](docs/final/ownership_track_B.md) | Code explanation and live change task per track |
 | [`docs/w8/results.md`](docs/w8/results.md) | Week 8 fixes: S1 daily forgetting, best-effort plan on infeasible days |
 | [`docs/w8/results_assistments.md`](docs/w8/results_assistments.md) | Week 8 public-data extension: BKT fitted on ASSISTments 2009–2010, held-out test, calibrated-learner scenario S4 |
