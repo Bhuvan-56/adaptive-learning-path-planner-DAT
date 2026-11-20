@@ -59,6 +59,7 @@
 % Files added by the Week 8 public-data extension and demo pages (20 Nov 2026) exist only from this revision on.
 \newcommand{\shax}{965331a}
 \DeclareRobustCommand{\rfx}[1]{\href{\repourl/blob/\shax/#1}{\nolinkurl{#1}}}
+\DeclareRobustCommand{\rfm}[1]{\href{\repourl/blob/main/#1}{\nolinkurl{#1}}}
 \DeclareRobustCommand{\rdx}[1]{\href{\repourl/tree/\shax/#1}{\nolinkurl{#1}}}
 \newcommand{\siteurl}{https://bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/}
 \newcommand{\nd}{\textit{n.d.}}
@@ -71,6 +72,7 @@
 \textbf{GitHub repository} & \href{\repourl}{adaptive-learning-path-planner-DAT} \\
 \textbf{Evidence revision} & \cm{d974503} (\texttt{d9745038c95717ef4e29de112227ed727045f0f2}), branch \texttt{main}; final tag \texttt{cs5903-final-2026} on the commit that adds this report \\
 \textbf{Revision, 20 Nov} & Public-data extension (ASSISTments, scenario S4), demo pages and defect B14: \cm{\shax}, branch \texttt{w8/public-data-and-demos}; links to files added there point at that commit \\
+\textbf{B14 fix, 20 Nov} & Fix \cm{03fd8ce} and the six-scenario re-run (\texttt{evaluation/results/w8/final\_v3/}), branch \texttt{main}; links to those files point at \texttt{main} \\
 \textbf{Website and demo} & \href{\siteurl}{\nolinkurl{bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/}} \\
 \end{tabular}
 
@@ -81,7 +83,7 @@
 \vspace{0.2em}\newline
 \textbf{Results.} 21 acceptance groups: 20 pass, 1 partial (M4-a, agreed with the mentor); the recorded suite is 303 passed (299 at the evidence revision, plus 4 S4 tests). Across 45,000 simulated learner-runs there are 0 prerequisite and 0 budget violations, and trace coverage is 100\% for the primary arms. The adaptive arm beats the static prerequisite-order baseline in all five scenarios, by $+0.045$ to $+0.727$ concepts mastered (paired 95\% CIs above zero), and improves retained recall everywhere. Greedy scheduling reaches 0.974 of the exact optimum on average (0.981 with the best-singleton fallback). The CAT is more accurate than fixed or random items in 5 of 6 paired comparisons. On 593 held-out ASSISTments students, BKT fitted per skill predicts answers with AUC 0.714 (engine defaults 0.681, per-skill average 0.621), and on simulated learners calibrated to those fits (S4) adaptive still beats static, $+0.055$ [0.027, 0.083] concepts.
 \vspace{0.2em}\newline
-\textbf{Limits.} All planning outcomes are simulator behaviour on simulated learners; no real learner used the planner, and real data enters only through the ASSISTments fit and S4. Since the diagnostic was connected to the planner (Week 8), a cold-start ablation beats the full system on mastery in all five runs (Section~\ref{sec:failures}); remediation never triggers inside the closed loop; and planned reviews are logged as done, so a later replan can drop them (B14, found on 20 November, not fixed).
+\textbf{Limits.} All planning outcomes are simulator behaviour on simulated learners; no real learner used the planner, and real data enters only through the ASSISTments fit and S4. Since the diagnostic was connected to the planner (Week 8), a cold-start ablation beats the full system on mastery in all five runs (Section~\ref{sec:failures}); remediation never triggers inside the closed loop; and planned reviews were logged as done, so a later replan could drop them (B14, found and fixed on 20 November; re-running all six integrated scenarios changed mean mastery by at most 0.002 concepts).
 \newpage
 \tableofcontents
 \newpage
@@ -603,7 +605,7 @@ Not supported: real learners using the planner, curriculum structure from data (
 \subsection{Failures and Edge Cases}
 \label{sec:failures}
 \begin{itemize}
-    \item \textbf{Planned reviews are logged as done (B14, open).} When \texttt{replan} packs a due review into a future day, it immediately records a correct review at that day in the shared review log (\rf{src/planning/replan.py}). A later replan or a missed day therefore sees a fresh review and drops it. Reproduction (\rfx{scripts/w8_b14_planned_reviews.py}): a Mastered concept practised on day 1 is planned for review on days 5, 9, 13 and 17. After missed days 3--8 the day-9 plan has no review, although true recall is 0.673 $<0.85$; a single replan on day 3 also removes all four. Found while building the live demo; not fixed. It may be why the review ablation rarely differs from adaptive\_full (B3), but that link was not tested.
+    \item \textbf{Planned reviews were logged as done (B14, fixed 20 Nov).} When \texttt{replan} packed a due review into a future day, it immediately recorded a correct review at that day in the shared review log (\rf{src/planning/replan.py}), so a later replan or a missed day saw a fresh review and dropped it. Reproduction (\rfx{scripts/w8_b14_planned_reviews.py}): a Mastered concept practised on day 1 is planned for review on days 5, 9, 13 and 17; after missed days 3--8 the day-9 plan had no review, although true recall is 0.673 $<0.85$. \textbf{Fix} (\cm{03fd8ce}): planned reviews go into a planning copy of the log, and the returned log keeps only attempts that happened; the day-9 plan now reviews on days 9, 13 and 17 (\rfm{tests/test_w8_b14_review_log.py}). \textbf{Effect:} all six integrated scenarios were re-run with the same configurations and seeds (\rfm{evaluation/results/w8/final_v3/b14_before_after.txt}). adaptive\_full's mean mastery changed by at most 0.002 concepts and retained recall by at most 0.0011, every after$-$before 95\% interval contains 0, and adaptive$-$static moved by at most 0.002 concepts. All reported numbers therefore stand (they are the pre-fix final\_v2 runs). B14 was not why the review ablation rarely differs: adaptive$-$no-review is 0.000 in five runs and $-0.019$ $[-0.034, -0.003]$ under S1 ($-0.017$ before the fix).
     % \item \textbf{The diagnostic now lowers mastery (open, B12).} After B10 made diagnostic answers count as evidence, the cold-start ablation beats adaptive\_full in all five runs ($-0.084$ to $-0.237$ concepts). Observed mechanism: one $\hat\theta$ gives every probed concept the same $p$, and even an all-correct diagnostic reaches only $p \approx 0.76 < 0.85$, so probed concepts start as Developing or Weak rather than Mastered and lose the practice-for-evidence sessions that cold-start Uncertain concepts get. Why this lowers mastery was not tested; no code was changed to recover the earlier numbers.
     \item \textbf{Deadline-infeasible days.} 623 of 5,000 adaptive days on toy S0 and 5,751 of 10,000 on maths S0 cannot reach the target by the deadline. The planner returns the proof and a best-effort plan, so these are not idle days.
     \item \textbf{History: adaptive was once worse than static.} In Week 5 adaptive lost to static ($-0.080$); in Week 7, 4,000 of 5,000 adaptive days had no plan because completed-but-Uncertain prerequisites blocked their dependents. The deadlock fix moved adaptive $-$ static from $-0.102$ to $+0.140$ (\rf{docs/w7/deadlock_fix_results.md}); the later B10 fix reduced it to $+0.056$.
@@ -781,7 +783,7 @@ B6/B7 & Static baseline can miss a feasible plan (3 / 3,000) and has no best-eff
 B8 & Greedy not optimal (worst ratio 0.214) & Some plans below optimum & Best-singleton fallback \\ \hline
 B9 & Planner does not model forgetting directly & Lost mastery recovered only through review & Measured in S1 \\ \hline
 B13 & Baselines keep $n=0$ diagnostic priors & Adaptive receives evidence the baselines do not & Disclosed; baselines frozen \\ \hline
-B14 & Planned reviews are logged as done when planned & A later replan or a missed day drops due reviews & Disclosed with a reproduction; fix in Section~\ref{sec:forward} \\ \hline
+B14 & Planned reviews were logged as done when planned & A later replan or a missed day dropped due reviews & Fixed (\cm{03fd8ce}); six scenarios re-run, mastery changed $\le 0.002$ concepts \\ \hline
 Validity & Simulated learners; S0 matches the planner; S3 favours practice; S4 (real-fit parameters) toy and no forgetting only; hand-made curricula; engine keeps default BKT parameters & External validity for real learners unknown & Mismatched and calibrated runs; P7 in Section~\ref{sec:forward} \\ \hline
 \end{longtable}
 }
@@ -804,7 +806,7 @@ P2 & Make remediation reachable and the remediation ablation real (B1, B2) & \te
 P3 & Public-data validation. \textbf{Done for BKT} (Section~\ref{sec:public}); remaining: fit HLR, run S4 under forgetting and on the maths curriculum & \rfx{scripts/assistments_fit_bkt.py}, \rfx{src/simulation/calibrated.py} & HLR needs repeated practice with timing & HLR held-out log loss against the fixed prior; S4 results for S1 and maths \\ \hline
 P4 & Re-run the difficulty-sensitive scenario S2 & \rf{experiments/beta_s2.yaml} & Low & Pooled S2 results with paired CIs; difficulty ablation compared \\ \hline
 P5 & Repairs for HEURISTIC\_NO\_PLAN (close M4-a); larger item bank so the CAT stop works (B5) & \rf{src/planning/feasibility.py}, \rf{scripts/make_item_bank.py} & Search cost on large DAGs & M4-a passes as written; mean CAT length $<10$ at equal accuracy \\ \hline
-P6 & Fix B14: log reviews when done, not when planned & Review packing in \rf{src/planning/replan.py} & Changes adaptive behaviour; re-run all scenarios & Due reviews survive replans and missed days; review ablation re-measured \\ \hline
+P6 & Fix B14: log reviews when done, not when planned. \textbf{Done 20 Nov} (\cm{03fd8ce}) & Review packing in \rf{src/planning/replan.py} & Re-ran all six scenarios & Done: due reviews survive replans and missed days; review ablation re-measured (no material change) \\ \hline
 P7 & Adopt fitted BKT parameters in the engine & \rfx{config/bkt_assistments.yaml}; a skill-to-concept mapping & Mapping covers few concepts; pre-register & Calibration under S4 improves; hard constraints unchanged \\ \hline
 \end{longtable}
 }

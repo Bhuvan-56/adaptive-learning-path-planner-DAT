@@ -1,0 +1,58 @@
+{
+  "benchmark_name": "w5_integrated_multiseed",
+  "config_hash": "4904e59d295433505cae5de17ad046f26f0e5c449ce092ce8c142d5f2541b1a3",
+  "git": {
+    "commit_sha": "8805f15dbab667bab7e92599779f3ff10feafe06",
+    "dirty": true
+  },
+  "input_files": {
+    "config": {
+      "path": "experiments/w8_final.yaml",
+      "sha256": "1be775710bceafc2f1e870ef7addd8abf4ea09c397217d8f2a89c075f3146832"
+    },
+    "curriculum": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\data\\curricula\\demo_curriculum.json",
+      "sha256": "36c8fcca4c0adfe00aa53a3664b7a501c179b6eeb6c502811699bd9765e817d4"
+    },
+    "item_bank": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\data\\processed\\item_bank_synthetic.csv",
+      "sha256": "e40ffdebe931d155cc5d9b6c9451f3aaf270231f2c50a81f6cdd54851af2f9e5"
+    },
+    "profiles": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\config\\profiles.yaml",
+      "sha256": "5e001c16c68f105b30fde6cf7eb7e3116c5ce0496773d341aa55e2b35a9d312f"
+    },
+    "q_matrix": {
+      "path": "C:\\Users\\bhuva\\Downloads\\DAT11\\data\\processed\\q_matrix_synthetic.csv",
+      "sha256": "1ed05f59ac73f8c4ecd3f937c8ed5ed414f12324b8760ede234266cf0decc39e"
+    }
+  },
+  "output_files": {
+    "per_learner.csv": "2fc544b38c1d7311eae043855a23f586131ace80227ca81d2005a18aac764c84",
+    "per_learner_seed_101.csv": "0592226d2b3e7e7876fe4950e88d38715d9ba7192c6580f1f4781e99f2b068c7",
+    "per_learner_seed_2024.csv": "e78118b3552a54270716048d14ceb5ee5375221158c7f44436f6296bad945aa1",
+    "per_learner_seed_42.csv": "2fc544b38c1d7311eae043855a23f586131ace80227ca81d2005a18aac764c84",
+    "per_learner_seed_777.csv": "3e600bca8af02fc89950772094cd24ba6b2210b7e7c8e4bbbeff5426cabe3469",
+    "per_learner_seed_999.csv": "8648ddd706c2b8b4f853f9f535d4d41e02b25c5acc0e44836215ee7f7a1af3af",
+    "summary.md": "f373a79a22ed91726a23b2686dd94371880db5f4f6d783a6fcaee7125fecbe0a",
+    "summary_seed_101.md": "a5cc56cb74c1f5120b191280ae5bfa1819df7fa07cc749596f39a35914065ceb",
+    "summary_seed_2024.md": "cbb60c74efda18de5e254ae5eb794f35ea88a116c0ab63e1fad50e1ce40b646b",
+    "summary_seed_42.md": "b64a4280f71bc0faf6665a09b25494d4e8deea3380df521635fa1a1225e050de",
+    "summary_seed_777.md": "9eeecc24709f44098d9c0434c117d2442acb1068f8b61c46b20057fc8e012072",
+    "summary_seed_999.md": "8eaa13aca4e4e93ef00475366102da23a3ae38be9b83e72348393a6469769568"
+  },
+  "package_versions": {
+    "networkx": "3.1",
+    "numpy": "1.24.3",
+    "pytest": "7.3.1",
+    "yaml": "6.0.1"
+  },
+  "seeds": [
+    42,
+    101,
+    2024,
+    777,
+    999
+  ],
+  "timestamp": "2026-11-20T02:55:23Z"
+}

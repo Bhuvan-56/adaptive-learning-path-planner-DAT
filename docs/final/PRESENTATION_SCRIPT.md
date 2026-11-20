@@ -137,12 +137,12 @@ The Live session page is the same loop with a person answering. It runs the real
 ### 19. Only the whole adaptive arm can be credited, not its parts
 *Abdur, about 60 s*
 
-We want to be clear about what does not work. B12, the diagnostic hurting, we have discussed, and it holds even on calibrated learners. B14 is new: when the planner schedules a review for a future day, it immediately writes that review into the log as if it had happened. So if anything triggers a replan before that day, or the learner misses days, the review disappears. In a minimal reproduction, a mastered concept planned for review on days five, nine, thirteen and seventeen gets no review on day nine after missed days, even though its recall is 0.67. We found it while building the live page, documented it with a script, and did not fix it under time pressure. It may explain why the review ablation barely differs — but we haven’t tested that. Remediation works in unit tests but never fires in the closed loop. And all planning results are from simulated learners.
+We want to be clear about what does not work. B12, the diagnostic hurting, we have discussed, and it holds even on calibrated learners. B14 we found while building the live page: when the planner scheduled a review for a future day, it wrote that review into the log as if it had already happened, so a replan or a missed day made it disappear. In a minimal reproduction, a mastered concept lost its day-nine review after missed days, even though its recall was 0.67. We fixed it, then re-ran all six scenarios: results moved by at most 0.002 concepts and every conclusion stands. So B14 was not why the review ablation barely differs. Remediation works in unit tests but never fires in the closed loop. And all planning results are from simulated learners.
 
 ### 20. Each next step has a test that says when it is done
 *Bhuvan, about 40 s*
 
-Each next step is written with a test that says when it is done. First, per-concept diagnostic priors, so the diagnostic helps: done when the no-diagnostic ablation no longer wins. Second, make remediation actually reachable in the loop. Third, fix B14 by logging a review when it happens, not when it’s planned, then re-measure the review ablation. Fourth, adopt the fitted parameters — but as a pre-registered change, judged by calibration under S4. And finish the public-data work: fit the review half-life and run S4 with forgetting and on the maths curriculum.
+Each next step is written with a test that says when it is done. First, per-concept diagnostic priors, so the diagnostic helps: done when the no-diagnostic ablation no longer wins. Second, make remediation actually reachable in the loop. Third — already done — B14 is fixed and re-measured. Next, adopt the fitted parameters — but as a pre-registered change, judged by calibration under S4. And finish the public-data work: fit the review half-life and run S4 with forgetting and on the maths curriculum.
 
 ### 21. A prerequisite-safe, budget-bounded, explainable planner that beats a static course order, checked on real-student parameters
 *Bhuvan, about 30 s*
@@ -159,7 +159,7 @@ To summarise: the engine never violated a prerequisite or the budget in 54 thous
 
 **If fitted parameters predict better, why not use them?** Switching after seeing the results would be an unregistered change, and the 56 ASSISTments skills map to only a few of our curriculum concepts. It is listed as P7, to be judged by calibration under S4.
 
-**What is B14, and does it change your results?** `replan` writes a planned review into the log as if it had happened, so a later replan or a missed day drops it. It affects review behaviour in the closed loop. Its effect on the reported numbers was not measured. It may explain why the review ablation rarely differs, but that is untested. The fix is listed as P6.
+**What is B14, and does it change your results?** `replan` wrote a planned review into the log as if it had happened, so a later replan or a missed day dropped it. We fixed it on 20 November and re-ran all six integrated scenarios: adaptive_full's mastery moved by at most 0.002 concepts, every before/after interval contains 0, and every conclusion stands (`evaluation/results/w8/final_v3/b14_before_after.txt`). It was not the reason the review ablation rarely differs.
 
 **Why is the greedy improvement so small?** Greedy is already at 0.974 of the optimum on average. The fallback fixes the cases where one valuable item beats the whole greedy pick: 10 of 250 instances, none made worse.
 

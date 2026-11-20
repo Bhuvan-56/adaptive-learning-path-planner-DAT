@@ -1,0 +1,108 @@
+## integrated_s0  (before evaluation\results\w8\final_v2\integrated_s0, after evaluation\results\w8\final_v3\integrated_s0)
+arm | mastered before | mastered after | retained before | retained after | prereq/budget violations after
+adaptive_full | 2.0920 | 2.0920 | 0.6604 | 0.6606 | 0/0
+static_prerequisite_order | 2.0360 | 2.0360 | 0.6362 | 0.6362 | 0/0
+non_adaptive_greedy | 2.0360 | 2.0360 | 0.6362 | 0.6362 | 0/0
+non_adaptive_greedy_best_singleton | 2.0490 | 2.0490 | 0.6382 | 0.6382 | 0/0
+ablation_no_diagnostic | 2.1760 | 2.1760 | 0.6985 | 0.6985 | 0/0
+ablation_no_replan | 2.0350 | 2.0350 | 0.6360 | 0.6360 | 0/0
+ablation_no_difficulty_step | 2.0920 | 2.0920 | 0.6604 | 0.6606 | 0/0
+ablation_no_review | 2.0930 | 2.0930 | 0.6605 | 0.6605 | 0/0
+ablation_no_remediation | 2.0920 | 2.0920 | 0.6604 | 0.6606 | 0/0
+mastered_concepts: adaptive_full after - before        +0.0000 [+0.0000, +0.0000]
+mastered_concepts: adaptive_full - static_prerequisite_order  before +0.0560 [+0.0400, +0.0740]  after +0.0560 [+0.0400, +0.0740]
+mastered_concepts: adaptive_full - ablation_no_review         before -0.0010 [-0.0030, +0.0000]  after -0.0010 [-0.0030, +0.0000]
+retained_recall: adaptive_full after - before        +0.0001 [-0.0005, +0.0009]
+retained_recall: adaptive_full - static_prerequisite_order  before +0.0242 [+0.0168, +0.0316]  after +0.0244 [+0.0169, +0.0317]
+retained_recall: adaptive_full - ablation_no_review         before -0.0001 [-0.0025, +0.0021]  after +0.0000 [-0.0021, +0.0021]
+
+## integrated_s1  (before evaluation\results\w8\final_v2\integrated_s1, after evaluation\results\w8\final_v3\integrated_s1)
+arm | mastered before | mastered after | retained before | retained after | prereq/budget violations after
+adaptive_full | 1.6320 | 1.6300 | 0.5309 | 0.5299 | 0/0
+static_prerequisite_order | 1.5870 | 1.5870 | 0.5159 | 0.5159 | 0/0
+non_adaptive_greedy | 1.5940 | 1.5940 | 0.5180 | 0.5180 | 0/0
+non_adaptive_greedy_best_singleton | 1.5900 | 1.5900 | 0.5160 | 0.5160 | 0/0
+ablation_no_diagnostic | 1.7300 | 1.7300 | 0.5542 | 0.5542 | 0/0
+ablation_no_replan | 1.5890 | 1.5890 | 0.5164 | 0.5164 | 0/0
+ablation_no_difficulty_step | 1.6320 | 1.6300 | 0.5309 | 0.5299 | 0/0
+ablation_no_review | 1.6490 | 1.6490 | 0.5320 | 0.5320 | 0/0
+ablation_no_remediation | 1.6320 | 1.6300 | 0.5309 | 0.5299 | 0/0
+mastered_concepts: adaptive_full after - before        -0.0020 [-0.0060, +0.0020]
+mastered_concepts: adaptive_full - static_prerequisite_order  before +0.0450 [+0.0220, +0.0640]  after +0.0430 [+0.0200, +0.0620]
+mastered_concepts: adaptive_full - ablation_no_review         before -0.0170 [-0.0330, -0.0010]  after -0.0190 [-0.0340, -0.0030]
+retained_recall: adaptive_full after - before        -0.0010 [-0.0028, +0.0008]
+retained_recall: adaptive_full - static_prerequisite_order  before +0.0150 [+0.0072, +0.0236]  after +0.0140 [+0.0061, +0.0224]
+retained_recall: adaptive_full - ablation_no_review         before -0.0011 [-0.0065, +0.0040]  after -0.0021 [-0.0070, +0.0030]
+
+## toy_s3  (before evaluation\results\w8\final_v2\toy_s3, after evaluation\results\w8\final_v3\toy_s3)
+arm | mastered before | mastered after | retained before | retained after | prereq/budget violations after
+adaptive_full | 2.4510 | 2.4510 | 0.8424 | 0.8426 | 0/0
+static_prerequisite_order | 2.3340 | 2.3340 | 0.8206 | 0.8206 | 0/0
+non_adaptive_greedy | 2.3340 | 2.3340 | 0.8206 | 0.8206 | 0/0
+non_adaptive_greedy_best_singleton | 2.3380 | 2.3380 | 0.8186 | 0.8186 | 0/0
+ablation_no_diagnostic | 2.6880 | 2.6880 | 0.8954 | 0.8954 | 0/0
+ablation_no_replan | 2.3330 | 2.3330 | 0.8203 | 0.8203 | 0/0
+ablation_no_difficulty_step | 2.4520 | 2.4520 | 0.8425 | 0.8427 | 0/0
+ablation_no_review | 2.4550 | 2.4550 | 0.8440 | 0.8440 | 0/0
+ablation_no_remediation | 2.4510 | 2.4510 | 0.8424 | 0.8426 | 0/0
+mastered_concepts: adaptive_full after - before        +0.0000 [+0.0000, +0.0000]
+mastered_concepts: adaptive_full - static_prerequisite_order  before +0.1170 [+0.0960, +0.1390]  after +0.1170 [+0.0960, +0.1390]
+mastered_concepts: adaptive_full - ablation_no_review         before -0.0040 [-0.0090, +0.0000]  after -0.0040 [-0.0090, +0.0000]
+retained_recall: adaptive_full after - before        +0.0002 [-0.0003, +0.0008]
+retained_recall: adaptive_full - static_prerequisite_order  before +0.0219 [+0.0169, +0.0270]  after +0.0221 [+0.0172, +0.0273]
+retained_recall: adaptive_full - ablation_no_review         before -0.0016 [-0.0034, +0.0003]  after -0.0013 [-0.0031, +0.0005]
+
+## maths_s0  (before evaluation\results\w8\final_v2\maths_s0, after evaluation\results\w8\final_v3\maths_s0)
+arm | mastered before | mastered after | retained before | retained after | prereq/budget violations after
+adaptive_full | 6.3480 | 6.3490 | 0.6838 | 0.6849 | 0/0
+static_prerequisite_order | 6.2540 | 6.2540 | 0.5891 | 0.5891 | 0/0
+non_adaptive_greedy | 6.3370 | 6.3370 | 0.6027 | 0.6027 | 0/0
+non_adaptive_greedy_best_singleton | 6.4300 | 6.4300 | 0.5931 | 0.5931 | 0/0
+ablation_no_diagnostic | 6.4680 | 6.4680 | 0.6766 | 0.6766 | 0/0
+ablation_no_replan | 6.2510 | 6.2510 | 0.5884 | 0.5884 | 0/0
+ablation_no_difficulty_step | 6.3480 | 6.3490 | 0.6838 | 0.6849 | 0/0
+ablation_no_review | 6.3490 | 6.3490 | 0.6854 | 0.6854 | 0/0
+ablation_no_remediation | 6.3480 | 6.3490 | 0.6838 | 0.6849 | 0/0
+mastered_concepts: adaptive_full after - before        +0.0010 [-0.0090, +0.0100]
+mastered_concepts: adaptive_full - static_prerequisite_order  before +0.0940 [+0.0470, +0.1400]  after +0.0950 [+0.0480, +0.1410]
+mastered_concepts: adaptive_full - ablation_no_review         before -0.0010 [-0.0100, +0.0090]  after +0.0000 [+0.0000, +0.0000]
+retained_recall: adaptive_full after - before        +0.0011 [-0.0003, +0.0023]
+retained_recall: adaptive_full - static_prerequisite_order  before +0.0947 [+0.0873, +0.1025]  after +0.0958 [+0.0883, +0.1034]
+retained_recall: adaptive_full - ablation_no_review         before -0.0016 [-0.0027, -0.0004]  after -0.0005 [-0.0016, +0.0004]
+
+## maths_s3  (before evaluation\results\w8\final_v2\maths_s3, after evaluation\results\w8\final_v3\maths_s3)
+arm | mastered before | mastered after | retained before | retained after | prereq/budget violations after
+adaptive_full | 7.5030 | 7.5050 | 0.8642 | 0.8644 | 0/0
+static_prerequisite_order | 6.7760 | 6.7760 | 0.7600 | 0.7600 | 0/0
+non_adaptive_greedy | 7.0980 | 7.0980 | 0.7835 | 0.7835 | 0/0
+non_adaptive_greedy_best_singleton | 7.1740 | 7.1740 | 0.7720 | 0.7720 | 0/0
+ablation_no_diagnostic | 7.5870 | 7.5870 | 0.8645 | 0.8645 | 0/0
+ablation_no_replan | 6.7800 | 6.7800 | 0.7600 | 0.7600 | 0/0
+ablation_no_difficulty_step | 7.5020 | 7.5040 | 0.8647 | 0.8649 | 0/0
+ablation_no_review | 7.5050 | 7.5050 | 0.8642 | 0.8642 | 0/0
+ablation_no_remediation | 7.5030 | 7.5050 | 0.8642 | 0.8644 | 0/0
+mastered_concepts: adaptive_full after - before        +0.0020 [-0.0020, +0.0060]
+mastered_concepts: adaptive_full - static_prerequisite_order  before +0.7270 [+0.6310, +0.8240]  after +0.7290 [+0.6320, +0.8280]
+mastered_concepts: adaptive_full - ablation_no_review         before -0.0020 [-0.0060, +0.0020]  after +0.0000 [+0.0000, +0.0000]
+retained_recall: adaptive_full after - before        +0.0002 [-0.0006, +0.0011]
+retained_recall: adaptive_full - static_prerequisite_order  before +0.1042 [+0.0996, +0.1090]  after +0.1044 [+0.0999, +0.1091]
+retained_recall: adaptive_full - ablation_no_review         before +0.0000 [-0.0010, +0.0010]  after +0.0002 [-0.0006, +0.0011]
+
+## integrated_s4  (before evaluation\results\w8\final_v2\integrated_s4, after evaluation\results\w8\final_v3\integrated_s4)
+arm | mastered before | mastered after | retained before | retained after | prereq/budget violations after
+adaptive_full | 2.2470 | 2.2470 | 0.5922 | 0.5923 | 0/0
+static_prerequisite_order | 2.1920 | 2.1920 | 0.5624 | 0.5624 | 0/0
+non_adaptive_greedy | 2.1920 | 2.1920 | 0.5624 | 0.5624 | 0/0
+non_adaptive_greedy_best_singleton | 2.1890 | 2.1890 | 0.5651 | 0.5651 | 0/0
+ablation_no_diagnostic | 2.3160 | 2.3160 | 0.6163 | 0.6163 | 0/0
+ablation_no_replan | 2.1910 | 2.1910 | 0.5623 | 0.5623 | 0/0
+ablation_no_difficulty_step | 2.2470 | 2.2470 | 0.5922 | 0.5923 | 0/0
+ablation_no_review | 2.2470 | 2.2470 | 0.5905 | 0.5905 | 0/0
+ablation_no_remediation | 2.2470 | 2.2470 | 0.5922 | 0.5923 | 0/0
+mastered_concepts: adaptive_full after - before        +0.0000 [+0.0000, +0.0000]
+mastered_concepts: adaptive_full - static_prerequisite_order  before +0.0550 [+0.0270, +0.0830]  after +0.0550 [+0.0270, +0.0830]
+mastered_concepts: adaptive_full - ablation_no_review         before +0.0000 [+0.0000, +0.0000]  after +0.0000 [+0.0000, +0.0000]
+retained_recall: adaptive_full after - before        +0.0001 [-0.0010, +0.0011]
+retained_recall: adaptive_full - static_prerequisite_order  before +0.0299 [+0.0214, +0.0385]  after +0.0299 [+0.0213, +0.0385]
+retained_recall: adaptive_full - ablation_no_review         before +0.0017 [-0.0004, +0.0039]  after +0.0018 [-0.0003, +0.0038]
+
