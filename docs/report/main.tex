@@ -49,17 +49,17 @@
 \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
 
 % --------------------------------------------------
-% Evidence links: every file link points at the evidence revision
+% Evidence links: every file link points at the final tag
 % --------------------------------------------------
 \newcommand{\repourl}{https://github.com/Bhuvan-56/adaptive-learning-path-planner-DAT}
-\newcommand{\sha}{d974503}
+\newcommand{\sha}{cs5903-final-2026}
 \DeclareRobustCommand{\rf}[1]{\href{\repourl/blob/\sha/#1}{\nolinkurl{#1}}}
 \DeclareRobustCommand{\rd}[1]{\href{\repourl/tree/\sha/#1}{\nolinkurl{#1}}}
 \DeclareRobustCommand{\cm}[1]{\href{\repourl/commit/#1}{\texttt{#1}}}
 % Files added by the Week 8 public-data extension and demo pages (20 Nov 2026) exist only from this revision on.
-\newcommand{\shax}{965331a}
+\newcommand{\shax}{cs5903-final-2026}
 \DeclareRobustCommand{\rfx}[1]{\href{\repourl/blob/\shax/#1}{\nolinkurl{#1}}}
-\DeclareRobustCommand{\rfm}[1]{\href{\repourl/blob/main/#1}{\nolinkurl{#1}}}
+\DeclareRobustCommand{\rfm}[1]{\href{\repourl/blob/\sha/#1}{\nolinkurl{#1}}}
 \DeclareRobustCommand{\rdx}[1]{\href{\repourl/tree/\shax/#1}{\nolinkurl{#1}}}
 \newcommand{\siteurl}{https://bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/}
 \newcommand{\nd}{\textit{n.d.}}
@@ -70,9 +70,7 @@
 
 \noindent\begin{tabular}{@{}L{3.48cm}L{11.98cm}@{}}
 \textbf{GitHub repository} & \href{\repourl}{adaptive-learning-path-planner-DAT} \\
-\textbf{Evidence revision} & \cm{d974503} (\texttt{d9745038c95717ef4e29de112227ed727045f0f2}), branch \texttt{main}; final tag \texttt{cs5903-final-2026} on the commit that adds this report \\
-\textbf{Revision, 20 Nov} & Public-data extension (ASSISTments, scenario S4), demo pages and defect B14: \cm{\shax}, branch \texttt{w8/public-data-and-demos}; links to files added there point at that commit \\
-\textbf{B14 fix, 20 Nov} & Fix \cm{03fd8ce} and the six-scenario re-run (\texttt{evaluation/results/w8/final\_v3/}), branch \texttt{main}; links to those files point at \texttt{main} \\
+\textbf{Final revision} & Tag \texttt{cs5903-final-2026} on branch \texttt{main}, the commit that adds this report; every file link in this report points at that tag \\
 \textbf{Website and demo} & \href{\siteurl}{\nolinkurl{bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/}} \\
 \end{tabular}
 
@@ -81,7 +79,7 @@
 \vspace{0.2em}\newline
 \textbf{What we built.} A Python backend service with eight modules (M1--M8): a validated curriculum DAG; Bayesian Knowledge Tracing (BKT) mastery with an evidence-count uncertainty proxy and a four-state classifier; a 10-item computerized adaptive test (2PL IRT); a prerequisite-safe, budget-bounded daily planner with feasibility proofs and event-driven replanning; a 2-up/1-down difficulty staircase; Half-Life Regression review weighted by prerequisite importance, plus remediation; a machine-checked audit trace; and a closed-loop evaluation harness with synthetic learners. A static website with live in-browser demos runs the same Python code, plus two pages where a person or a simulated learner answers questions and the engine diagnoses and replans after every answer (Section~\ref{sec:ui}). BKT was also fitted on the public ASSISTments 2009--2010 dataset and tested on held-out students (Section~\ref{sec:public}).
 \vspace{0.2em}\newline
-\textbf{Results.} 21 acceptance groups: 20 pass, 1 partial (M4-a, agreed with the mentor); the recorded suite is 303 passed (299 at the evidence revision, plus 4 S4 tests). Across 45,000 simulated learner-runs there are 0 prerequisite and 0 budget violations, and trace coverage is 100\% for the primary arms. The adaptive arm beats the static prerequisite-order baseline in all five scenarios, by $+0.045$ to $+0.727$ concepts mastered (paired 95\% CIs above zero), and improves retained recall everywhere. Greedy scheduling reaches 0.974 of the exact optimum on average (0.981 with the best-singleton fallback). The CAT is more accurate than fixed or random items in 5 of 6 paired comparisons. On 593 held-out ASSISTments students, BKT fitted per skill predicts answers with AUC 0.714 (engine defaults 0.681, per-skill average 0.621), and on simulated learners calibrated to those fits (S4) adaptive still beats static, $+0.055$ [0.027, 0.083] concepts.
+\textbf{Results.} 21 acceptance groups: 20 pass, 1 partial (M4-a, agreed with the mentor); the recorded suite is 303 passed (299 on 14 November, plus 4 S4 tests). Across 45,000 simulated learner-runs there are 0 prerequisite and 0 budget violations, and trace coverage is 100\% for the primary arms. The adaptive arm beats the static prerequisite-order baseline in all five scenarios, by $+0.045$ to $+0.727$ concepts mastered (paired 95\% CIs above zero), and improves retained recall everywhere. Greedy scheduling reaches 0.974 of the exact optimum on average (0.981 with the best-singleton fallback). The CAT is more accurate than fixed or random items in 5 of 6 paired comparisons. On 593 held-out ASSISTments students, BKT fitted per skill predicts answers with AUC 0.714 (engine defaults 0.681, per-skill average 0.621), and on simulated learners calibrated to those fits (S4) adaptive still beats static, $+0.055$ [0.027, 0.083] concepts.
 \vspace{0.2em}\newline
 \textbf{Limits.} All planning outcomes are simulator behaviour on simulated learners; no real learner used the planner, and real data enters only through the ASSISTments fit and S4. Since the diagnostic was connected to the planner (Week 8), a cold-start ablation beats the full system on mastery in all five runs (Section~\ref{sec:failures}); remediation never triggers inside the closed loop; and planned reviews were logged as done, so a later replan could drop them (B14, found and fixed on 20 November; re-running all six integrated scenarios changed mean mastery by at most 0.002 concepts).
 \newpage
@@ -615,7 +613,7 @@ Not supported: real learners using the planner, curriculum structure from data (
 % ==================================================
 \section{Milestone Verification Matrix}
 % ==================================================
-Full criteria are in \rf{docs/ACCEPTANCE_GROUPS.md}. Recorded suite at the evidence revision: \textbf{299 passed} on Windows, Python 3.11 (\rf{weekly/W8.md}); 303 after the S4 tests were added (20 November). Rows without a group ID are requirements from the brief verified by experiment.
+Full criteria are in \rf{docs/ACCEPTANCE_GROUPS.md}. Recorded suite on 14 November (\cm{d974503}): \textbf{299 passed} on Windows, Python 3.11 (\rf{weekly/W8.md}); 303 after the S4 tests were added (20 November). Rows without a group ID are requirements from the brief verified by experiment.
 
 {\small
 \begin{longtable}{|C{1.12cm}|C{0.87cm}|L{3.65cm}|L{3.47cm}|C{1.13cm}|L{3.65cm}|}
@@ -816,7 +814,7 @@ P7 & Adopt fitted BKT parameters in the engine & \rfx{config/bkt_assistments.yam
 % ==================================================
 {\small
 \begin{longtable}{|L{2.47cm}|L{8.18cm}|L{4.38cm}|}
-\caption{Contributions (git history at the evidence revision).}\\
+\caption{Contributions (git history up to 14 November, \cm{d974503}).}\\
 \hline
 \textbf{Member} & \textbf{Areas and modules} & \textbf{Representative commits} \\ \hline
 \endfirsthead
@@ -828,7 +826,7 @@ Abdur Rehman (Track B) & BKT parity tests against pyBKT; CAT diagnostic and synt
 & \cm{34a4946}, \cm{339711c}, \cm{a20513a}, \cm{c6f59e5}, \cm{572850f}, \cm{d7e1ea2}, \cm{c5d1a8f}, \cm{f86a1c1} \\ \hline
 \end{longtable}
 }
-\textbf{Week 8 extension (20 November, after the evidence revision).} Abdur Rehman: ASSISTments data preparation and BKT fit, scenario S4 and its runs, live-session and simulation pages, defect B14 reproduction, documentation (\cm{b64a248}, \cm{f51804f}, \cm{024bbec}, \cm{\shax}).
+\textbf{Week 8 extension (20 November).} Abdur Rehman: ASSISTments data preparation and BKT fit, scenario S4 and its runs, live-session and simulation pages, defect B14 reproduction, documentation (\cm{b64a248}, \cm{f51804f}, \cm{024bbec}, \cm{965331a}, \cm{03fd8ce}).
 
 % Code walkthroughs and live change tasks for each member: \rf{docs/final/ownership_track_A.md}, \rf{docs/final/ownership_track_B.md}.
 
@@ -916,7 +914,7 @@ One trace entry (the first of 12 for this plan: 4 candidates $\times$ 3 days):
 
 \section{Reproduction and Evidence Links}
 {\sloppy
-All at revision \cm{d974503}. Final report and limitations: \rf{docs/final/FINAL_REPORT.md}, \rf{docs/final/LIMITATIONS.md}. Demo script: \rf{docs/final/DEMO.md}. Formal models and metrics: \rf{docs/FORMAL_MODELS.md}, \rf{docs/METRICS.md}. Acceptance groups: \rf{docs/ACCEPTANCE_GROUPS.md}. Decisions: \rd{decisions}. Weekly records: \rd{weekly}. Raw results: \rd{evaluation/results}; final runs \rd{evaluation/results/w8/final_v2}; diagnostic comparison \rd{evaluation/results/w8/diagnostic_comparison}. Before and after evidence: \rd{evaluation/results/w8_evidence}. Week 8 extension (at \cm{\shax}): \rfx{docs/w8/results_assistments.md}, \rfx{data/provenance/assistments_2009_2010.json}, \rdx{evaluation/results/w8/assistments_bkt}, \rdx{evaluation/results/w8/final_v2/integrated_s4}, \rfx{evaluation/results/w8_evidence/b14_planned_reviews.txt}, \rfx{site/sim.html}, \rfx{site/live.html}. Website source: \rd{site}; live site \href{\siteurl}{\nolinkurl{bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/}}.
+All at the final tag \texttt{cs5903-final-2026}. Final report and limitations: \rf{docs/final/FINAL_REPORT.md}, \rf{docs/final/LIMITATIONS.md}. Demo script: \rf{docs/final/DEMO.md}. Formal models and metrics: \rf{docs/FORMAL_MODELS.md}, \rf{docs/METRICS.md}. Acceptance groups: \rf{docs/ACCEPTANCE_GROUPS.md}. Decisions: \rd{decisions}. Weekly records: \rd{weekly}. Raw results: \rd{evaluation/results}; final runs \rd{evaluation/results/w8/final_v2}; diagnostic comparison \rd{evaluation/results/w8/diagnostic_comparison}. Before and after evidence: \rd{evaluation/results/w8_evidence}. Week 8 extension (at \cm{\shax}): \rfx{docs/w8/results_assistments.md}, \rfx{data/provenance/assistments_2009_2010.json}, \rdx{evaluation/results/w8/assistments_bkt}, \rdx{evaluation/results/w8/final_v2/integrated_s4}, \rfx{evaluation/results/w8_evidence/b14_planned_reviews.txt}, \rfx{site/sim.html}, \rfx{site/live.html}. Website source: \rd{site}; live site \href{\siteurl}{\nolinkurl{bhuvan-56.github.io/adaptive-learning-path-planner-DAT/site/}}.
 
 No optional bonus (BP-ID) claims are made.\par}
 
