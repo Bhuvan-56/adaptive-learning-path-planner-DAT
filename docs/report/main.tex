@@ -79,7 +79,7 @@
 \vspace{0.2em}\newline
 \textbf{What we built.} A Python backend service with eight modules (M1--M8): a validated curriculum DAG; Bayesian Knowledge Tracing (BKT) mastery with an evidence-count uncertainty proxy and a four-state classifier; a 10-item computerized adaptive test (2PL IRT); a prerequisite-safe, budget-bounded daily planner with feasibility proofs and event-driven replanning; a 2-up/1-down difficulty staircase; Half-Life Regression review weighted by prerequisite importance, plus remediation; a machine-checked audit trace; and a closed-loop evaluation harness with synthetic learners. A static website with live in-browser demos runs the same Python code, plus two pages where a person or a simulated learner answers questions and the engine diagnoses and replans after every answer (Section~\ref{sec:ui}). BKT was also fitted on the public ASSISTments 2009--2010 dataset and tested on held-out students (Section~\ref{sec:public}).
 \vspace{0.2em}\newline
-\textbf{Results.} 21 acceptance groups: 20 pass, 1 partial (M4-a, agreed with the mentor); the recorded suite is 303 passed (299 on 14 November, plus 4 S4 tests). Across 45,000 simulated learner-runs there are 0 prerequisite and 0 budget violations, and trace coverage is 100\% for the primary arms. The adaptive arm beats the static prerequisite-order baseline in all five scenarios, by $+0.045$ to $+0.727$ concepts mastered (paired 95\% CIs above zero), and improves retained recall everywhere. Greedy scheduling reaches 0.974 of the exact optimum on average (0.981 with the best-singleton fallback). The CAT is more accurate than fixed or random items in 5 of 6 paired comparisons. On 593 held-out ASSISTments students, BKT fitted per skill predicts answers with AUC 0.714 (engine defaults 0.681, per-skill average 0.621), and on simulated learners calibrated to those fits (S4) adaptive still beats static, $+0.055$ [0.027, 0.083] concepts.
+\textbf{Results.} 21 acceptance groups: 20 pass, 1 partial (M4-a, agreed with the mentor); the recorded suite is 312 passed (299 on 14 November, plus 13 Week 8 extension tests). Across 45,000 simulated learner-runs there are 0 prerequisite and 0 budget violations, and trace coverage is 100\% for the primary arms. The adaptive arm beats the static prerequisite-order baseline in all five scenarios, by $+0.045$ to $+0.727$ concepts mastered (paired 95\% CIs above zero), and improves retained recall everywhere. Greedy scheduling reaches 0.974 of the exact optimum on average (0.981 with the best-singleton fallback). The CAT is more accurate than fixed or random items in 5 of 6 paired comparisons. On 593 held-out ASSISTments students, BKT fitted per skill predicts answers with AUC 0.714 (engine defaults 0.681, per-skill average 0.621), and on simulated learners calibrated to those fits (S4) adaptive still beats static, $+0.055$ [0.027, 0.083] concepts.
 \vspace{0.2em}\newline
 \textbf{Limits.} All planning outcomes are simulator behaviour on simulated learners; no real learner used the planner, and real data enters only through the ASSISTments fit and S4. Since the diagnostic was connected to the planner (Week 8), a cold-start ablation beats the full system on mastery in all five runs (Section~\ref{sec:failures}); remediation never triggers inside the closed loop; and planned reviews were logged as done, so a later replan could drop them (B14, found and fixed on 20 November; re-running all six integrated scenarios changed mean mastery by at most 0.002 concepts).
 \newpage
@@ -430,7 +430,7 @@ ablation\_\allowbreak no\_\allowbreak remediation & CAT & replan & 2-up/1-down &
 {\footnotesize
 \begin{verbatim}
 pip install -r requirements.txt
-python -m pytest -q                                                  # 303 passed
+python -m pytest -q                                                  # 312 passed
 python -m src.planning.benchmark                                     # Q1
 python -m src.evaluation.diagnostic_comparison \
        --config experiments/w4_comparison.yaml                       # Q2
@@ -613,7 +613,7 @@ Not supported: real learners using the planner, curriculum structure from data (
 % ==================================================
 \section{Milestone Verification Matrix}
 % ==================================================
-Full criteria are in \rf{docs/ACCEPTANCE_GROUPS.md}. Recorded suite on 14 November (\cm{d974503}): \textbf{299 passed} on Windows, Python 3.11 (\rf{weekly/W8.md}); 303 after the S4 tests were added (20 November). Rows without a group ID are requirements from the brief verified by experiment.
+Full criteria are in \rf{docs/ACCEPTANCE_GROUPS.md}. Recorded suite on 14 November (\cm{d974503}): \textbf{299 passed} on Windows, Python 3.11 (\rf{weekly/W8.md}); 312 after the Week 8 extension tests were added (20 November: 4 S4, 6 demo, 3 B14). Rows without a group ID are requirements from the brief verified by experiment.
 
 {\small
 \begin{longtable}{|C{1.12cm}|C{0.87cm}|L{3.65cm}|L{3.47cm}|C{1.13cm}|L{3.65cm}|}
@@ -822,7 +822,7 @@ P7 & Adopt fitted BKT parameters in the engine & \rfx{config/bkt_assistments.yam
 \endhead
 Bhuvan Chandra (Track A) & Curriculum graph and validation; static, greedy and oracle planners; feasibility; replanning and best-effort plans; trace schema and checker; CLI; S1 forgetting fix; maths curriculum and S3 harness; final fixes B10/B11, diagnostic comparison and calibration; final report; website curriculum, S1 and robustness pages. 104 non-merge commits.
 & \cm{0549b2b}, \cm{0262d45}, \cm{01fc631}, \cm{840a12b}, \cm{72b8f02}, \cm{9b50338}, \cm{70183b7}, \cm{edde468}, \cm{b2994f6}, \cm{2357507} \\ \hline
-Abdur Rehman (Track B) & BKT parity tests against pyBKT; CAT diagnostic and synthetic 2PL item bank; comparative evaluation; simulator variants and retention quiz; multi-seed harness; best-singleton fallback; adaptive deadlock fix; project website and Pyodide demos; Week 8 extension below. 89 non-merge commits.
+Abdur Rehman (Track B) & BKT parity tests against pyBKT; CAT diagnostic and synthetic 2PL item bank; comparative evaluation; simulator variants and retention quiz; multi-seed harness; best-singleton fallback; adaptive deadlock fix; project website and Pyodide demos; Week 8 extension below. 90 non-merge commits.
 & \cm{34a4946}, \cm{339711c}, \cm{a20513a}, \cm{c6f59e5}, \cm{572850f}, \cm{d7e1ea2}, \cm{c5d1a8f}, \cm{f86a1c1} \\ \hline
 \end{longtable}
 }
@@ -830,7 +830,7 @@ Abdur Rehman (Track B) & BKT parity tests against pyBKT; CAT diagnostic and synt
 
 % Code walkthroughs and live change tasks for each member: \rf{docs/final/ownership_track_A.md}, \rf{docs/final/ownership_track_B.md}.
 
-\textbf{AI-assisted work.}Coding agents were used during development to support implementation, debugging, and refinement across different project phases. \textbf{How it was checked:} Changes were reviewed against project requirements, validated through testing, and evaluated using recorded experimental results. The final implementation was verified through the test suite and evaluation metrics, with reported results reflecting the observed outcomes. The Week 8 extension (public-data fit, S4, demo pages, B14, this revision of the report) was prepared with an AI coding assistant (Claude). Every number was checked against the committed result files, the S4 run was reproduced exactly by a second run, and the team ran the test suite on the project's Windows environment.
+\textbf{AI-assisted work.}Coding agents were used during development to support implementation, debugging, and refinement across different project phases. \textbf{How it was checked:} Changes were reviewed against project requirements, validated through testing, and evaluated using recorded experimental results. The final implementation was verified through the test suite and evaluation metrics, with reported results reflecting the observed outcomes. The Week 8 extension (public-data fit, S4, demo pages, B14, this revision of the report) was prepared with an AI coding assistant.
 \vspace{0.2em}\newline
 \textbf{Third-party assets.} Only the open-source libraries in Section~2.3, used unmodified under BSD-3, MIT and MPL-2.0 licences. All curricula, item banks and learners are synthetic and generated by the team (the demo questions are hand-written); the one external dataset is ASSISTments 2009--2010, used under its research terms and not redistributed, with provenance files beside each data file. No private learner data or unlicensed assets are included.
 
