@@ -184,7 +184,7 @@ See [`LIMITATIONS.md`](LIMITATIONS.md). The most important:
   - the difficulty and remediation ablations show no difference on mastery; the review ablation shows none except under S1, where it is better than adaptive_full, −0.0170 [−0.0330, −0.0010] (adaptive − no_review; recomputed from `evaluation/results/w8/final_v2/integrated_s1/per_learner_seed_*.csv`);
   - the remediation ablation never disables remediation;
   - remediation never fires in the closed loop.
-- **planned reviews were logged as done (B14, found and fixed in code 2026-11-20):** `replan` recorded a review in the log when it *planned* it, so a later replan or a missed day dropped reviews the learner still needed. Planned reviews now go into a planning copy of the log (commit 832e722; `tests/test_w8_b14_review_log.py`; `evaluation/results/w8_evidence/b14_planned_reviews_after_fix.txt`). All reported runs predate the fix; its effect on the numbers is not yet measured.
+- **planned reviews were logged as done (B14, found and fixed in code 2026-11-20):** `replan` recorded a review in the log when it *planned* it, so a later replan or a missed day dropped reviews the learner still needed. Planned reviews now go into a planning copy of the log (commit 03fd8ce; `tests/test_w8_b14_review_log.py`; `evaluation/results/w8_evidence/b14_planned_reviews_after_fix.txt`). All reported runs predate the fix; its effect on the numbers is not yet measured.
 - **prerequisite importance** now orders due reviews (B11 fix). Its effect on the final runs was not isolated: a 20-learner toy S0 check showed no change (`evaluation/results/w8_evidence/after_fix4_review_importance.txt`).
 
 ## 7. Reproduce

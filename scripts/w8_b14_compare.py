@@ -1,7 +1,7 @@
 """B14 fix: before/after for every integrated run (W8, 2026-11-20).
 
 Before = evaluation/results/w8/final_v2/<run> (pre-fix); after = evaluation/results/w8/final_v3/<run>
-(same configs and seeds, after commit 832e722). For each run prints, per arm, mastered concepts and
+(same configs and seeds, after commit 03fd8ce). For each run prints, per arm, mastered concepts and
 retained recall before and after, and paired 95% bootstrap CIs (B = 1000, seed 42) for
   after - before (adaptive_full), adaptive_full - static_prerequisite_order,
   adaptive_full - ablation_no_review.
